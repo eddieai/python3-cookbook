@@ -348,70 +348,74 @@
 <p>你想遍历一个可迭代对象中的所有元素，但是却不想使用 for 循环。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>为了手动的遍历可迭代对象，使用 <code>next()</code>函数并在代码中捕获 <code>StopIteration</code> 异常。 比如，下面的例子手动读取一个文件中的所有行：</p>
-<pre><code>def manual_iter():
-    with open('/etc/passwd') as f:
-        try:
-            while True:
-                line = next(f)
-                print(line, end='')
-        except StopIteration:
-            pass
-</code></pre><p>通常来讲， <code>StopIteration</code> 用来指示迭代的结尾。 然而，如果你手动使用上面演示的 <code>next()</code>函数的话，你还可以通过返回一个指定值来标记结尾，比如 <code>None</code>。 下面是示例：</p>
-<pre><code>with open('/etc/passwd') as f:
-    while True:
-        line = next(f)
-        if line is None:
-            break
-        print(line, end='')
-</code></pre><h2 id="讨论">讨论</h2>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">manual_iter</span>():
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>) <span class="hljs-keyword">as</span> f:
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+                line = <span class="hljs-built_in">next</span>(f)
+                <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
+        <span class="hljs-keyword">except</span> StopIteration:
+            <span class="hljs-keyword">pass</span>
+</code></pre>
+<p>通常来讲， <code>StopIteration</code> 用来指示迭代的结尾。 然而，如果你手动使用上面演示的 <code>next()</code>函数的话，你还可以通过返回一个指定值来标记结尾，比如 <code>None</code>。 下面是示例：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>) <span class="hljs-keyword">as</span> f:
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        line = <span class="hljs-built_in">next</span>(f)
+        <span class="hljs-keyword">if</span> line <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-keyword">break</span>
+        <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>大多数情况下，我们会使用 <code>for</code> 循环语句用来遍历一个可迭代对象。 但是，偶尔也需要对迭代做更加精确的控制，这时候了解底层迭代机制就显得尤为重要了。</p>
 <p>下面的交互示例向我们演示了迭代期间所发生的基本细节：</p>
-<pre><code>&gt;&gt;&gt; items = [1, 2, 3]
-&gt;&gt;&gt; # Get the iterator
-&gt;&gt;&gt; it = iter(items) # Invokes items.__iter__()
-&gt;&gt;&gt; # Run the iterator
-&gt;&gt;&gt; next(it) # Invokes it.__next__()
-1
-&gt;&gt;&gt; next(it)
-2
-&gt;&gt;&gt; next(it)
-3
-&gt;&gt;&gt; next(it)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>items = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Get the iterator</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>it = <span class="hljs-built_in">iter</span>(items) <span class="hljs-comment"># Invokes items.__iter__()</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Run the iterator</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(it) <span class="hljs-comment"># Invokes it.__next__()</span>
+<span class="hljs-number">1</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(it)
+<span class="hljs-number">2</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(it)
+<span class="hljs-number">3</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(it)
 Traceback (most recent call last):
-    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+    File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
 StopIteration
 &gt;&gt;&gt;
-</code></pre><p>本章接下来几小节会更深入的讲解迭代相关技术，前提是你先要理解基本的迭代协议机制。 所以确保你已经把这章的内容牢牢记在心中。</p>
+</code></pre>
+<p>本章接下来几小节会更深入的讲解迭代相关技术，前提是你先要理解基本的迭代协议机制。 所以确保你已经把这章的内容牢牢记在心中。</p>
 <h1 id="42-代理迭代">4.2 代理迭代</h1>
 <h2 id="问题">问题</h2>
 <p>你构建了一个自定义容器对象，里面包含有列表、元组或其他可迭代对象。 你想直接在你的这个新容器对象上执行迭代操作。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>实际上你只需要定义一个 <code>__iter__()</code> 方法，将迭代操作代理到容器内部的对象上去。比如：</p>
-<pre><code>class Node:
-    def __init__(self, value):
-        self._value = value
-        self._children = []
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-variable language_">self</span>._value = value
+        <span class="hljs-variable language_">self</span>._children = []
 
-    def __repr__(self):
-        return 'Node({!r})'.format(self._value)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'Node({!r})'</span>.<span class="hljs-built_in">format</span>(<span class="hljs-variable language_">self</span>._value)
 
-    def add_child(self, node):
-        self._children.append(node)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_child</span>(<span class="hljs-params">self, node</span>):
+        <span class="hljs-variable language_">self</span>._children.append(node)
 
-    def __iter__(self):
-        return iter(self._children)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__iter__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">iter</span>(<span class="hljs-variable language_">self</span>._children)
 
-# Example
-if __name__ == '__main__':
-    root = Node(0)
-    child1 = Node(1)
-    child2 = Node(2)
+<span class="hljs-comment"># Example</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+    root = Node(<span class="hljs-number">0</span>)
+    child1 = Node(<span class="hljs-number">1</span>)
+    child2 = Node(<span class="hljs-number">2</span>)
     root.add_child(child1)
     root.add_child(child2)
-    # Outputs Node(1), Node(2)
-    for ch in root:
-        print(ch)
-</code></pre><p>在上面代码中， <code>__iter__()</code>方法只是简单的将迭代请求传递给内部的 <code>_children</code>属性。</p>
+    <span class="hljs-comment"># Outputs Node(1), Node(2)</span>
+    <span class="hljs-keyword">for</span> ch <span class="hljs-keyword">in</span> root:
+        <span class="hljs-built_in">print</span>(ch)
+</code></pre>
+<p>在上面代码中， <code>__iter__()</code>方法只是简单的将迭代请求传递给内部的 <code>_children</code>属性。</p>
 <h2 id="讨论">讨论</h2>
 <p>Python 的迭代器协议需要<code>__iter__()</code>方法返回一个实现了 <code>__next__()</code>方法的迭代器对象。 如果你只是迭代遍历其他容器的内容，你无须担心底层是怎样实现的。你所要做的只是传递迭代请求既可。</p>
 <p>这里的<code>iter()</code> 函数的使用简化了代码，<code>iter(s)</code>只是简单的通过调用 <code>s.__iter__()</code>方法来返回对应的迭代器对象， 就跟 <code>len(s)</code> 会调用 <code>s.__len__()</code>原理是一样的。</p>
@@ -420,272 +424,284 @@ if __name__ == '__main__':
 <p>你想实现一个自定义迭代模式，跟普通的内置函数比如 <code>range()</code>, <code>reversed()</code>不一样。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你想实现一种新的迭代模式，使用一个生成器函数来定义它。 下面是一个生产某个范围内浮点数的生成器：</p>
-<pre><code>def frange(start, stop, increment):
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">frange</span>(<span class="hljs-params">start, stop, increment</span>):
     x = start
-    while x &lt; stop:
-        yield x
+    <span class="hljs-keyword">while</span> x &lt; stop:
+        <span class="hljs-keyword">yield</span> x
         x += increment
-</code></pre><p>为了使用这个函数， 你可以用 for 循环迭代它或者使用其他接受一个可迭代对象的函数(比如 <code>sum()</code>, <code>list()</code> 等)。示例如下：</p>
-<pre><code>&gt;&gt;&gt; for n in frange(0, 4, 0.5):
-...     print(n)
+</code></pre>
+<p>为了使用这个函数， 你可以用 for 循环迭代它或者使用其他接受一个可迭代对象的函数(比如 <code>sum()</code>, <code>list()</code> 等)。示例如下：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> frange(<span class="hljs-number">0</span>, <span class="hljs-number">4</span>, <span class="hljs-number">0.5</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(n)
 ...
-0
-0.5
-1.0
-1.5
-2.0
-2.5
-3.0
-3.5
-&gt;&gt;&gt; list(frange(0, 1, 0.125))
-[0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]
+<span class="hljs-number">0</span>
+<span class="hljs-number">0.5</span>
+<span class="hljs-number">1.0</span>
+<span class="hljs-number">1.5</span>
+<span class="hljs-number">2.0</span>
+<span class="hljs-number">2.5</span>
+<span class="hljs-number">3.0</span>
+<span class="hljs-number">3.5</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">list</span>(frange(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0.125</span>))
+[<span class="hljs-number">0</span>, <span class="hljs-number">0.125</span>, <span class="hljs-number">0.25</span>, <span class="hljs-number">0.375</span>, <span class="hljs-number">0.5</span>, <span class="hljs-number">0.625</span>, <span class="hljs-number">0.75</span>, <span class="hljs-number">0.875</span>]
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>一个函数中需要有一个 <code>yield</code> 语句即可将其转换为一个生成器。 跟普通函数不同的是，生成器只能用于迭代操作。 下面是一个实验，向你展示这样的函数底层工作机制：</p>
-<pre><code>&gt;&gt;&gt; def countdown(n):
-...     print('Starting to count from', n)
-...     while n &gt; 0:
-...         yield n
-...         n -= 1
-...     print('Done!')
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">countdown</span>(<span class="hljs-params">n</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(<span class="hljs-string">'Starting to count from'</span>, n)
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">while</span> n &gt; <span class="hljs-number">0</span>:
+<span class="hljs-meta">... </span>        <span class="hljs-keyword">yield</span> n
+<span class="hljs-meta">... </span>        n -= <span class="hljs-number">1</span>
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(<span class="hljs-string">'Done!'</span>)
 ...
 
-&gt;&gt;&gt; # Create the generator, notice no output appears
-&gt;&gt;&gt; c = countdown(3)
-&gt;&gt;&gt; c
-&lt;generator object countdown at 0x1006a0af0&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Create the generator, notice no output appears</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>c = countdown(<span class="hljs-number">3</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>c
+&lt;generator <span class="hljs-built_in">object</span> countdown at <span class="hljs-number">0x1006a0af0</span>&gt;
 
-&gt;&gt;&gt; # Run to first yield and emit a value
-&gt;&gt;&gt; next(c)
-Starting to count from 3
-3
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Run to first yield and emit a value</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(c)
+Starting to count <span class="hljs-keyword">from</span> <span class="hljs-number">3</span>
+<span class="hljs-number">3</span>
 
-&gt;&gt;&gt; # Run to the next yield
-&gt;&gt;&gt; next(c)
-2
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Run to the next yield</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(c)
+<span class="hljs-number">2</span>
 
-&gt;&gt;&gt; # Run to next yield
-&gt;&gt;&gt; next(c)
-1
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Run to next yield</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(c)
+<span class="hljs-number">1</span>
 
-&gt;&gt;&gt; # Run to next yield (iteration stops)
-&gt;&gt;&gt; next(c)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Run to next yield (iteration stops)</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(c)
 Done!
 Traceback (most recent call last):
-    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+    File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
 StopIteration
 &gt;&gt;&gt;
-</code></pre><p>一个生成器函数主要特征是它只会回应在迭代中使用到的 next 操作。 一旦生成器函数返回退出，迭代终止。我们在迭代中通常使用的 for 语句会自动处理这些细节，所以你无需担心。</p>
+</code></pre>
+<p>一个生成器函数主要特征是它只会回应在迭代中使用到的 next 操作。 一旦生成器函数返回退出，迭代终止。我们在迭代中通常使用的 for 语句会自动处理这些细节，所以你无需担心。</p>
 <h1 id="44-实现迭代器协议">4.4 实现迭代器协议</h1>
 <h2 id="问题">问题</h2>
 <p>你想构建一个能支持迭代操作的自定义对象，并希望找到一个能实现迭代协议的简单方法。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>目前为止，在一个对象上实现迭代最简单的方式是使用一个生成器函数。 在4.2小节中，使用 Node 类来表示树形数据结构。你可能想实现一个以深度优先方式遍历树形节点的生成器。 下面是代码示例：</p>
-<pre><code>class Node:
-    def __init__(self, value):
-        self._value = value
-        self._children = []
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-variable language_">self</span>._value = value
+        <span class="hljs-variable language_">self</span>._children = []
 
-    def __repr__(self):
-        return 'Node({!r})'.format(self._value)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'Node({!r})'</span>.<span class="hljs-built_in">format</span>(<span class="hljs-variable language_">self</span>._value)
 
-    def add_child(self, node):
-        self._children.append(node)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_child</span>(<span class="hljs-params">self, node</span>):
+        <span class="hljs-variable language_">self</span>._children.append(node)
 
-    def __iter__(self):
-        return iter(self._children)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__iter__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">iter</span>(<span class="hljs-variable language_">self</span>._children)
 
-    def depth_first(self):
-        yield self
-        for c in self:
-            yield from c.depth_first()
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">depth_first</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">yield</span> <span class="hljs-variable language_">self</span>
+        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>:
+            <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> c.depth_first()
 
-# Example
-if __name__ == '__main__':
-    root = Node(0)
-    child1 = Node(1)
-    child2 = Node(2)
+<span class="hljs-comment"># Example</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+    root = Node(<span class="hljs-number">0</span>)
+    child1 = Node(<span class="hljs-number">1</span>)
+    child2 = Node(<span class="hljs-number">2</span>)
     root.add_child(child1)
     root.add_child(child2)
-    child1.add_child(Node(3))
-    child1.add_child(Node(4))
-    child2.add_child(Node(5))
+    child1.add_child(Node(<span class="hljs-number">3</span>))
+    child1.add_child(Node(<span class="hljs-number">4</span>))
+    child2.add_child(Node(<span class="hljs-number">5</span>))
 
-    for ch in root.depth_first():
-        print(ch)
-    # Outputs Node(0), Node(1), Node(3), Node(4), Node(2), Node(5)
-</code></pre><p>在这段代码中，<code>depth_first()</code>方法简单直观。 它首先返回自己本身并迭代每一个子节点并 通过调用子节点的 <code>depth_first()</code> 方法(使用<code>yield from</code>语句)返回对应元素。</p>
+    <span class="hljs-keyword">for</span> ch <span class="hljs-keyword">in</span> root.depth_first():
+        <span class="hljs-built_in">print</span>(ch)
+    <span class="hljs-comment"># Outputs Node(0), Node(1), Node(3), Node(4), Node(2), Node(5)</span>
+</code></pre>
+<p>在这段代码中，<code>depth_first()</code>方法简单直观。 它首先返回自己本身并迭代每一个子节点并 通过调用子节点的 <code>depth_first()</code> 方法(使用<code>yield from</code>语句)返回对应元素。</p>
 <h2 id="讨论">讨论</h2>
 <p>Python 的迭代协议要求一个 <code>__iter__()</code> 方法返回一个特殊的迭代器对象， 这个迭代器对象实现了 <code>__next__()</code> 方法并通过 <code>StopIteration</code> 异常标识迭代的完成。 但是，实现这些通常会比较繁琐。 下面我们演示下这种方式，如何使用一个关联迭代器类重新实现 <code>depth_first()</code> 方法：</p>
-<pre><code>class Node2:
-    def __init__(self, value):
-        self._value = value
-        self._children = []
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Node2</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-variable language_">self</span>._value = value
+        <span class="hljs-variable language_">self</span>._children = []
 
-    def __repr__(self):
-        return 'Node({!r})'.format(self._value)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__repr__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'Node({!r})'</span>.<span class="hljs-built_in">format</span>(<span class="hljs-variable language_">self</span>._value)
 
-    def add_child(self, node):
-        self._children.append(node)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">add_child</span>(<span class="hljs-params">self, node</span>):
+        <span class="hljs-variable language_">self</span>._children.append(node)
 
-    def __iter__(self):
-        return iter(self._children)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__iter__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">iter</span>(<span class="hljs-variable language_">self</span>._children)
 
-    def depth_first(self):
-        return DepthFirstIterator(self)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">depth_first</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> DepthFirstIterator(<span class="hljs-variable language_">self</span>)
 
 
-class DepthFirstIterator(object):
-    '''
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DepthFirstIterator</span>(<span class="hljs-title class_ inherited__">object</span>):
+    <span class="hljs-string">'''
     Depth-first traversal
-    '''
+    '''</span>
 
-    def __init__(self, start_node):
-        self._node = start_node
-        self._children_iter = None
-        self._child_iter = None
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, start_node</span>):
+        <span class="hljs-variable language_">self</span>._node = start_node
+        <span class="hljs-variable language_">self</span>._children_iter = <span class="hljs-literal">None</span>
+        <span class="hljs-variable language_">self</span>._child_iter = <span class="hljs-literal">None</span>
 
-    def __iter__(self):
-        return self
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__iter__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>
 
-    def __next__(self):
-        # Return myself if just started; create an iterator for children
-        if self._children_iter is None:
-            self._children_iter = iter(self._node)
-            return self._node
-        # If processing a child, return its next item
-        elif self._child_iter:
-            try:
-                nextchild = next(self._child_iter)
-                return nextchild
-            except StopIteration:
-                self._child_iter = None
-                return next(self)
-        # Advance to the next child and start its iteration
-        else:
-            self._child_iter = next(self._children_iter).depth_first()
-            return next(self)
-</code></pre><p><code>DepthFirstIterator</code>类和上面使用生成器的版本工作原理类似， 但是它写起来很繁琐，因为迭代器必须在迭代处理过程中维护大量的状态信息。 坦白来讲，没人愿意写这么晦涩的代码。将你的迭代器定义为一个生成器后一切迎刃而解。</p>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__next__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-comment"># Return myself if just started; create an iterator for children</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>._children_iter <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:
+            <span class="hljs-variable language_">self</span>._children_iter = <span class="hljs-built_in">iter</span>(<span class="hljs-variable language_">self</span>._node)
+            <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._node
+        <span class="hljs-comment"># If processing a child, return its next item</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>._child_iter:
+            <span class="hljs-keyword">try</span>:
+                nextchild = <span class="hljs-built_in">next</span>(<span class="hljs-variable language_">self</span>._child_iter)
+                <span class="hljs-keyword">return</span> nextchild
+            <span class="hljs-keyword">except</span> StopIteration:
+                <span class="hljs-variable language_">self</span>._child_iter = <span class="hljs-literal">None</span>
+                <span class="hljs-keyword">return</span> <span class="hljs-built_in">next</span>(<span class="hljs-variable language_">self</span>)
+        <span class="hljs-comment"># Advance to the next child and start its iteration</span>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>._child_iter = <span class="hljs-built_in">next</span>(<span class="hljs-variable language_">self</span>._children_iter).depth_first()
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">next</span>(<span class="hljs-variable language_">self</span>)
+</code></pre>
+<p><code>DepthFirstIterator</code>类和上面使用生成器的版本工作原理类似， 但是它写起来很繁琐，因为迭代器必须在迭代处理过程中维护大量的状态信息。 坦白来讲，没人愿意写这么晦涩的代码。将你的迭代器定义为一个生成器后一切迎刃而解。</p>
 <h1 id="45-反向迭代">4.5 反向迭代</h1>
 <h2 id="问题">问题</h2>
 <p>你想反方向迭代一个序列</p>
 <h2 id="解决方案">解决方案</h2>
 <p>使用内置的 <code>reversed()</code>函数，比如：</p>
-<pre><code>&gt;&gt;&gt; a = [1, 2, 3, 4]
-&gt;&gt;&gt; for x in reversed(a):
-...     print(x)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(a):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x)
 ...
-4
-3
-2
-1
-</code></pre><p>反向迭代仅仅当对象的大小可预先确定或者对象实现了 <code>__reversed__()</code> 的特殊方法时才能生效。 如果两者都不符合，那你必须先将对象转换为一个列表才行，比如：</p>
-<pre><code># Print a file backwards
-f = open('somefile')
-for line in reversed(list(f)):
-    print(line, end='')
-</code></pre><p>要注意的是如果可迭代对象元素很多的话，将其预先转换为一个列表要消耗大量的内存。</p>
+<span class="hljs-number">4</span>
+<span class="hljs-number">3</span>
+<span class="hljs-number">2</span>
+<span class="hljs-number">1</span>
+</code></pre>
+<p>反向迭代仅仅当对象的大小可预先确定或者对象实现了 <code>__reversed__()</code> 的特殊方法时才能生效。 如果两者都不符合，那你必须先将对象转换为一个列表才行，比如：</p>
+<pre><code class="lang-python"><span class="hljs-comment"># Print a file backwards</span>
+f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'somefile'</span>)
+<span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">list</span>(f)):
+    <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
+</code></pre>
+<p>要注意的是如果可迭代对象元素很多的话，将其预先转换为一个列表要消耗大量的内存。</p>
 <h2 id="讨论">讨论</h2>
 <p>很多程序员并不知道可以通过在自定义类上实现<code>__reversed__()</code> 方法来实现反向迭代。比如：</p>
-<pre><code>class Countdown:
-    def __init__(self, start):
-        self.start = start
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Countdown</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, start</span>):
+        <span class="hljs-variable language_">self</span>.start = start
 
-    # Forward iterator
-    def __iter__(self):
-        n = self.start
-        while n &gt; 0:
-            yield n
-            n -= 1
+    <span class="hljs-comment"># Forward iterator</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__iter__</span>(<span class="hljs-params">self</span>):
+        n = <span class="hljs-variable language_">self</span>.start
+        <span class="hljs-keyword">while</span> n &gt; <span class="hljs-number">0</span>:
+            <span class="hljs-keyword">yield</span> n
+            n -= <span class="hljs-number">1</span>
 
-    # Reverse iterator
-    def __reversed__(self):
-        n = 1
-        while n &lt;= self.start:
-            yield n
-            n += 1
+    <span class="hljs-comment"># Reverse iterator</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__reversed__</span>(<span class="hljs-params">self</span>):
+        n = <span class="hljs-number">1</span>
+        <span class="hljs-keyword">while</span> n &lt;= <span class="hljs-variable language_">self</span>.start:
+            <span class="hljs-keyword">yield</span> n
+            n += <span class="hljs-number">1</span>
 
-for rr in reversed(Countdown(30)):
-    print(rr)
-for rr in Countdown(30):
-    print(rr)
-</code></pre><p>定义一个反向迭代器可以使得代码非常的高效， 因为它不再需要将数据填充到一个列表中然后再去反向迭代这个列表。</p>
+<span class="hljs-keyword">for</span> rr <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(Countdown(<span class="hljs-number">30</span>)):
+    <span class="hljs-built_in">print</span>(rr)
+<span class="hljs-keyword">for</span> rr <span class="hljs-keyword">in</span> Countdown(<span class="hljs-number">30</span>):
+    <span class="hljs-built_in">print</span>(rr)
+</code></pre>
+<p>定义一个反向迭代器可以使得代码非常的高效， 因为它不再需要将数据填充到一个列表中然后再去反向迭代这个列表。</p>
 <h1 id="46-带有外部状态的生成器函数">4.6 带有外部状态的生成器函数</h1>
 <h2 id="问题">问题</h2>
 <p>你想定义一个生成器函数，但是它会调用某个你想暴露给用户使用的外部状态值。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你想让你的生成器暴露外部状态给用户， 别忘了你可以简单的将它实现为一个类，然后把生成器函数放到 <code>__iter__()</code> 方法中过去。比如：</p>
-<pre><code>from collections import deque
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> deque
 
-class linehistory:
-    def __init__(self, lines, histlen=3):
-        self.lines = lines
-        self.history = deque(maxlen=histlen)
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">linehistory</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, lines, histlen=<span class="hljs-number">3</span></span>):
+        <span class="hljs-variable language_">self</span>.lines = lines
+        <span class="hljs-variable language_">self</span>.history = deque(maxlen=histlen)
 
-    def __iter__(self):
-        for lineno, line in enumerate(self.lines, 1):
-            self.history.append((lineno, line))
-            yield line
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__iter__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">for</span> lineno, line <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.lines, <span class="hljs-number">1</span>):
+            <span class="hljs-variable language_">self</span>.history.append((lineno, line))
+            <span class="hljs-keyword">yield</span> line
 
-    def clear(self):
-        self.history.clear()
-</code></pre><p>为了使用这个类，你可以将它当做是一个普通的生成器函数。 然而，由于可以创建一个实例对象，于是你可以访问内部属性值， 比如 <code>history</code> 属性或者是 <code>clear()</code> 方法。代码示例如下：</p>
-<pre><code>with open('somefile.txt') as f:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">clear</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.history.clear()
+</code></pre>
+<p>为了使用这个类，你可以将它当做是一个普通的生成器函数。 然而，由于可以创建一个实例对象，于是你可以访问内部属性值， 比如 <code>history</code> 属性或者是 <code>clear()</code> 方法。代码示例如下：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'somefile.txt'</span>) <span class="hljs-keyword">as</span> f:
     lines = linehistory(f)
-    for line in lines:
-        if 'python' in line:
-            for lineno, hline in lines.history:
-                print('{}:{}'.format(lineno, hline), end='')
-</code></pre><h2 id="讨论">讨论</h2>
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'python'</span> <span class="hljs-keyword">in</span> line:
+            <span class="hljs-keyword">for</span> lineno, hline <span class="hljs-keyword">in</span> lines.history:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">'{}:{}'</span>.<span class="hljs-built_in">format</span>(lineno, hline), end=<span class="hljs-string">''</span>)
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>关于生成器，很容易掉进函数无所不能的陷阱。 如果生成器函数需要跟你的程序其他部分打交道的话(比如暴露属性值，允许通过方法调用来控制等等)， 可能会导致你的代码异常的复杂。 如果是这种情况的话，可以考虑使用上面介绍的定义类的方式。 在 <code>__iter__()</code>方法中定义你的生成器不会改变你任何的算法逻辑。 由于它是类的一部分，所以允许你定义各种属性和方法来供用户使用。</p>
 <p>一个需要注意的小地方是，如果你在迭代操作时不使用 for 循环语句，那么你得先调用 <code>iter()</code>函数。比如：</p>
-<pre><code>&gt;&gt;&gt; f = open('somefile.txt')
-&gt;&gt;&gt; lines = linehistory(f)
-&gt;&gt;&gt; next(lines)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'somefile.txt'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>lines = linehistory(f)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(lines)
 Traceback (most recent call last):
-    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-TypeError: 'linehistory' object is not an iterator
+    File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+TypeError: <span class="hljs-string">'linehistory'</span> <span class="hljs-built_in">object</span> <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> an iterator
 
-&gt;&gt;&gt; # Call iter() first, then start iterating
-&gt;&gt;&gt; it = iter(lines)
-&gt;&gt;&gt; next(it)
-'hello world\n'
-&gt;&gt;&gt; next(it)
-'this is a test\n'
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Call iter() first, then start iterating</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>it = <span class="hljs-built_in">iter</span>(lines)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(it)
+<span class="hljs-string">'hello world\n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">next</span>(it)
+<span class="hljs-string">'this is a test\n'</span>
 &gt;&gt;&gt;
-</code></pre><h1 id="47-迭代器切片">4.7 迭代器切片</h1>
+</code></pre>
+<h1 id="47-迭代器切片">4.7 迭代器切片</h1>
 <h2 id="问题">问题</h2>
 <p>你想得到一个由迭代器生成的切片对象，但是标准切片操作并不能做到。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>函数 <code>itertools.islice()</code>正好适用于在迭代器和生成器上做切片操作。比如：</p>
-<pre><code>&gt;&gt;&gt; def count(n):
-...     while True:
-...         yield n
-...         n += 1
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">count</span>(<span class="hljs-params">n</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+<span class="hljs-meta">... </span>        <span class="hljs-keyword">yield</span> n
+<span class="hljs-meta">... </span>        n += <span class="hljs-number">1</span>
 ...
-&gt;&gt;&gt; c = count(0)
-&gt;&gt;&gt; c[10:20]
+<span class="hljs-meta">&gt;&gt;&gt; </span>c = count(<span class="hljs-number">0</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>c[<span class="hljs-number">10</span>:<span class="hljs-number">20</span>]
 Traceback (most recent call last):
-    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-TypeError: 'generator' object is not subscriptable
+    File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+TypeError: <span class="hljs-string">'generator'</span> <span class="hljs-built_in">object</span> <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> subscriptable
 
-&gt;&gt;&gt; # Now using islice()
-&gt;&gt;&gt; import itertools
-&gt;&gt;&gt; for x in itertools.islice(c, 10, 20):
-...     print(x)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Now using islice()</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> itertools
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> itertools.islice(c, <span class="hljs-number">10</span>, <span class="hljs-number">20</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x)
 ...
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
+<span class="hljs-number">10</span>
+<span class="hljs-number">11</span>
+<span class="hljs-number">12</span>
+<span class="hljs-number">13</span>
+<span class="hljs-number">14</span>
+<span class="hljs-number">15</span>
+<span class="hljs-number">16</span>
+<span class="hljs-number">17</span>
+<span class="hljs-number">18</span>
+<span class="hljs-number">19</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>迭代器和生成器不能使用标准的切片操作，因为它们的长度事先我们并不知道(并且也没有实现索引)。 函数 <code>islice()</code>返回一个可以生成指定元素的迭代器，它通过遍历并丢弃直到切片开始索引位置的所有元素。 然后才开始一个个的返回元素，并直到切片结束索引位置。</p>
 <p>这里要着重强调的一点是 <code>islice()</code> 会消耗掉传入的迭代器中的数据。 必须考虑到迭代器是不可逆的这个事实。 所以如果你需要之后再次访问这个迭代器的话，那你就得先将它里面的数据放入一个列表中。</p>
 <h1 id="48-跳过可迭代对象的开始部分">4.8 跳过可迭代对象的开始部分</h1>
@@ -694,393 +710,426 @@ TypeError: 'generator' object is not subscriptable
 <h2 id="解决方案">解决方案</h2>
 <p><code>itertools</code> 模块中有一些函数可以完成这个任务。 首先介绍的是 <code>itertools.dropwhile()</code>函数。使用时，你给它传递一个函数对象和一个可迭代对象。 它会返回一个迭代器对象，丢弃原有序列中直到函数返回 True 之前的所有元素，然后返回后面所有元素。</p>
 <p>为了演示，假定你在读取一个开始部分是几行注释的源文件。比如：</p>
-<pre><code>&gt;&gt;&gt; with open('/etc/passwd') as f:
-... for line in f:
-...     print(line, end='')
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>) <span class="hljs-keyword">as</span> f:
+<span class="hljs-meta">... </span><span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f:
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
 ...
-##
-# User Database
-#
-# Note that this file is consulted directly only when the system is running
-# in single-user mode. At other times, this information is provided by
-# Open Directory.
+<span class="hljs-comment">##</span>
+<span class="hljs-comment"># User Database</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># Note that this file is consulted directly only when the system is running</span>
+<span class="hljs-comment"># in single-user mode. At other times, this information is provided by</span>
+<span class="hljs-comment"># Open Directory.</span>
 ...
-##
-nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
-root:*:0:0:System Administrator:/var/root:/bin/sh
-...
-&gt;&gt;&gt;
-</code></pre><p>如果你想跳过开始部分的注释行的话，可以这样做：</p>
-<pre><code>&gt;&gt;&gt; from itertools import dropwhile
-&gt;&gt;&gt; with open('/etc/passwd') as f:
-...     for line in dropwhile(lambda line: line.startswith('#'), f):
-...         print(line, end='')
-...
-nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
-root:*:0:0:System Administrator:/var/root:/bin/sh
+<span class="hljs-comment">##</span>
+nobody:*:-<span class="hljs-number">2</span>:-<span class="hljs-number">2</span>:Unprivileged User:/var/empty:/usr/<span class="hljs-built_in">bin</span>/false
+root:*:<span class="hljs-number">0</span>:<span class="hljs-number">0</span>:System Administrator:/var/root:/<span class="hljs-built_in">bin</span>/sh
 ...
 &gt;&gt;&gt;
-</code></pre><p>这个例子是基于根据某个测试函数跳过开始的元素。 如果你已经明确知道了要跳过的元素的个数的话，那么可以使用 <code>itertools.islice()</code> 来代替。比如：</p>
-<pre><code>&gt;&gt;&gt; from itertools import islice
-&gt;&gt;&gt; items = ['a', 'b', 'c', 1, 4, 10, 15]
-&gt;&gt;&gt; for x in islice(items, 3, None):
-...     print(x)
+</code></pre>
+<p>如果你想跳过开始部分的注释行的话，可以这样做：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> dropwhile
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>) <span class="hljs-keyword">as</span> f:
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> dropwhile(<span class="hljs-keyword">lambda</span> line: line.startswith(<span class="hljs-string">'#'</span>), f):
+<span class="hljs-meta">... </span>        <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
 ...
-1
-4
-10
-15
+nobody:*:-<span class="hljs-number">2</span>:-<span class="hljs-number">2</span>:Unprivileged User:/var/empty:/usr/<span class="hljs-built_in">bin</span>/false
+root:*:<span class="hljs-number">0</span>:<span class="hljs-number">0</span>:System Administrator:/var/root:/<span class="hljs-built_in">bin</span>/sh
+...
 &gt;&gt;&gt;
-</code></pre><p>在这个例子中， <code>islice()</code> 函数最后那个 <code>None</code> 参数指定了你要获取从第3个到最后的所有元素， 如果 <code>None</code> 和3的位置对调，意思就是仅仅获取前三个元素恰恰相反， (这个跟切片的相反操作 <code>[3:]</code> 和 <code>[:3]</code>原理是一样的)。</p>
+</code></pre>
+<p>这个例子是基于根据某个测试函数跳过开始的元素。 如果你已经明确知道了要跳过的元素的个数的话，那么可以使用 <code>itertools.islice()</code> 来代替。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> islice
+<span class="hljs-meta">&gt;&gt;&gt; </span>items = [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>, <span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">10</span>, <span class="hljs-number">15</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> islice(items, <span class="hljs-number">3</span>, <span class="hljs-literal">None</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x)
+...
+<span class="hljs-number">1</span>
+<span class="hljs-number">4</span>
+<span class="hljs-number">10</span>
+<span class="hljs-number">15</span>
+&gt;&gt;&gt;
+</code></pre>
+<p>在这个例子中， <code>islice()</code> 函数最后那个 <code>None</code> 参数指定了你要获取从第3个到最后的所有元素， 如果 <code>None</code> 和3的位置对调，意思就是仅仅获取前三个元素恰恰相反， (这个跟切片的相反操作 <code>[3:]</code> 和 <code>[:3]</code>原理是一样的)。</p>
 <h2 id="讨论">讨论</h2>
 <p>函数 <code>dropwhile()</code> 和 <code>islice()</code> 其实就是两个帮助函数，为的就是避免写出下面这种冗余代码：</p>
-<pre><code>with open('/etc/passwd') as f:
-    # Skip over initial comments
-    while True:
-        line = next(f, '')
-        if not line.startswith('#'):
-            break
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>) <span class="hljs-keyword">as</span> f:
+    <span class="hljs-comment"># Skip over initial comments</span>
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
+        line = <span class="hljs-built_in">next</span>(f, <span class="hljs-string">''</span>)
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> line.startswith(<span class="hljs-string">'#'</span>):
+            <span class="hljs-keyword">break</span>
 
-    # Process remaining lines
-    while line:
-        # Replace with useful processing
-        print(line, end='')
-        line = next(f, None)
-</code></pre><p>跳过一个可迭代对象的开始部分跟通常的过滤是不同的。 比如，上述代码的第一个部分可能会这样重写：</p>
-<pre><code>with open('/etc/passwd') as f:
-    lines = (line for line in f if not line.startswith('#'))
-    for line in lines:
-        print(line, end='')
-</code></pre><p>这样写确实可以跳过开始部分的注释行，但是同样也会跳过文件中其他所有的注释行。 换句话讲，我们的解决方案是仅仅跳过开始部分满足测试条件的行，在那以后，所有的元素不再进行测试和过滤了。</p>
+    <span class="hljs-comment"># Process remaining lines</span>
+    <span class="hljs-keyword">while</span> line:
+        <span class="hljs-comment"># Replace with useful processing</span>
+        <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
+        line = <span class="hljs-built_in">next</span>(f, <span class="hljs-literal">None</span>)
+</code></pre>
+<p>跳过一个可迭代对象的开始部分跟通常的过滤是不同的。 比如，上述代码的第一个部分可能会这样重写：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>) <span class="hljs-keyword">as</span> f:
+    lines = (line <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> line.startswith(<span class="hljs-string">'#'</span>))
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
+        <span class="hljs-built_in">print</span>(line, end=<span class="hljs-string">''</span>)
+</code></pre>
+<p>这样写确实可以跳过开始部分的注释行，但是同样也会跳过文件中其他所有的注释行。 换句话讲，我们的解决方案是仅仅跳过开始部分满足测试条件的行，在那以后，所有的元素不再进行测试和过滤了。</p>
 <p>最后需要着重强调的一点是，本节的方案适用于所有可迭代对象，包括那些事先不能确定大小的， 比如生成器，文件及其类似的对象。</p>
 <h1 id="49-排列组合的迭代">4.9 排列组合的迭代</h1>
 <h2 id="问题">问题</h2>
 <p>你想迭代遍历一个集合中元素的所有可能的排列或组合</p>
 <h2 id="解决方案">解决方案</h2>
 <p>itertools 模块提供了三个函数来解决这类问题。 其中一个是 <code>itertools.permutations()</code>， 它接受一个集合并产生一个元组序列，每个元组由集合中所有元素的一个可能排列组成。 也就是说通过打乱集合中元素排列顺序生成一个元组，比如：</p>
-<pre><code>&gt;&gt;&gt; items = ['a', 'b', 'c']
-&gt;&gt;&gt; from itertools import permutations
-&gt;&gt;&gt; for p in permutations(items):
-...     print(p)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>items = [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> permutations
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> permutations(items):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(p)
 ...
-('a', 'b', 'c')
-('a', 'c', 'b')
-('b', 'a', 'c')
-('b', 'c', 'a')
-('c', 'a', 'b')
-('c', 'b', 'a')
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'c'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'a'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>, <span class="hljs-string">'a'</span>)
+(<span class="hljs-string">'c'</span>, <span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'c'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'a'</span>)
 &gt;&gt;&gt;
-</code></pre><p>如果你想得到指定长度的所有排列，你可以传递一个可选的长度参数。就像这样：</p>
-<pre><code>&gt;&gt;&gt; for p in permutations(items, 2):
-...     print(p)
+</code></pre>
+<p>如果你想得到指定长度的所有排列，你可以传递一个可选的长度参数。就像这样：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> permutations(items, <span class="hljs-number">2</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(p)
 ...
-('a', 'b')
-('a', 'c')
-('b', 'a')
-('b', 'c')
-('c', 'a')
-('c', 'b')
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'a'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'c'</span>, <span class="hljs-string">'a'</span>)
+(<span class="hljs-string">'c'</span>, <span class="hljs-string">'b'</span>)
 &gt;&gt;&gt;
-</code></pre><p>使用 <code>itertools.combinations()</code>可得到输入集合中元素的所有的组合。比如：</p>
-<pre><code>&gt;&gt;&gt; from itertools import combinations
-&gt;&gt;&gt; for c in combinations(items, 3):
-...     print(c)
+</code></pre>
+<p>使用 <code>itertools.combinations()</code>可得到输入集合中元素的所有的组合。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> combinations
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> combinations(items, <span class="hljs-number">3</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(c)
 ...
-('a', 'b', 'c')
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)
 
-&gt;&gt;&gt; for c in combinations(items, 2):
-...     print(c)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> combinations(items, <span class="hljs-number">2</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(c)
 ...
-('a', 'b')
-('a', 'c')
-('b', 'c')
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)
 
-&gt;&gt;&gt; for c in combinations(items, 1):
-...     print(c)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> combinations(items, <span class="hljs-number">1</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(c)
 ...
-('a',)
-('b',)
-('c',)
+(<span class="hljs-string">'a'</span>,)
+(<span class="hljs-string">'b'</span>,)
+(<span class="hljs-string">'c'</span>,)
 &gt;&gt;&gt;
-</code></pre><p>对于 <code>combinations()</code> 来讲，元素的顺序已经不重要了。 也就是说，组合 <code>('a', 'b')</code>跟 <code>('b', 'a')</code>其实是一样的(最终只会输出其中一个)。</p>
+</code></pre>
+<p>对于 <code>combinations()</code> 来讲，元素的顺序已经不重要了。 也就是说，组合 <code>('a', 'b')</code>跟 <code>('b', 'a')</code>其实是一样的(最终只会输出其中一个)。</p>
 <p>在计算组合的时候，一旦元素被选取就会从候选中剔除掉(比如如果元素’a’已经被选取了，那么接下来就不会再考虑它了)。 而函数 <code>itertools.combinations_with_replacement()</code>允许同一个元素被选择多次，比如：</p>
-<pre><code>&gt;&gt;&gt; for c in combinations_with_replacement(items, 3):
-...     print(c)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> combinations_with_replacement(items, <span class="hljs-number">3</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(c)
 ...
-('a', 'a', 'a')
-('a', 'a', 'b')
-('a', 'a', 'c')
-('a', 'b', 'b')
-('a', 'b', 'c')
-('a', 'c', 'c')
-('b', 'b', 'b')
-('b', 'b', 'c')
-('b', 'c', 'c')
-('c', 'c', 'c')
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'a'</span>, <span class="hljs-string">'a'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'a'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'a'</span>, <span class="hljs-string">'c'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'b'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>, <span class="hljs-string">'c'</span>)
+(<span class="hljs-string">'c'</span>, <span class="hljs-string">'c'</span>, <span class="hljs-string">'c'</span>)
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>这一小节我们向你展示的仅仅是 <code>itertools</code> 模块的一部分功能。 尽管你也可以自己手动实现排列组合算法，但是这样做得要花点脑力。 当我们碰到看上去有些复杂的迭代问题时，最好可以先去看看 itertools 模块。 如果这个问题很普遍，那么很有可能会在里面找到解决方案！</p>
 <h1 id="410-序列上索引值迭代">4.10 序列上索引值迭代</h1>
 <h2 id="问题">问题</h2>
 <p>你想在迭代一个序列的同时跟踪正在被处理的元素索引。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>内置的 <code>enumerate()</code> 函数可以很好的解决这个问题：</p>
-<pre><code>&gt;&gt;&gt; my_list = ['a', 'b', 'c']
-&gt;&gt;&gt; for idx, val in enumerate(my_list):
-...     print(idx, val)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>my_list = [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> idx, val <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(my_list):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(idx, val)
 ...
-0 a
-1 b
-2 c
-</code></pre><p>为了按传统行号输出(行号从1开始)，你可以传递一个开始参数：</p>
-<pre><code>&gt;&gt;&gt; my_list = ['a', 'b', 'c']
-&gt;&gt;&gt; for idx, val in enumerate(my_list, 1):
-...     print(idx, val)
+<span class="hljs-number">0</span> a
+<span class="hljs-number">1</span> b
+<span class="hljs-number">2</span> c
+</code></pre>
+<p>为了按传统行号输出(行号从1开始)，你可以传递一个开始参数：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>my_list = [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'c'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> idx, val <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(my_list, <span class="hljs-number">1</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(idx, val)
 ...
-1 a
-2 b
-3 c
-</code></pre><p>这种情况在你遍历文件时想在错误消息中使用行号定位时候非常有用：</p>
-<pre><code>def parse_data(filename):
-    with open(filename, 'rt') as f:
-        for lineno, line in enumerate(f, 1):
+<span class="hljs-number">1</span> a
+<span class="hljs-number">2</span> b
+<span class="hljs-number">3</span> c
+</code></pre>
+<p>这种情况在你遍历文件时想在错误消息中使用行号定位时候非常有用：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">parse_data</span>(<span class="hljs-params">filename</span>):
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(filename, <span class="hljs-string">'rt'</span>) <span class="hljs-keyword">as</span> f:
+        <span class="hljs-keyword">for</span> lineno, line <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(f, <span class="hljs-number">1</span>):
             fields = line.split()
-            try:
-                count = int(fields[1])
+            <span class="hljs-keyword">try</span>:
+                count = <span class="hljs-built_in">int</span>(fields[<span class="hljs-number">1</span>])
                 ...
-            except ValueError as e:
-                print('Line {}: Parse error: {}'.format(lineno, e))
-</code></pre><p><code>enumerate()</code> 对于跟踪某些值在列表中出现的位置是很有用的。 所以，如果你想将一个文件中出现的单词映射到它出现的行号上去，可以很容易的利用 <code>enumerate()</code>来完成：</p>
-<pre><code>word_summary = defaultdict(list)
+            <span class="hljs-keyword">except</span> ValueError <span class="hljs-keyword">as</span> e:
+                <span class="hljs-built_in">print</span>(<span class="hljs-string">'Line {}: Parse error: {}'</span>.<span class="hljs-built_in">format</span>(lineno, e))
+</code></pre>
+<p><code>enumerate()</code> 对于跟踪某些值在列表中出现的位置是很有用的。 所以，如果你想将一个文件中出现的单词映射到它出现的行号上去，可以很容易的利用 <code>enumerate()</code>来完成：</p>
+<pre><code class="lang-python">word_summary = defaultdict(<span class="hljs-built_in">list</span>)
 
-with open('myfile.txt', 'r') as f:
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'myfile.txt'</span>, <span class="hljs-string">'r'</span>) <span class="hljs-keyword">as</span> f:
     lines = f.readlines()
 
-for idx, line in enumerate(lines):
-    # Create a list of words in current line
-    words = [w.strip().lower() for w in line.split()]
-    for word in words:
+<span class="hljs-keyword">for</span> idx, line <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(lines):
+    <span class="hljs-comment"># Create a list of words in current line</span>
+    words = [w.strip().lower() <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> line.split()]
+    <span class="hljs-keyword">for</span> word <span class="hljs-keyword">in</span> words:
         word_summary[word].append(idx)
-</code></pre><p>如果你处理完文件后打印 <code>word_summary</code>，会发现它是一个字典(准确来讲是一个 <code>defaultdict</code> )， 对于每个单词有一个 <code>key</code> ，每个 <code>key</code> 对应的值是一个由这个单词出现的行号组成的列表。 如果某个单词在一行中出现过两次，那么这个行号也会出现两次， 同时也可以作为文本的一个简单统计。</p>
+</code></pre>
+<p>如果你处理完文件后打印 <code>word_summary</code>，会发现它是一个字典(准确来讲是一个 <code>defaultdict</code> )， 对于每个单词有一个 <code>key</code> ，每个 <code>key</code> 对应的值是一个由这个单词出现的行号组成的列表。 如果某个单词在一行中出现过两次，那么这个行号也会出现两次， 同时也可以作为文本的一个简单统计。</p>
 <h2 id="讨论">讨论</h2>
 <p>当你想额外定义一个计数变量的时候，使用 <code>enumerate()</code> 函数会更加简单。你可能会像下面这样写代码：</p>
-<pre><code>lineno = 1
-for line in f:
-    # Process line
+<pre><code class="lang-python">lineno = <span class="hljs-number">1</span>
+<span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f:
+    <span class="hljs-comment"># Process line</span>
     ...
-    lineno += 1
-</code></pre><p>但是如果使用 <code>enumerate()</code> 函数来代替就显得更加优雅了：</p>
-<pre><code>for lineno, line in enumerate(f):
-    # Process line
+    lineno += <span class="hljs-number">1</span>
+</code></pre>
+<p>但是如果使用 <code>enumerate()</code> 函数来代替就显得更加优雅了：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">for</span> lineno, line <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(f):
+    <span class="hljs-comment"># Process line</span>
     ...
-</code></pre><p><code>enumerate()</code>函数返回的是一个 <code>enumerate</code>对象实例， 它是一个迭代器，返回连续的包含一个计数和一个值的元组， 元组中的值通过在传入序列上调用 <code>next()</code>返回。</p>
+</code></pre>
+<p><code>enumerate()</code>函数返回的是一个 <code>enumerate</code>对象实例， 它是一个迭代器，返回连续的包含一个计数和一个值的元组， 元组中的值通过在传入序列上调用 <code>next()</code>返回。</p>
 <p>还有一点可能并不很重要，但是也值得注意， 有时候当你在一个已经解压后的元组序列上使用 <code>enumerate()</code> 函数时很容易调入陷阱。 你得像下面正确的方式这样写：</p>
-<pre><code>data = [ (1, 2), (3, 4), (5, 6), (7, 8) ]
+<pre><code class="lang-python">data = [ (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>), (<span class="hljs-number">3</span>, <span class="hljs-number">4</span>), (<span class="hljs-number">5</span>, <span class="hljs-number">6</span>), (<span class="hljs-number">7</span>, <span class="hljs-number">8</span>) ]
 
-# Correct!
-for n, (x, y) in enumerate(data):
+<span class="hljs-comment"># Correct!</span>
+<span class="hljs-keyword">for</span> n, (x, y) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(data):
     ...
-# Error!
-for n, x, y in enumerate(data):
+<span class="hljs-comment"># Error!</span>
+<span class="hljs-keyword">for</span> n, x, y <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(data):
     ...
-</code></pre><h1 id="411-同时迭代多个序列">4.11 同时迭代多个序列</h1>
+</code></pre>
+<h1 id="411-同时迭代多个序列">4.11 同时迭代多个序列</h1>
 <h2 id="问题">问题</h2>
 <p>你想同时迭代多个序列，每次分别从一个序列中取一个元素。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>为了同时迭代多个序列，使用 <code>zip()</code> 函数。比如：</p>
-<pre><code>&gt;&gt;&gt; xpts = [1, 5, 4, 2, 10, 7]
-&gt;&gt;&gt; ypts = [101, 78, 37, 15, 62, 99]
-&gt;&gt;&gt; for x, y in zip(xpts, ypts):
-...     print(x,y)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>xpts = [<span class="hljs-number">1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">4</span>, <span class="hljs-number">2</span>, <span class="hljs-number">10</span>, <span class="hljs-number">7</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>ypts = [<span class="hljs-number">101</span>, <span class="hljs-number">78</span>, <span class="hljs-number">37</span>, <span class="hljs-number">15</span>, <span class="hljs-number">62</span>, <span class="hljs-number">99</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> x, y <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(xpts, ypts):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x,y)
 ...
-1 101
-5 78
-4 37
-2 15
-10 62
-7 99
+<span class="hljs-number">1</span> <span class="hljs-number">101</span>
+<span class="hljs-number">5</span> <span class="hljs-number">78</span>
+<span class="hljs-number">4</span> <span class="hljs-number">37</span>
+<span class="hljs-number">2</span> <span class="hljs-number">15</span>
+<span class="hljs-number">10</span> <span class="hljs-number">62</span>
+<span class="hljs-number">7</span> <span class="hljs-number">99</span>
 &gt;&gt;&gt;
-</code></pre><p><code>zip(a, b)</code>会生成一个可返回元组 <code>(x, y)</code> 的迭代器，其中 x 来自 a，y 来自 b。 一旦其中某个序列到底结尾，迭代宣告结束。 因此迭代长度跟参数中最短序列长度一致。</p>
-<pre><code>&gt;&gt;&gt; a = [1, 2, 3]
-&gt;&gt;&gt; b = ['w', 'x', 'y', 'z']
-&gt;&gt;&gt; for i in zip(a,b):
-...     print(i)
+</code></pre>
+<p><code>zip(a, b)</code>会生成一个可返回元组 <code>(x, y)</code> 的迭代器，其中 x 来自 a，y 来自 b。 一旦其中某个序列到底结尾，迭代宣告结束。 因此迭代长度跟参数中最短序列长度一致。</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = [<span class="hljs-string">'w'</span>, <span class="hljs-string">'x'</span>, <span class="hljs-string">'y'</span>, <span class="hljs-string">'z'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(a,b):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(i)
 ...
-(1, 'w')
-(2, 'x')
-(3, 'y')
+(<span class="hljs-number">1</span>, <span class="hljs-string">'w'</span>)
+(<span class="hljs-number">2</span>, <span class="hljs-string">'x'</span>)
+(<span class="hljs-number">3</span>, <span class="hljs-string">'y'</span>)
 &gt;&gt;&gt;
-</code></pre><p>如果这个不是你想要的效果，那么还可以使用 <code>itertools.zip_longest()</code> 函数来代替。比如：</p>
-<pre><code>&gt;&gt;&gt; from itertools import zip_longest
-&gt;&gt;&gt; for i in zip_longest(a,b):
-...     print(i)
+</code></pre>
+<p>如果这个不是你想要的效果，那么还可以使用 <code>itertools.zip_longest()</code> 函数来代替。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> zip_longest
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> zip_longest(a,b):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(i)
 ...
-(1, 'w')
-(2, 'x')
-(3, 'y')
-(None, 'z')
+(<span class="hljs-number">1</span>, <span class="hljs-string">'w'</span>)
+(<span class="hljs-number">2</span>, <span class="hljs-string">'x'</span>)
+(<span class="hljs-number">3</span>, <span class="hljs-string">'y'</span>)
+(<span class="hljs-literal">None</span>, <span class="hljs-string">'z'</span>)
 
-&gt;&gt;&gt; for i in zip_longest(a, b, fillvalue=0):
-...     print(i)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> zip_longest(a, b, fillvalue=<span class="hljs-number">0</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(i)
 ...
-(1, 'w')
-(2, 'x')
-(3, 'y')
-(0, 'z')
+(<span class="hljs-number">1</span>, <span class="hljs-string">'w'</span>)
+(<span class="hljs-number">2</span>, <span class="hljs-string">'x'</span>)
+(<span class="hljs-number">3</span>, <span class="hljs-string">'y'</span>)
+(<span class="hljs-number">0</span>, <span class="hljs-string">'z'</span>)
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>当你想成对处理数据的时候 <code>zip()</code> 函数是很有用的。 比如，假设你头列表和一个值列表，就像下面这样：</p>
-<pre><code>headers = ['name', 'shares', 'price']
-values = ['ACME', 100, 490.1]
-</code></pre><p>使用 zip() 可以让你将它们打包并生成一个字典：</p>
-<pre><code>s = dict(zip(headers,values))
-</code></pre><p>或者你也可以像下面这样产生输出：</p>
-<pre><code>for name, val in zip(headers, values):
-    print(name, '=', val)
-</code></pre><p>虽然不常见，但是 <code>zip()</code>可以接受多于两个的序列的参数。 这时候所生成的结果元组中元素个数跟输入序列个数一样。比如;</p>
-<pre><code>&gt;&gt;&gt; a = [1, 2, 3]
-&gt;&gt;&gt; b = [10, 11, 12]
-&gt;&gt;&gt; c = ['x','y','z']
-&gt;&gt;&gt; for i in zip(a, b, c):
-...     print(i)
+<pre><code class="lang-python">headers = [<span class="hljs-string">'name'</span>, <span class="hljs-string">'shares'</span>, <span class="hljs-string">'price'</span>]
+values = [<span class="hljs-string">'ACME'</span>, <span class="hljs-number">100</span>, <span class="hljs-number">490.1</span>]
+</code></pre>
+<p>使用 zip() 可以让你将它们打包并生成一个字典：</p>
+<pre><code class="lang-python">s = <span class="hljs-built_in">dict</span>(<span class="hljs-built_in">zip</span>(headers,values))
+</code></pre>
+<p>或者你也可以像下面这样产生输出：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">for</span> name, val <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(headers, values):
+    <span class="hljs-built_in">print</span>(name, <span class="hljs-string">'='</span>, val)
+</code></pre>
+<p>虽然不常见，但是 <code>zip()</code>可以接受多于两个的序列的参数。 这时候所生成的结果元组中元素个数跟输入序列个数一样。比如;</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = [<span class="hljs-number">10</span>, <span class="hljs-number">11</span>, <span class="hljs-number">12</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>c = [<span class="hljs-string">'x'</span>,<span class="hljs-string">'y'</span>,<span class="hljs-string">'z'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(a, b, c):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(i)
 ...
-(1, 10, 'x')
-(2, 11, 'y')
-(3, 12, 'z')
+(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>, <span class="hljs-string">'x'</span>)
+(<span class="hljs-number">2</span>, <span class="hljs-number">11</span>, <span class="hljs-string">'y'</span>)
+(<span class="hljs-number">3</span>, <span class="hljs-number">12</span>, <span class="hljs-string">'z'</span>)
 &gt;&gt;&gt;
-</code></pre><p>最后强调一点就是，<code>zip()</code> 会创建一个迭代器来作为结果返回。 如果你需要将结对的值存储在列表中，要使用<code>list()</code> 函数。比如：</p>
-<pre><code>&gt;&gt;&gt; zip(a, b)
-&lt;zip object at 0x1007001b8&gt;
-&gt;&gt;&gt; list(zip(a, b))
-[(1, 10), (2, 11), (3, 12)]
+</code></pre>
+<p>最后强调一点就是，<code>zip()</code> 会创建一个迭代器来作为结果返回。 如果你需要将结对的值存储在列表中，要使用<code>list()</code> 函数。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">zip</span>(a, b)
+&lt;<span class="hljs-built_in">zip</span> <span class="hljs-built_in">object</span> at <span class="hljs-number">0x1007001b8</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">list</span>(<span class="hljs-built_in">zip</span>(a, b))
+[(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>), (<span class="hljs-number">2</span>, <span class="hljs-number">11</span>), (<span class="hljs-number">3</span>, <span class="hljs-number">12</span>)]
 &gt;&gt;&gt;
-</code></pre><h1 id="412-不同集合上元素的迭代">4.12 不同集合上元素的迭代</h1>
+</code></pre>
+<h1 id="412-不同集合上元素的迭代">4.12 不同集合上元素的迭代</h1>
 <h2 id="问题">问题</h2>
 <p>你想在多个对象执行相同的操作，但是这些对象在不同的容器中，你希望代码在不失可读性的情况下避免写重复的循环。</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>itertools.chain()</code> 方法可以用来简化这个任务。 它接受一个可迭代对象列表作为输入，并返回一个迭代器，有效的屏蔽掉在多个容器中迭代细节。 为了演示清楚，考虑下面这个例子：</p>
-<pre><code>&gt;&gt;&gt; from itertools import chain
-&gt;&gt;&gt; a = [1, 2, 3, 4]
-&gt;&gt;&gt; b = ['x', 'y', 'z']
-&gt;&gt;&gt; for x in chain(a, b):
-... print(x)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> itertools <span class="hljs-keyword">import</span> chain
+<span class="hljs-meta">&gt;&gt;&gt; </span>a = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = [<span class="hljs-string">'x'</span>, <span class="hljs-string">'y'</span>, <span class="hljs-string">'z'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> chain(a, b):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(x)
 ...
-1
-2
-3
-4
+<span class="hljs-number">1</span>
+<span class="hljs-number">2</span>
+<span class="hljs-number">3</span>
+<span class="hljs-number">4</span>
 x
 y
 z
 &gt;&gt;&gt;
-</code></pre><p>使用 <code>chain()</code> 的一个常见场景是当你想对不同的集合中所有元素执行某些操作的时候。比如：</p>
-<pre><code># Various working sets of items
-active_items = set()
-inactive_items = set()
+</code></pre>
+<p>使用 <code>chain()</code> 的一个常见场景是当你想对不同的集合中所有元素执行某些操作的时候。比如：</p>
+<pre><code class="lang-python"><span class="hljs-comment"># Various working sets of items</span>
+active_items = <span class="hljs-built_in">set</span>()
+inactive_items = <span class="hljs-built_in">set</span>()
 
-# Iterate over all items
-for item in chain(active_items, inactive_items):
-    # Process item
-</code></pre><p>这种解决方案要比像下面这样使用两个单独的循环更加优雅，</p>
-<pre><code>for item in active_items:
-    # Process item
+<span class="hljs-comment"># Iterate over all items</span>
+<span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> chain(active_items, inactive_items):
+    <span class="hljs-comment"># Process item</span>
+</code></pre>
+<p>这种解决方案要比像下面这样使用两个单独的循环更加优雅，</p>
+<pre><code class="lang-python"><span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> active_items:
+    <span class="hljs-comment"># Process item</span>
     ...
 
-for item in inactive_items:
-    # Process item
+<span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> inactive_items:
+    <span class="hljs-comment"># Process item</span>
     ...
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>itertools.chain()</code> 接受一个或多个可迭代对象最为输入参数。 然后创建一个迭代器，依次连续的返回每个可迭代对象中的元素。 这种方式要比先将序列合并再迭代要高效的多。比如：</p>
-<pre><code># Inefficent
-for x in a + b:
+<pre><code class="lang-python"><span class="hljs-comment"># Inefficent</span>
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> a + b:
     ...
 
-# Better
-for x in chain(a, b):
+<span class="hljs-comment"># Better</span>
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> chain(a, b):
     ...
-</code></pre><p>第一种方案中，<code>a + b</code>操作会创建一个全新的序列并要求a和b的类型一致。 <code>chian()</code> 不会有这一步，所以如果输入序列非常大的时候会很省内存。 并且当可迭代对象类型不一样的时候 <code>chain()</code> 同样可以很好的工作。</p>
+</code></pre>
+<p>第一种方案中，<code>a + b</code>操作会创建一个全新的序列并要求a和b的类型一致。 <code>chian()</code> 不会有这一步，所以如果输入序列非常大的时候会很省内存。 并且当可迭代对象类型不一样的时候 <code>chain()</code> 同样可以很好的工作。</p>
 <h1 id="413-创建数据处理管道">4.13 创建数据处理管道</h1>
 <h2 id="问题">问题</h2>
 <p>你想以数据管道(类似 Unix 管道)的方式迭代处理数据。 比如，你有个大量的数据需要处理，但是不能将它们一次性放入内存中。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>生成器函数是一个实现管道机制的好办法。 为了演示，假定你要处理一个非常大的日志文件目录：</p>
-<pre><code>foo/
-    access-log-012007.gz
-    access-log-022007.gz
-    access-log-032007.gz
+<pre><code class="lang-python">foo/
+    access-log-<span class="hljs-number">012007.</span>gz
+    access-log-<span class="hljs-number">022007.</span>gz
+    access-log-<span class="hljs-number">032007.</span>gz
     ...
     access-log-012008
 bar/
-    access-log-092007.bz2
+    access-log-<span class="hljs-number">092007.</span>bz2
     ...
     access-log-022008
-</code></pre><p>假设每个日志文件包含这样的数据：</p>
-<pre><code>124.115.6.12 - - [10/Jul/2012:00:18:50 -0500] "GET /robots.txt ..." 200 71
-210.212.209.67 - - [10/Jul/2012:00:18:51 -0500] "GET /ply/ ..." 200 11875
-210.212.209.67 - - [10/Jul/2012:00:18:51 -0500] "GET /favicon.ico ..." 404 369
-61.135.216.105 - - [10/Jul/2012:00:20:04 -0500] "GET /blog/atom.xml ..." 304 -
+</code></pre>
+<p>假设每个日志文件包含这样的数据：</p>
+<pre><code class="lang-python"><span class="hljs-number">124.115</span><span class="hljs-number">.6</span><span class="hljs-number">.12</span> - - [<span class="hljs-number">10</span>/Jul/<span class="hljs-number">2012</span>:<span class="hljs-number">00</span>:<span class="hljs-number">18</span>:<span class="hljs-number">50</span> -0500] <span class="hljs-string">"GET /robots.txt ..."</span> <span class="hljs-number">200</span> <span class="hljs-number">71</span>
+<span class="hljs-number">210.212</span><span class="hljs-number">.209</span><span class="hljs-number">.67</span> - - [<span class="hljs-number">10</span>/Jul/<span class="hljs-number">2012</span>:<span class="hljs-number">00</span>:<span class="hljs-number">18</span>:<span class="hljs-number">51</span> -0500] <span class="hljs-string">"GET /ply/ ..."</span> <span class="hljs-number">200</span> <span class="hljs-number">11875</span>
+<span class="hljs-number">210.212</span><span class="hljs-number">.209</span><span class="hljs-number">.67</span> - - [<span class="hljs-number">10</span>/Jul/<span class="hljs-number">2012</span>:<span class="hljs-number">00</span>:<span class="hljs-number">18</span>:<span class="hljs-number">51</span> -0500] <span class="hljs-string">"GET /favicon.ico ..."</span> <span class="hljs-number">404</span> <span class="hljs-number">369</span>
+<span class="hljs-number">61.135</span><span class="hljs-number">.216</span><span class="hljs-number">.105</span> - - [<span class="hljs-number">10</span>/Jul/<span class="hljs-number">2012</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span>:04 -0500] <span class="hljs-string">"GET /blog/atom.xml ..."</span> <span class="hljs-number">304</span> -
 ...
-</code></pre><p>为了处理这些文件，你可以定义一个由多个执行特定任务独立任务的简单生成器函数组成的容器。就像这样：</p>
-<pre><code>import os
-import fnmatch
-import gzip
-import bz2
-import re
+</code></pre>
+<p>为了处理这些文件，你可以定义一个由多个执行特定任务独立任务的简单生成器函数组成的容器。就像这样：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> fnmatch
+<span class="hljs-keyword">import</span> gzip
+<span class="hljs-keyword">import</span> bz2
+<span class="hljs-keyword">import</span> re
 
-def gen_find(filepat, top):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">gen_find</span>(<span class="hljs-params">filepat, top</span>):
+    <span class="hljs-string">'''
     Find all filenames in a directory tree that match a shell wildcard pattern
-    '''
-    for path, dirlist, filelist in os.walk(top):
-        for name in fnmatch.filter(filelist, filepat):
-            yield os.path.join(path,name)
+    '''</span>
+    <span class="hljs-keyword">for</span> path, dirlist, filelist <span class="hljs-keyword">in</span> os.walk(top):
+        <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> fnmatch.<span class="hljs-built_in">filter</span>(filelist, filepat):
+            <span class="hljs-keyword">yield</span> os.path.join(path,name)
 
-def gen_opener(filenames):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">gen_opener</span>(<span class="hljs-params">filenames</span>):
+    <span class="hljs-string">'''
     Open a sequence of filenames one at a time producing a file object.
     The file is closed immediately when proceeding to the next iteration.
-    '''
-    for filename in filenames:
-        if filename.endswith('.gz'):
-            f = gzip.open(filename, 'rt')
-        elif filename.endswith('.bz2'):
-            f = bz2.open(filename, 'rt')
-        else:
-            f = open(filename, 'rt')
-        yield f
+    '''</span>
+    <span class="hljs-keyword">for</span> filename <span class="hljs-keyword">in</span> filenames:
+        <span class="hljs-keyword">if</span> filename.endswith(<span class="hljs-string">'.gz'</span>):
+            f = gzip.<span class="hljs-built_in">open</span>(filename, <span class="hljs-string">'rt'</span>)
+        <span class="hljs-keyword">elif</span> filename.endswith(<span class="hljs-string">'.bz2'</span>):
+            f = bz2.<span class="hljs-built_in">open</span>(filename, <span class="hljs-string">'rt'</span>)
+        <span class="hljs-keyword">else</span>:
+            f = <span class="hljs-built_in">open</span>(filename, <span class="hljs-string">'rt'</span>)
+        <span class="hljs-keyword">yield</span> f
         f.close()
 
-def gen_concatenate(iterators):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">gen_concatenate</span>(<span class="hljs-params">iterators</span>):
+    <span class="hljs-string">'''
     Chain a sequence of iterators together into a single sequence.
-    '''
-    for it in iterators:
-        yield from it
+    '''</span>
+    <span class="hljs-keyword">for</span> it <span class="hljs-keyword">in</span> iterators:
+        <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> it
 
-def gen_grep(pattern, lines):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">gen_grep</span>(<span class="hljs-params">pattern, lines</span>):
+    <span class="hljs-string">'''
     Look for a regex pattern in a sequence of lines
-    '''
-    pat = re.compile(pattern)
-    for line in lines:
-        if pat.search(line):
-            yield line
-</code></pre><p>现在你可以很容易的将这些函数连起来创建一个处理管道。 比如，为了查找包含单词 python 的所有日志行，你可以这样做：</p>
-<pre><code>lognames = gen_find('access-log*', 'www')
+    '''</span>
+    pat = re.<span class="hljs-built_in">compile</span>(pattern)
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
+        <span class="hljs-keyword">if</span> pat.search(line):
+            <span class="hljs-keyword">yield</span> line
+</code></pre>
+<p>现在你可以很容易的将这些函数连起来创建一个处理管道。 比如，为了查找包含单词 python 的所有日志行，你可以这样做：</p>
+<pre><code class="lang-python">lognames = gen_find(<span class="hljs-string">'access-log*'</span>, <span class="hljs-string">'www'</span>)
 files = gen_opener(lognames)
 lines = gen_concatenate(files)
-pylines = gen_grep('(?i)python', lines)
-for line in pylines:
-    print(line)
-</code></pre><p>如果将来的时候你想扩展管道，你甚至可以在生成器表达式中包装数据。 比如，下面这个版本计算出传输的字节数并计算其总和。</p>
-<pre><code>lognames = gen_find('access-log*', 'www')
+pylines = gen_grep(<span class="hljs-string">'(?i)python'</span>, lines)
+<span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> pylines:
+    <span class="hljs-built_in">print</span>(line)
+</code></pre>
+<p>如果将来的时候你想扩展管道，你甚至可以在生成器表达式中包装数据。 比如，下面这个版本计算出传输的字节数并计算其总和。</p>
+<pre><code class="lang-python">lognames = gen_find(<span class="hljs-string">'access-log*'</span>, <span class="hljs-string">'www'</span>)
 files = gen_opener(lognames)
 lines = gen_concatenate(files)
-pylines = gen_grep('(?i)python', lines)
-bytecolumn = (line.rsplit(None,1)[1] for line in pylines)
-bytes = (int(x) for x in bytecolumn if x != '-')
-print('Total', sum(bytes))
-</code></pre><h2 id="讨论">讨论</h2>
+pylines = gen_grep(<span class="hljs-string">'(?i)python'</span>, lines)
+bytecolumn = (line.rsplit(<span class="hljs-literal">None</span>,<span class="hljs-number">1</span>)[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> pylines)
+<span class="hljs-built_in">bytes</span> = (<span class="hljs-built_in">int</span>(x) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> bytecolumn <span class="hljs-keyword">if</span> x != <span class="hljs-string">'-'</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">'Total'</span>, <span class="hljs-built_in">sum</span>(<span class="hljs-built_in">bytes</span>))
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>以管道方式处理数据可以用来解决各类其他问题，包括解析，读取实时数据，定时轮询等。</p>
 <p>为了理解上述代码，重点是要明白 <code>yield</code> 语句作为数据的生产者而 <code>for</code> 循环语句作为数据的消费者。 当这些生成器被连在一起后，每个 <code>yield</code> 会将一个单独的数据元素传递给迭代处理管道的下一阶段。 在例子最后部分，<code>sum()</code> 函数是最终的程序驱动者，每次从生成器管道中提取出一个元素。</p>
 <p>这种方式一个非常好的特点是每个生成器函数很小并且都是独立的。这样的话就很容易编写和维护它们了。 很多时候，这些函数如果比较通用的话可以在其他场景重复使用。 并且最终将这些组件组合起来的代码看上去非常简单，也很容易理解。</p>
@@ -1094,40 +1143,43 @@ print('Total', sum(bytes))
 <p>你想将一个多层嵌套的序列展开成一个单层列表</p>
 <h2 id="解决方案">解决方案</h2>
 <p>可以写一个包含 <code>yield from</code> 语句的递归生成器来轻松解决这个问题。比如：</p>
-<pre><code>from collections import Iterable
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> collections <span class="hljs-keyword">import</span> Iterable
 
-def flatten(items, ignore_types=(str, bytes)):
-    for x in items:
-        if isinstance(x, Iterable) and not isinstance(x, ignore_types):
-            yield from flatten(x)
-        else:
-            yield x
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">flatten</span>(<span class="hljs-params">items, ignore_types=(<span class="hljs-params"><span class="hljs-built_in">str</span>, <span class="hljs-built_in">bytes</span></span>)</span>):
+    <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> items:
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(x, Iterable) <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">isinstance</span>(x, ignore_types):
+            <span class="hljs-keyword">yield</span> <span class="hljs-keyword">from</span> flatten(x)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">yield</span> x
 
-items = [1, 2, [3, 4, [5, 6], 7], 8]
-# Produces 1 2 3 4 5 6 7 8
-for x in flatten(items):
-    print(x)
-</code></pre><p>在上面代码中， <code>isinstance(x, Iterable)</code> 检查某个元素是否是可迭代的。 如果是的话， <code>yield from</code> 就会返回所有子例程的值。最终返回结果就是一个没有嵌套的简单序列了。</p>
+items = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, [<span class="hljs-number">5</span>, <span class="hljs-number">6</span>], <span class="hljs-number">7</span>], <span class="hljs-number">8</span>]
+<span class="hljs-comment"># Produces 1 2 3 4 5 6 7 8</span>
+<span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> flatten(items):
+    <span class="hljs-built_in">print</span>(x)
+</code></pre>
+<p>在上面代码中， <code>isinstance(x, Iterable)</code> 检查某个元素是否是可迭代的。 如果是的话， <code>yield from</code> 就会返回所有子例程的值。最终返回结果就是一个没有嵌套的简单序列了。</p>
 <p>额外的参数 <code>ignore_types</code> 和检测语句 <code>isinstance(x, ignore_types)</code> 用来将字符串和字节排除在可迭代对象外，防止将它们再展开成单个的字符。 这样的话字符串数组就能最终返回我们所期望的结果了。比如：</p>
-<pre><code>&gt;&gt;&gt; items = ['Dave', 'Paula', ['Thomas', 'Lewis']]
-&gt;&gt;&gt; for x in flatten(items):
-...     print(x)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>items = [<span class="hljs-string">'Dave'</span>, <span class="hljs-string">'Paula'</span>, [<span class="hljs-string">'Thomas'</span>, <span class="hljs-string">'Lewis'</span>]]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> flatten(items):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x)
 ...
 Dave
 Paula
 Thomas
 Lewis
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>语句 <code>yield from</code> 在你想在生成器中调用其他生成器作为子例程的时候非常有用。 如果你不使用它的话，那么就必须写额外的<code>for</code> 循环了。比如：</p>
-<pre><code>def flatten(items, ignore_types=(str, bytes)):
-    for x in items:
-        if isinstance(x, Iterable) and not isinstance(x, ignore_types):
-            for i in flatten(x):
-                yield i
-        else:
-            yield x
-</code></pre><p>尽管只改了一点点，但是 <code>yield from</code> 语句看上去感觉更好，并且也使得代码更简洁清爽。</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">flatten</span>(<span class="hljs-params">items, ignore_types=(<span class="hljs-params"><span class="hljs-built_in">str</span>, <span class="hljs-built_in">bytes</span></span>)</span>):
+    <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> items:
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">isinstance</span>(x, Iterable) <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">isinstance</span>(x, ignore_types):
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> flatten(x):
+                <span class="hljs-keyword">yield</span> i
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">yield</span> x
+</code></pre>
+<p>尽管只改了一点点，但是 <code>yield from</code> 语句看上去感觉更好，并且也使得代码更简洁清爽。</p>
 <p>之前提到的对于字符串和字节的额外检查是为了防止将它们再展开成单个字符。 如果还有其他你不想展开的类型，修改参数 <code>ignore_types</code> 即可。</p>
 <p>最后要注意的一点是，<code>yield from</code> 在涉及到基于协程和生成器的并发编程中扮演着更加重要的角色。 可以参考12.12小节查看另外一个例子。</p>
 <h1 id="415-顺序迭代合并后的排序迭代对象">4.15 顺序迭代合并后的排序迭代对象</h1>
@@ -1135,60 +1187,65 @@ Lewis
 <p>你有一系列排序序列，想将它们合并后得到一个排序序列并在上面迭代遍历。</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>heapq.merge()</code> 函数可以帮你解决这个问题。比如：</p>
-<pre><code>&gt;&gt;&gt; import heapq
-&gt;&gt;&gt; a = [1, 4, 7, 10]
-&gt;&gt;&gt; b = [2, 5, 6, 11]
-&gt;&gt;&gt; for c in heapq.merge(a, b):
-...     print(c)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> heapq
+<span class="hljs-meta">&gt;&gt;&gt; </span>a = [<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">7</span>, <span class="hljs-number">10</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = [<span class="hljs-number">2</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">11</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> heapq.merge(a, b):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(c)
 ...
-1
-2
-4
-5
-6
-7
-10
-11
-</code></pre><h2 id="讨论">讨论</h2>
+<span class="hljs-number">1</span>
+<span class="hljs-number">2</span>
+<span class="hljs-number">4</span>
+<span class="hljs-number">5</span>
+<span class="hljs-number">6</span>
+<span class="hljs-number">7</span>
+<span class="hljs-number">10</span>
+<span class="hljs-number">11</span>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>heapq.merge</code> 可迭代特性意味着它不会立马读取所有序列。 这就意味着你可以在非常长的序列中使用它，而不会有太大的开销。 比如，下面是一个例子来演示如何合并两个排序文件：</p>
-<pre><code>with open('sorted_file_1', 'rt') as file1, \
-    open('sorted_file_2', 'rt') as file2, \
-    open('merged_file', 'wt') as outf:
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'sorted_file_1'</span>, <span class="hljs-string">'rt'</span>) <span class="hljs-keyword">as</span> file1, \
+    <span class="hljs-built_in">open</span>(<span class="hljs-string">'sorted_file_2'</span>, <span class="hljs-string">'rt'</span>) <span class="hljs-keyword">as</span> file2, \
+    <span class="hljs-built_in">open</span>(<span class="hljs-string">'merged_file'</span>, <span class="hljs-string">'wt'</span>) <span class="hljs-keyword">as</span> outf:
 
-    for line in heapq.merge(file1, file2):
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> heapq.merge(file1, file2):
         outf.write(line)
-</code></pre><p>有一点要强调的是 <code>heapq.merge()</code>需要所有输入序列必须是排过序的。 特别的，它并不会预先读取所有数据到堆栈中或者预先排序，也不会对输入做任何的排序检测。 它仅仅是检查所有序列的开始部分并返回最小的那个，这个过程一直会持续直到所有输入序列中的元素都被遍历完。</p>
+</code></pre>
+<p>有一点要强调的是 <code>heapq.merge()</code>需要所有输入序列必须是排过序的。 特别的，它并不会预先读取所有数据到堆栈中或者预先排序，也不会对输入做任何的排序检测。 它仅仅是检查所有序列的开始部分并返回最小的那个，这个过程一直会持续直到所有输入序列中的元素都被遍历完。</p>
 <h1 id="416-迭代器代替-while-无限循环">4.16 迭代器代替 while 无限循环</h1>
 <h2 id="问题">问题</h2>
 <p>你在代码中使用<code>while</code>循环来迭代处理数据，因为它需要调用某个函数或者和一般迭代模式不同的测试条件。 能不能用迭代器来重写这个循环呢？</p>
 <h2 id="解决方案">解决方案</h2>
 <p>一个常见的 IO 操作程序可能会想下面这样：</p>
-<pre><code>CHUNKSIZE = 8192
+<pre><code class="lang-python">CHUNKSIZE = <span class="hljs-number">8192</span>
 
-def reader(s):
-    while True:
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">reader</span>(<span class="hljs-params">s</span>):
+    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:
         data = s.recv(CHUNKSIZE)
-        if data == b'':
-            break
+        <span class="hljs-keyword">if</span> data == <span class="hljs-string">b''</span>:
+            <span class="hljs-keyword">break</span>
         process_data(data)
-</code></pre><p>这种代码通常可以使用 <code>iter()</code>来代替，如下所示：</p>
-<pre><code>def reader2(s):
-    for chunk in iter(lambda: s.recv(CHUNKSIZE), b''):
-        pass
-        # process_data(data)
-</code></pre><p>如果你怀疑它到底能不能正常工作，可以试验下一个简单的例子。比如：</p>
-<pre><code>&gt;&gt;&gt; import sys
-&gt;&gt;&gt; f = open('/etc/passwd')
-&gt;&gt;&gt; for chunk in iter(lambda: f.read(10), ''):
-...     n = sys.stdout.write(chunk)
+</code></pre>
+<p>这种代码通常可以使用 <code>iter()</code>来代替，如下所示：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">reader2</span>(<span class="hljs-params">s</span>):
+    <span class="hljs-keyword">for</span> chunk <span class="hljs-keyword">in</span> <span class="hljs-built_in">iter</span>(<span class="hljs-keyword">lambda</span>: s.recv(CHUNKSIZE), <span class="hljs-string">b''</span>):
+        <span class="hljs-keyword">pass</span>
+        <span class="hljs-comment"># process_data(data)</span>
+</code></pre>
+<p>如果你怀疑它到底能不能正常工作，可以试验下一个简单的例子。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> sys
+<span class="hljs-meta">&gt;&gt;&gt; </span>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> chunk <span class="hljs-keyword">in</span> <span class="hljs-built_in">iter</span>(<span class="hljs-keyword">lambda</span>: f.read(<span class="hljs-number">10</span>), <span class="hljs-string">''</span>):
+<span class="hljs-meta">... </span>    n = sys.stdout.write(chunk)
 ...
-nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
-root:*:0:0:System Administrator:/var/root:/bin/sh
-daemon:*:1:1:System Services:/var/root:/usr/bin/false
-_uucp:*:4:4:Unix to Unix Copy Protocol:/var/spool/uucp:/usr/sbin/uucico
+nobody:*:-<span class="hljs-number">2</span>:-<span class="hljs-number">2</span>:Unprivileged User:/var/empty:/usr/<span class="hljs-built_in">bin</span>/false
+root:*:<span class="hljs-number">0</span>:<span class="hljs-number">0</span>:System Administrator:/var/root:/<span class="hljs-built_in">bin</span>/sh
+daemon:*:<span class="hljs-number">1</span>:<span class="hljs-number">1</span>:System Services:/var/root:/usr/<span class="hljs-built_in">bin</span>/false
+_uucp:*:<span class="hljs-number">4</span>:<span class="hljs-number">4</span>:Unix to Unix Copy Protocol:/var/spool/uucp:/usr/sbin/uucico
 ...
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>iter</code> 函数一个鲜为人知的特性是它接受一个可选的 <code>callable</code> 对象和一个标记(结尾)值作为输入参数。 当以这种方式使用的时候，它会创建一个迭代器， 这个迭代器会不断调用 <code>callable</code>对象直到返回值和标记值相等为止。</p>
 <p>这种特殊的方法对于一些特定的会被重复调用的函数很有效果，比如涉及到 I/O 调用的函数。 举例来讲，如果你想从套接字或文件中以数据块的方式读取数据，通常你得要不断重复的执行 <code>read()</code> 或<code>recv()</code> ， 并在后面紧跟一个文件结尾测试来决定是否终止。这节中的方案使用一个简单的<code>iter()</code>调用就可以将两者结合起来了。 其中 <code>lambda</code>函数参数是为了创建一个无参的 <code>callable</code>对象，并为 <code>recv</code> 或 <code>read()</code>方法提供了 <code>size</code>参数。</p>
 
@@ -1234,7 +1291,7 @@ _uucp:*:4:4:Unix to Unix Copy Protocol:/var/spool/uucp:/usr/sbin/uucico
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"第四章：迭代器与生成器","level":"1.5","depth":1,"next":{"title":"第五章：文件与 IO","level":"1.6","depth":1,"path":"files-and-io.md","ref":"files-and-io.md","articles":[]},"previous":{"title":"第三章：数字日期和时间","level":"1.4","depth":1,"path":"digital-date-and-time.md","ref":"digital-date-and-time.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"iterators-and-generators.md","mtime":"2025-01-05T10:56:44.746Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2025-01-05T12:14:20.822Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"第四章：迭代器与生成器","level":"1.5","depth":1,"next":{"title":"第五章：文件与 IO","level":"1.6","depth":1,"path":"files-and-io.md","ref":"files-and-io.md","articles":[]},"previous":{"title":"第三章：数字日期和时间","level":"1.4","depth":1,"path":"digital-date-and-time.md","ref":"digital-date-and-time.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"iterators-and-generators.md","mtime":"2025-01-05T18:01:57.042Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2025-01-05T18:02:08.648Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

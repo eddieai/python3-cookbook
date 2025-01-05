@@ -348,138 +348,154 @@
 <p>你需要将一个字符串分割为多个字段，但是分隔符(还有周围的空格)并不是固定的。</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>string</code> 对象的 <code>split()</code> 方法只适应于非常简单的字符串分割情形， 它并不允许有多个分隔符或者是分隔符周围不确定的空格。 当你需要更加灵活的切割字符串的时候，最好使用 <code>re.split()</code> 方法：</p>
-<pre><code>&gt;&gt;&gt; line = 'asdf fjdk; afed, fjek,asdf, foo'
-&gt;&gt;&gt; import re
-&gt;&gt;&gt; re.split(r'[;,\s]\s*', line)
-['asdf', 'fjdk', 'afed', 'fjek', 'asdf', 'foo']
-</code></pre><h2 id="讨论">讨论</h2>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>line = <span class="hljs-string">'asdf fjdk; afed, fjek,asdf, foo'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.split(<span class="hljs-string">r'[;,\s]\s*'</span>, line)
+[<span class="hljs-string">'asdf'</span>, <span class="hljs-string">'fjdk'</span>, <span class="hljs-string">'afed'</span>, <span class="hljs-string">'fjek'</span>, <span class="hljs-string">'asdf'</span>, <span class="hljs-string">'foo'</span>]
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>函数<code>re.split()</code> 是非常实用的，因为它允许你为分隔符指定多个正则模式。 比如，在上面的例子中，分隔符可以是逗号，分号或者是空格，并且后面紧跟着任意个的空格。 只要这个模式被找到，那么匹配的分隔符两边的实体都会被当成是结果中的元素返回。 返回结果为一个字段列表，这个跟 <code>str.split()</code> 返回值类型是一样的。</p>
 <p>当你使用 <code>re.split()</code> 函数时候，需要特别注意的是正则表达式中是否包含一个括号捕获分组。 如果使用了捕获分组，那么被匹配的文本也将出现在结果列表中。比如，观察一下这段代码运行后的结果：</p>
-<pre><code>&gt;&gt;&gt; fields = re.split(r'(;|,|\s)\s*', line)
-&gt;&gt;&gt; fields
-['asdf', ' ', 'fjdk', ';', 'afed', ',', 'fjek', ',', 'asdf', ',', 'foo']
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>fields = re.split(<span class="hljs-string">r'(;|,|\s)\s*'</span>, line)
+<span class="hljs-meta">&gt;&gt;&gt; </span>fields
+[<span class="hljs-string">'asdf'</span>, <span class="hljs-string">' '</span>, <span class="hljs-string">'fjdk'</span>, <span class="hljs-string">';'</span>, <span class="hljs-string">'afed'</span>, <span class="hljs-string">','</span>, <span class="hljs-string">'fjek'</span>, <span class="hljs-string">','</span>, <span class="hljs-string">'asdf'</span>, <span class="hljs-string">','</span>, <span class="hljs-string">'foo'</span>]
 &gt;&gt;&gt;
-</code></pre><p>获取分割字符在某些情况下也是有用的。 比如，你可能想保留分割字符串，用来在后面重新构造一个新的输出字符串：</p>
-<pre><code>&gt;&gt;&gt; values = fields[::2]
-&gt;&gt;&gt; delimiters = fields[1::2] + ['']
-&gt;&gt;&gt; values
-['asdf', 'fjdk', 'afed', 'fjek', 'asdf', 'foo']
-&gt;&gt;&gt; delimiters
-[' ', ';', ',', ',', ',', '']
-&gt;&gt;&gt; # Reform the line using the same delimiters
-&gt;&gt;&gt; ''.join(v+d for v,d in zip(values, delimiters))
-'asdf fjdk;afed,fjek,asdf,foo'
+</code></pre>
+<p>获取分割字符在某些情况下也是有用的。 比如，你可能想保留分割字符串，用来在后面重新构造一个新的输出字符串：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>values = fields[::<span class="hljs-number">2</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>delimiters = fields[<span class="hljs-number">1</span>::<span class="hljs-number">2</span>] + [<span class="hljs-string">''</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>values
+[<span class="hljs-string">'asdf'</span>, <span class="hljs-string">'fjdk'</span>, <span class="hljs-string">'afed'</span>, <span class="hljs-string">'fjek'</span>, <span class="hljs-string">'asdf'</span>, <span class="hljs-string">'foo'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>delimiters
+[<span class="hljs-string">' '</span>, <span class="hljs-string">';'</span>, <span class="hljs-string">','</span>, <span class="hljs-string">','</span>, <span class="hljs-string">','</span>, <span class="hljs-string">''</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Reform the line using the same delimiters</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">''</span>.join(v+d <span class="hljs-keyword">for</span> v,d <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(values, delimiters))
+<span class="hljs-string">'asdf fjdk;afed,fjek,asdf,foo'</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你不想保留分割字符串到结果列表中去，但仍然需要使用到括号来分组正则表达式的话， 确保你的分组是非捕获分组，形如 <code>(?:...)</code> 。比如：</p>
-<pre><code>&gt;&gt;&gt; re.split(r'(?:,|;|\s)\s*', line)
-['asdf', 'fjdk', 'afed', 'fjek', 'asdf', 'foo']
+</code></pre>
+<p>如果你不想保留分割字符串到结果列表中去，但仍然需要使用到括号来分组正则表达式的话， 确保你的分组是非捕获分组，形如 <code>(?:...)</code> 。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>re.split(<span class="hljs-string">r'(?:,|;|\s)\s*'</span>, line)
+[<span class="hljs-string">'asdf'</span>, <span class="hljs-string">'fjdk'</span>, <span class="hljs-string">'afed'</span>, <span class="hljs-string">'fjek'</span>, <span class="hljs-string">'asdf'</span>, <span class="hljs-string">'foo'</span>]
 &gt;&gt;&gt;
-</code></pre><h1 id="22-字符串开头或结尾匹配">2.2 字符串开头或结尾匹配</h1>
+</code></pre>
+<h1 id="22-字符串开头或结尾匹配">2.2 字符串开头或结尾匹配</h1>
 <h2 id="问题">问题</h2>
 <p>你需要通过指定的文本模式去检查字符串的开头或者结尾，比如文件名后缀，URL Scheme 等等。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>检查字符串开头或结尾的一个简单方法是使用 <code>str.startswith()</code> 或者是 <code>str.endswith()</code> 方法。比如：</p>
-<pre><code>&gt;&gt;&gt; filename = 'spam.txt'
-&gt;&gt;&gt; filename.endswith('.txt')
-True
-&gt;&gt;&gt; filename.startswith('file:')
-False
-&gt;&gt;&gt; url = 'http://www.python.org'
-&gt;&gt;&gt; url.startswith('http:')
-True
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>filename = <span class="hljs-string">'spam.txt'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>filename.endswith(<span class="hljs-string">'.txt'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>filename.startswith(<span class="hljs-string">'file:'</span>)
+<span class="hljs-literal">False</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>url = <span class="hljs-string">'http://www.python.org'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>url.startswith(<span class="hljs-string">'http:'</span>)
+<span class="hljs-literal">True</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你想检查多种匹配可能，只需要将所有的匹配项放入到一个元组中去， 然后传给 <code>startswith()</code> 或者 <code>endswith()</code> 方法：</p>
-<pre><code>&gt;&gt;&gt; import os
-&gt;&gt;&gt; filenames = os.listdir('.')
-&gt;&gt;&gt; filenames
-[ 'Makefile', 'foo.c', 'bar.py', 'spam.c', 'spam.h' ]
-&gt;&gt;&gt; [name for name in filenames if name.endswith(('.c', '.h')) ]
-['foo.c', 'spam.c', 'spam.h'
-&gt;&gt;&gt; any(name.endswith('.py') for name in filenames)
-True
+</code></pre>
+<p>如果你想检查多种匹配可能，只需要将所有的匹配项放入到一个元组中去， 然后传给 <code>startswith()</code> 或者 <code>endswith()</code> 方法：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> os
+<span class="hljs-meta">&gt;&gt;&gt; </span>filenames = os.listdir(<span class="hljs-string">'.'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>filenames
+[ <span class="hljs-string">'Makefile'</span>, <span class="hljs-string">'foo.c'</span>, <span class="hljs-string">'bar.py'</span>, <span class="hljs-string">'spam.c'</span>, <span class="hljs-string">'spam.h'</span> ]
+<span class="hljs-meta">&gt;&gt;&gt; </span>[name <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> filenames <span class="hljs-keyword">if</span> name.endswith((<span class="hljs-string">'.c'</span>, <span class="hljs-string">'.h'</span>)) ]
+[<span class="hljs-string">'foo.c'</span>, <span class="hljs-string">'spam.c'</span>, <span class="hljs-string">'spam.h'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">any</span>(name.endswith(<span class="hljs-string">'.py'</span>) <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> filenames)
+<span class="hljs-literal">True</span>
 &gt;&gt;&gt;
-</code></pre><p>下面是另一个例子：</p>
-<pre><code>from urllib.request import urlopen
+</code></pre>
+<p>下面是另一个例子：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> urllib.request <span class="hljs-keyword">import</span> urlopen
 
-def read_data(name):
-    if name.startswith(('http:', 'https:', 'ftp:')):
-        return urlopen(name).read()
-    else:
-        with open(name) as f:
-            return f.read()
-</code></pre><p>奇怪的是，这个方法中必须要输入一个元组作为参数。 如果你恰巧有一个 <code>list</code> 或者 <code>set</code> 类型的选择项， 要确保传递参数前先调用 <code>tuple()</code> 将其转换为元组类型。比如：</p>
-<pre><code>&gt;&gt;&gt; choices = ['http:', 'ftp:']
-&gt;&gt;&gt; url = 'http://www.python.org'
-&gt;&gt;&gt; url.startswith(choices)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">read_data</span>(<span class="hljs-params">name</span>):
+    <span class="hljs-keyword">if</span> name.startswith((<span class="hljs-string">'http:'</span>, <span class="hljs-string">'https:'</span>, <span class="hljs-string">'ftp:'</span>)):
+        <span class="hljs-keyword">return</span> urlopen(name).read()
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(name) <span class="hljs-keyword">as</span> f:
+            <span class="hljs-keyword">return</span> f.read()
+</code></pre>
+<p>奇怪的是，这个方法中必须要输入一个元组作为参数。 如果你恰巧有一个 <code>list</code> 或者 <code>set</code> 类型的选择项， 要确保传递参数前先调用 <code>tuple()</code> 将其转换为元组类型。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>choices = [<span class="hljs-string">'http:'</span>, <span class="hljs-string">'ftp:'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>url = <span class="hljs-string">'http://www.python.org'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>url.startswith(choices)
 Traceback (most recent call last):
-File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-TypeError: startswith first arg must be str or a tuple of str, not list
-&gt;&gt;&gt; url.startswith(tuple(choices))
-True
+File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+TypeError: startswith first arg must be <span class="hljs-built_in">str</span> <span class="hljs-keyword">or</span> a <span class="hljs-built_in">tuple</span> of <span class="hljs-built_in">str</span>, <span class="hljs-keyword">not</span> <span class="hljs-built_in">list</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>url.startswith(<span class="hljs-built_in">tuple</span>(choices))
+<span class="hljs-literal">True</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>startswith()</code> 和 <code>endswith()</code> 方法提供了一个非常方便的方式去做字符串开头和结尾的检查。 类似的操作也可以使用切片来实现，但是代码看起来没有那么优雅。比如：</p>
-<pre><code>&gt;&gt;&gt; filename = 'spam.txt'
-&gt;&gt;&gt; filename[-4:] == '.txt'
-True
-&gt;&gt;&gt; url = 'http://www.python.org'
-&gt;&gt;&gt; url[:5] == 'http:' or url[:6] == 'https:' or url[:4] == 'ftp:'
-True
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>filename = <span class="hljs-string">'spam.txt'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>filename[-<span class="hljs-number">4</span>:] == <span class="hljs-string">'.txt'</span>
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>url = <span class="hljs-string">'http://www.python.org'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>url[:<span class="hljs-number">5</span>] == <span class="hljs-string">'http:'</span> <span class="hljs-keyword">or</span> url[:<span class="hljs-number">6</span>] == <span class="hljs-string">'https:'</span> <span class="hljs-keyword">or</span> url[:<span class="hljs-number">4</span>] == <span class="hljs-string">'ftp:'</span>
+<span class="hljs-literal">True</span>
 &gt;&gt;&gt;
-</code></pre><p>你可以能还想使用正则表达式去实现，比如：</p>
-<pre><code>&gt;&gt;&gt; import re
-&gt;&gt;&gt; url = 'http://www.python.org'
-&gt;&gt;&gt; re.match('http:|https:|ftp:', url)
-&lt;_sre.SRE_Match object at 0x101253098&gt;
+</code></pre>
+<p>你可以能还想使用正则表达式去实现，比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>url = <span class="hljs-string">'http://www.python.org'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.<span class="hljs-keyword">match</span>(<span class="hljs-string">'http:|https:|ftp:'</span>, url)
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x101253098</span>&gt;
 &gt;&gt;&gt;
-</code></pre><p>这种方式也行得通，但是对于简单的匹配实在是有点小材大用了，本节中的方法更加简单并且运行会更快些。</p>
+</code></pre>
+<p>这种方式也行得通，但是对于简单的匹配实在是有点小材大用了，本节中的方法更加简单并且运行会更快些。</p>
 <p>最后提一下，当和其他操作比如普通数据聚合相结合的时候 <code>startswith()</code> 和 <code>endswith()</code> 方法是很不错的。 比如，下面这个语句检查某个文件夹中是否存在指定的文件类型：</p>
-<pre><code>if any(name.endswith(('.c', '.h')) for name in listdir(dirname)):
+<pre><code class="lang-python"><span class="hljs-keyword">if</span> <span class="hljs-built_in">any</span>(name.endswith((<span class="hljs-string">'.c'</span>, <span class="hljs-string">'.h'</span>)) <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> listdir(dirname)):
 ...
-</code></pre><h1 id="23-用-shell-通配符匹配字符串">2.3 用 Shell 通配符匹配字符串</h1>
+</code></pre>
+<h1 id="23-用-shell-通配符匹配字符串">2.3 用 Shell 通配符匹配字符串</h1>
 <h2 id="问题">问题</h2>
 <p>你想使用 Unix Shell 中常用的通配符(比如 <code>*.py</code> , <code>Dat[0-9]*.csv</code> 等)去匹配文本字符串</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>fnmatch</code> 模块提供了两个函数—— <code>fnmatch()</code> 和 <code>fnmatchcase()</code>，可以用来实现这样的匹配。用法如下：</p>
-<pre><code>&gt;&gt;&gt; from fnmatch import fnmatch, fnmatchcase
-&gt;&gt;&gt; fnmatch('foo.txt', '*.txt')
-True
-&gt;&gt;&gt; fnmatch('foo.txt', '?oo.txt')
-True
-&gt;&gt;&gt; fnmatch('Dat45.csv', 'Dat[0-9]*')
-True
-&gt;&gt;&gt; names = ['Dat1.csv', 'Dat2.csv', 'config.ini', 'foo.py']
-&gt;&gt;&gt; [name for name in names if fnmatch(name, 'Dat*.csv')]
-['Dat1.csv', 'Dat2.csv']
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> fnmatch <span class="hljs-keyword">import</span> fnmatch, fnmatchcase
+<span class="hljs-meta">&gt;&gt;&gt; </span>fnmatch(<span class="hljs-string">'foo.txt'</span>, <span class="hljs-string">'*.txt'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>fnmatch(<span class="hljs-string">'foo.txt'</span>, <span class="hljs-string">'?oo.txt'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>fnmatch(<span class="hljs-string">'Dat45.csv'</span>, <span class="hljs-string">'Dat[0-9]*'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>names = [<span class="hljs-string">'Dat1.csv'</span>, <span class="hljs-string">'Dat2.csv'</span>, <span class="hljs-string">'config.ini'</span>, <span class="hljs-string">'foo.py'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>[name <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> names <span class="hljs-keyword">if</span> fnmatch(name, <span class="hljs-string">'Dat*.csv'</span>)]
+[<span class="hljs-string">'Dat1.csv'</span>, <span class="hljs-string">'Dat2.csv'</span>]
 &gt;&gt;&gt;
-</code></pre><p><code>fnmatch()</code> 函数使用底层操作系统的大小写敏感规则(不同的系统是不一样的)来匹配模式。比如：</p>
-<pre><code>&gt;&gt;&gt; # On OS X (Mac)
-&gt;&gt;&gt; fnmatch('foo.txt', '*.TXT')
-False
-&gt;&gt;&gt; # On Windows
-&gt;&gt;&gt; fnmatch('foo.txt', '*.TXT')
-True
+</code></pre>
+<p><code>fnmatch()</code> 函数使用底层操作系统的大小写敏感规则(不同的系统是不一样的)来匹配模式。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># On OS X (Mac)</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>fnmatch(<span class="hljs-string">'foo.txt'</span>, <span class="hljs-string">'*.TXT'</span>)
+<span class="hljs-literal">False</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># On Windows</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>fnmatch(<span class="hljs-string">'foo.txt'</span>, <span class="hljs-string">'*.TXT'</span>)
+<span class="hljs-literal">True</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你对这个区别很在意，可以使用 <code>fnmatchcase()</code> 来代替。它完全使用你的模式大小写匹配。比如：</p>
-<pre><code>&gt;&gt;&gt; fnmatchcase('foo.txt', '*.TXT')
-False
+</code></pre>
+<p>如果你对这个区别很在意，可以使用 <code>fnmatchcase()</code> 来代替。它完全使用你的模式大小写匹配。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>fnmatchcase(<span class="hljs-string">'foo.txt'</span>, <span class="hljs-string">'*.TXT'</span>)
+<span class="hljs-literal">False</span>
 &gt;&gt;&gt;
-</code></pre><p>这两个函数通常会被忽略的一个特性是在处理非文件名的字符串时候它们也是很有用的。 比如，假设你有一个街道地址的列表数据：</p>
-<pre><code>addresses = [
-    '5412 N CLARK ST',
-    '1060 W ADDISON ST',
-    '1039 W GRANVILLE AVE',
-    '2122 N CLARK ST',
-    '4802 N BROADWAY',
+</code></pre>
+<p>这两个函数通常会被忽略的一个特性是在处理非文件名的字符串时候它们也是很有用的。 比如，假设你有一个街道地址的列表数据：</p>
+<pre><code class="lang-python">addresses = [
+    <span class="hljs-string">'5412 N CLARK ST'</span>,
+    <span class="hljs-string">'1060 W ADDISON ST'</span>,
+    <span class="hljs-string">'1039 W GRANVILLE AVE'</span>,
+    <span class="hljs-string">'2122 N CLARK ST'</span>,
+    <span class="hljs-string">'4802 N BROADWAY'</span>,
 ]
-</code></pre><p>你可以像这样写列表推导：</p>
-<pre><code>&gt;&gt;&gt; from fnmatch import fnmatchcase
-&gt;&gt;&gt; [addr for addr in addresses if fnmatchcase(addr, '* ST')]
-['5412 N CLARK ST', '1060 W ADDISON ST', '2122 N CLARK ST']
-&gt;&gt;&gt; [addr for addr in addresses if fnmatchcase(addr, '54[0-9][0-9] *CLARK*')]
-['5412 N CLARK ST']
+</code></pre>
+<p>你可以像这样写列表推导：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> fnmatch <span class="hljs-keyword">import</span> fnmatchcase
+<span class="hljs-meta">&gt;&gt;&gt; </span>[addr <span class="hljs-keyword">for</span> addr <span class="hljs-keyword">in</span> addresses <span class="hljs-keyword">if</span> fnmatchcase(addr, <span class="hljs-string">'* ST'</span>)]
+[<span class="hljs-string">'5412 N CLARK ST'</span>, <span class="hljs-string">'1060 W ADDISON ST'</span>, <span class="hljs-string">'2122 N CLARK ST'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>[addr <span class="hljs-keyword">for</span> addr <span class="hljs-keyword">in</span> addresses <span class="hljs-keyword">if</span> fnmatchcase(addr, <span class="hljs-string">'54[0-9][0-9] *CLARK*'</span>)]
+[<span class="hljs-string">'5412 N CLARK ST'</span>]
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>fnmatch()</code> 函数匹配能力介于简单的字符串方法和强大的正则表达式之间。 如果在数据处理操作中只需要简单的通配符就能完成的时候，这通常是一个比较合理的方案。</p>
 <p>如果你的代码需要做文件名的匹配，最好使用 <code>glob</code> 模块。参考5.13小节。</p>
 <h1 id="24-字符串匹配和搜索">2.4 字符串匹配和搜索</h1>
@@ -487,187 +503,205 @@ False
 <p>你想匹配或者搜索特定模式的文本</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你想匹配的是字面字符串，那么你通常只需要调用基本字符串方法就行， 比如 <code>str.find()</code>, <code>str.endswith()</code> , <code>str.startswith()</code> 或者类似的方法：</p>
-<pre><code>&gt;&gt;&gt; text = 'yeah, but no, but yeah, but no, but yeah'
-&gt;&gt;&gt; # Exact match
-&gt;&gt;&gt; text == 'yeah'
-False
-&gt;&gt;&gt; # Match at start or end
-&gt;&gt;&gt; text.startswith('yeah')
-True
-&gt;&gt;&gt; text.endswith('no')
-False
-&gt;&gt;&gt; # Search for the location of the first occurrence
-&gt;&gt;&gt; text.find('no')
-10
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text = <span class="hljs-string">'yeah, but no, but yeah, but no, but yeah'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Exact match</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text == <span class="hljs-string">'yeah'</span>
+<span class="hljs-literal">False</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Match at start or end</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.startswith(<span class="hljs-string">'yeah'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.endswith(<span class="hljs-string">'no'</span>)
+<span class="hljs-literal">False</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Search for the location of the first occurrence</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.find(<span class="hljs-string">'no'</span>)
+<span class="hljs-number">10</span>
 &gt;&gt;&gt;
-</code></pre><p>对于复杂的匹配需要使用正则表达式和 <code>re</code> 模块。 为了解释正则表达式的基本原理，假设你想匹配数字格式的日期字符串比如 <code>11/27/2012</code> ，你可以这样做：</p>
-<pre><code>&gt;&gt;&gt; text1 = '11/27/2012'
-&gt;&gt;&gt; text2 = 'Nov 27, 2012'
+</code></pre>
+<p>对于复杂的匹配需要使用正则表达式和 <code>re</code> 模块。 为了解释正则表达式的基本原理，假设你想匹配数字格式的日期字符串比如 <code>11/27/2012</code> ，你可以这样做：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text1 = <span class="hljs-string">'11/27/2012'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text2 = <span class="hljs-string">'Nov 27, 2012'</span>
 &gt;&gt;&gt;
-&gt;&gt;&gt; import re
-&gt;&gt;&gt; # Simple matching: \d+ means match one or more digits
-&gt;&gt;&gt; if re.match(r'\d+/\d+/\d+', text1):
-... print('yes')
-... else:
-... print('no')
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Simple matching: \d+ means match one or more digits</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">if</span> re.<span class="hljs-keyword">match</span>(<span class="hljs-string">r'\d+/\d+/\d+'</span>, text1):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'yes'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">else</span>:
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'no'</span>)
 ...
 yes
-&gt;&gt;&gt; if re.match(r'\d+/\d+/\d+', text2):
-... print('yes')
-... else:
-... print('no')
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">if</span> re.<span class="hljs-keyword">match</span>(<span class="hljs-string">r'\d+/\d+/\d+'</span>, text2):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'yes'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">else</span>:
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'no'</span>)
 ...
 no
 &gt;&gt;&gt;
-</code></pre><p>如果你想使用同一个模式去做多次匹配，你应该先将模式字符串预编译为模式对象。比如：</p>
-<pre><code>&gt;&gt;&gt; datepat = re.compile(r'\d+/\d+/\d+')
-&gt;&gt;&gt; if datepat.match(text1):
-... print('yes')
-... else:
-... print('no')
+</code></pre>
+<p>如果你想使用同一个模式去做多次匹配，你应该先将模式字符串预编译为模式对象。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>datepat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'\d+/\d+/\d+'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">if</span> datepat.<span class="hljs-keyword">match</span>(text1):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'yes'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">else</span>:
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'no'</span>)
 ...
 yes
-&gt;&gt;&gt; if datepat.match(text2):
-... print('yes')
-... else:
-... print('no')
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">if</span> datepat.<span class="hljs-keyword">match</span>(text2):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'yes'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">else</span>:
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'no'</span>)
 ...
 no
 &gt;&gt;&gt;
-</code></pre><p><code>match()</code> 总是从字符串开始去匹配，如果你想查找字符串任意部分的模式出现位置， 使用 <code>findall()</code> 方法去代替。比如：</p>
-<pre><code>&gt;&gt;&gt; text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
-&gt;&gt;&gt; datepat.findall(text)
-['11/27/2012', '3/13/2013']
+</code></pre>
+<p><code>match()</code> 总是从字符串开始去匹配，如果你想查找字符串任意部分的模式出现位置， 使用 <code>findall()</code> 方法去代替。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text = <span class="hljs-string">'Today is 11/27/2012. PyCon starts 3/13/2013.'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat.findall(text)
+[<span class="hljs-string">'11/27/2012'</span>, <span class="hljs-string">'3/13/2013'</span>]
 &gt;&gt;&gt;
-</code></pre><p>在定义正则式的时候，通常会利用括号去捕获分组。比如：</p>
-<pre><code>&gt;&gt;&gt; datepat = re.compile(r'(\d+)/(\d+)/(\d+)')
+</code></pre>
+<p>在定义正则式的时候，通常会利用括号去捕获分组。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>datepat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'(\d+)/(\d+)/(\d+)'</span>)
 &gt;&gt;&gt;
-</code></pre><p>捕获分组可以使得后面的处理更加简单，因为可以分别将每个组的内容提取出来。比如：</p>
-<pre><code>&gt;&gt;&gt; m = datepat.match('11/27/2012')
-&gt;&gt;&gt; m
-&lt;_sre.SRE_Match object at 0x1005d2750&gt;
-&gt;&gt;&gt; # Extract the contents of each group
-&gt;&gt;&gt; m.group(0)
-'11/27/2012'
-&gt;&gt;&gt; m.group(1)
-'11'
-&gt;&gt;&gt; m.group(2)
-'27'
-&gt;&gt;&gt; m.group(3)
-'2012'
-&gt;&gt;&gt; m.groups()
-('11', '27', '2012')
-&gt;&gt;&gt; month, day, year = m.groups()
+</code></pre>
+<p>捕获分组可以使得后面的处理更加简单，因为可以分别将每个组的内容提取出来。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>m = datepat.<span class="hljs-keyword">match</span>(<span class="hljs-string">'11/27/2012'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>m
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x1005d2750</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Extract the contents of each group</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.group(<span class="hljs-number">0</span>)
+<span class="hljs-string">'11/27/2012'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.group(<span class="hljs-number">1</span>)
+<span class="hljs-string">'11'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.group(<span class="hljs-number">2</span>)
+<span class="hljs-string">'27'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.group(<span class="hljs-number">3</span>)
+<span class="hljs-string">'2012'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.groups()
+(<span class="hljs-string">'11'</span>, <span class="hljs-string">'27'</span>, <span class="hljs-string">'2012'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>month, day, year = m.groups()
 &gt;&gt;&gt;
-&gt;&gt;&gt; # Find all matches (notice splitting into tuples)
-&gt;&gt;&gt; text
-'Today is 11/27/2012. PyCon starts 3/13/2013.'
-&gt;&gt;&gt; datepat.findall(text)
-[('11', '27', '2012'), ('3', '13', '2013')]
-&gt;&gt;&gt; for month, day, year in datepat.findall(text):
-... print('{}-{}-{}'.format(year, month, day))
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Find all matches (notice splitting into tuples)</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text
+<span class="hljs-string">'Today is 11/27/2012. PyCon starts 3/13/2013.'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat.findall(text)
+[(<span class="hljs-string">'11'</span>, <span class="hljs-string">'27'</span>, <span class="hljs-string">'2012'</span>), (<span class="hljs-string">'3'</span>, <span class="hljs-string">'13'</span>, <span class="hljs-string">'2013'</span>)]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> month, day, year <span class="hljs-keyword">in</span> datepat.findall(text):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'{}-{}-{}'</span>.<span class="hljs-built_in">format</span>(year, month, day))
 ...
-2012-11-27
-2013-3-13
+<span class="hljs-number">2012</span>-<span class="hljs-number">11</span>-<span class="hljs-number">27</span>
+<span class="hljs-number">2013</span>-<span class="hljs-number">3</span>-<span class="hljs-number">13</span>
 &gt;&gt;&gt;
-</code></pre><p><code>findall()</code>方法会搜索文本并以列表形式返回所有的匹配。 如果你想以迭代方式返回匹配，可以使用 <code>finditer()</code> 方法来代替，比如：</p>
-<pre><code>&gt;&gt;&gt; for m in datepat.finditer(text):
-... print(m.groups())
+</code></pre>
+<p><code>findall()</code>方法会搜索文本并以列表形式返回所有的匹配。 如果你想以迭代方式返回匹配，可以使用 <code>finditer()</code> 方法来代替，比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> datepat.finditer(text):
+<span class="hljs-meta">... </span><span class="hljs-built_in">print</span>(m.groups())
 ...
-('11', '27', '2012')
-('3', '13', '2013')
+(<span class="hljs-string">'11'</span>, <span class="hljs-string">'27'</span>, <span class="hljs-string">'2012'</span>)
+(<span class="hljs-string">'3'</span>, <span class="hljs-string">'13'</span>, <span class="hljs-string">'2013'</span>)
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>关于正则表达式理论的教程已经超出了本书的范围。 不过，这一节阐述了使用 re 模块进行匹配和搜索文本的最基本方法。 核心步骤就是先使用 <code>re.compile()</code> 编译正则表达式字符串， 然后使用 <code>match()</code> , <code>findall()</code> 或者 <code>finditer()</code> 等方法。</p>
 <p>当写正则式字符串的时候，相对普遍的做法是使用原始字符串比如 <code>r'(\d+)/(\d+)/(\d+)'</code> 。 这种字符串将不去解析反斜杠，这在正则表达式中是很有用的。 如果不这样做的话，你必须使用两个反斜杠，类似 <code>'(\\d+)/(\\d+)/(\\d+)'</code> 。</p>
 <p>需要注意的是 <code>match()</code> 方法仅仅检查字符串的开始部分。它的匹配结果有可能并不是你期望的那样。比如：</p>
-<pre><code>&gt;&gt;&gt; m = datepat.match('11/27/2012abcdef')
-&gt;&gt;&gt; m
-&lt;_sre.SRE_Match object at 0x1005d27e8&gt;
-&gt;&gt;&gt; m.group()
-'11/27/2012'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>m = datepat.<span class="hljs-keyword">match</span>(<span class="hljs-string">'11/27/2012abcdef'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>m
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x1005d27e8</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.group()
+<span class="hljs-string">'11/27/2012'</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你想精确匹配，确保你的正则表达式以$结尾，就像这么这样：</p>
-<pre><code>&gt;&gt;&gt; datepat = re.compile(r'(\d+)/(\d+)/(\d+)$')
-&gt;&gt;&gt; datepat.match('11/27/2012abcdef')
-&gt;&gt;&gt; datepat.match('11/27/2012')
-&lt;_sre.SRE_Match object at 0x1005d2750&gt;
+</code></pre>
+<p>如果你想精确匹配，确保你的正则表达式以$结尾，就像这么这样：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>datepat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'(\d+)/(\d+)/(\d+)$'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat.<span class="hljs-keyword">match</span>(<span class="hljs-string">'11/27/2012abcdef'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat.<span class="hljs-keyword">match</span>(<span class="hljs-string">'11/27/2012'</span>)
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x1005d2750</span>&gt;
 &gt;&gt;&gt;
-</code></pre><p>最后，如果你仅仅是做一次简单的文本匹配/搜索操作的话，可以略过编译部分，直接使用 <code>re</code> 模块级别的函数。比如：</p>
-<pre><code>&gt;&gt;&gt; re.findall(r'(\d+)/(\d+)/(\d+)', text)
-[('11', '27', '2012'), ('3', '13', '2013')]
+</code></pre>
+<p>最后，如果你仅仅是做一次简单的文本匹配/搜索操作的话，可以略过编译部分，直接使用 <code>re</code> 模块级别的函数。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>re.findall(<span class="hljs-string">r'(\d+)/(\d+)/(\d+)'</span>, text)
+[(<span class="hljs-string">'11'</span>, <span class="hljs-string">'27'</span>, <span class="hljs-string">'2012'</span>), (<span class="hljs-string">'3'</span>, <span class="hljs-string">'13'</span>, <span class="hljs-string">'2013'</span>)]
 &gt;&gt;&gt;
-</code></pre><p>但是需要注意的是，如果你打算做大量的匹配和搜索操作的话，最好先编译正则表达式，然后再重复使用它。 模块级别的函数会将最近编译过的模式缓存起来，因此并不会消耗太多的性能， 但是如果使用预编译模式的话，你将会减少查找和一些额外的处理损耗。</p>
+</code></pre>
+<p>但是需要注意的是，如果你打算做大量的匹配和搜索操作的话，最好先编译正则表达式，然后再重复使用它。 模块级别的函数会将最近编译过的模式缓存起来，因此并不会消耗太多的性能， 但是如果使用预编译模式的话，你将会减少查找和一些额外的处理损耗。</p>
 <h1 id="25-字符串搜索和替换">2.5 字符串搜索和替换</h1>
 <h2 id="问题">问题</h2>
 <p>你想在字符串中搜索和匹配指定的文本模式</p>
 <h2 id="解决方案">解决方案</h2>
 <p>对于简单的字面模式，直接使用 <code>str.repalce()</code> 方法即可，比如：</p>
-<pre><code>&gt;&gt;&gt; text = 'yeah, but no, but yeah, but no, but yeah'
-&gt;&gt;&gt; text.replace('yeah', 'yep')
-'yep, but no, but yep, but no, but yep'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text = <span class="hljs-string">'yeah, but no, but yeah, but no, but yeah'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.replace(<span class="hljs-string">'yeah'</span>, <span class="hljs-string">'yep'</span>)
+<span class="hljs-string">'yep, but no, but yep, but no, but yep'</span>
 &gt;&gt;&gt;
-</code></pre><p>对于复杂的模式，请使用 <code>re</code> 模块中的 <code>sub()</code> 函数。 为了说明这个，假设你想将形式为 <code>11/27/201</code> 的日期字符串改成 <code>2012-11-27</code> 。示例如下：</p>
-<pre><code>&gt;&gt;&gt; text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
-&gt;&gt;&gt; import re
-&gt;&gt;&gt; re.sub(r'(\d+)/(\d+)/(\d+)', r'\3-\1-\2', text)
-'Today is 2012-11-27. PyCon starts 2013-3-13.'
+</code></pre>
+<p>对于复杂的模式，请使用 <code>re</code> 模块中的 <code>sub()</code> 函数。 为了说明这个，假设你想将形式为 <code>11/27/201</code> 的日期字符串改成 <code>2012-11-27</code> 。示例如下：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text = <span class="hljs-string">'Today is 11/27/2012. PyCon starts 3/13/2013.'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.sub(<span class="hljs-string">r'(\d+)/(\d+)/(\d+)'</span>, <span class="hljs-string">r'\3-\1-\2'</span>, text)
+<span class="hljs-string">'Today is 2012-11-27. PyCon starts 2013-3-13.'</span>
 &gt;&gt;&gt;
-</code></pre><p><code>sub()</code> 函数中的第一个参数是被匹配的模式，第二个参数是替换模式。反斜杠数字比如 <code>\3</code> 指向前面模式的捕获组号。</p>
+</code></pre>
+<p><code>sub()</code> 函数中的第一个参数是被匹配的模式，第二个参数是替换模式。反斜杠数字比如 <code>\3</code> 指向前面模式的捕获组号。</p>
 <p>如果你打算用相同的模式做多次替换，考虑先编译它来提升性能。比如：</p>
-<pre><code>&gt;&gt;&gt; import re
-&gt;&gt;&gt; datepat = re.compile(r'(\d+)/(\d+)/(\d+)')
-&gt;&gt;&gt; datepat.sub(r'\3-\1-\2', text)
-'Today is 2012-11-27. PyCon starts 2013-3-13.'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'(\d+)/(\d+)/(\d+)'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat.sub(<span class="hljs-string">r'\3-\1-\2'</span>, text)
+<span class="hljs-string">'Today is 2012-11-27. PyCon starts 2013-3-13.'</span>
 &gt;&gt;&gt;
-</code></pre><p>对于更加复杂的替换，可以传递一个替换回调函数来代替，比如：</p>
-<pre><code>&gt;&gt;&gt; from calendar import month_abbr
-&gt;&gt;&gt; def change_date(m):
-... mon_name = month_abbr[int(m.group(1))]
-... return '{} {} {}'.format(m.group(2), mon_name, m.group(3))
+</code></pre>
+<p>对于更加复杂的替换，可以传递一个替换回调函数来代替，比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> calendar <span class="hljs-keyword">import</span> month_abbr
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">change_date</span>(<span class="hljs-params">m</span>):
+<span class="hljs-meta">... </span>mon_name = month_abbr[<span class="hljs-built_in">int</span>(m.group(<span class="hljs-number">1</span>))]
+<span class="hljs-meta">... </span><span class="hljs-keyword">return</span> <span class="hljs-string">'{} {} {}'</span>.<span class="hljs-built_in">format</span>(m.group(<span class="hljs-number">2</span>), mon_name, m.group(<span class="hljs-number">3</span>))
 ...
-&gt;&gt;&gt; datepat.sub(change_date, text)
-'Today is 27 Nov 2012. PyCon starts 13 Mar 2013.'
+<span class="hljs-meta">&gt;&gt;&gt; </span>datepat.sub(change_date, text)
+<span class="hljs-string">'Today is 27 Nov 2012. PyCon starts 13 Mar 2013.'</span>
 &gt;&gt;&gt;
-</code></pre><p>一个替换回调函数的参数是一个 <code>match</code> 对象，也就是 <code>match()</code> 或者 <code>find()</code> 返回的对象。 使用 <code>group()</code> 方法来提取特定的匹配部分。回调函数最后返回替换字符串。</p>
+</code></pre>
+<p>一个替换回调函数的参数是一个 <code>match</code> 对象，也就是 <code>match()</code> 或者 <code>find()</code> 返回的对象。 使用 <code>group()</code> 方法来提取特定的匹配部分。回调函数最后返回替换字符串。</p>
 <p>如果除了替换后的结果外，你还想知道有多少替换发生了，可以使用 <code>re.subn()</code> 来代替。比如：</p>
-<pre><code>&gt;&gt;&gt; newtext, n = datepat.subn(r'\3-\1-\2', text)
-&gt;&gt;&gt; newtext
-'Today is 2012-11-27. PyCon starts 2013-3-13.'
-&gt;&gt;&gt; n
-2
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>newtext, n = datepat.subn(<span class="hljs-string">r'\3-\1-\2'</span>, text)
+<span class="hljs-meta">&gt;&gt;&gt; </span>newtext
+<span class="hljs-string">'Today is 2012-11-27. PyCon starts 2013-3-13.'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>n
+<span class="hljs-number">2</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>关于正则表达式搜索和替换，上面演示的 <code>sub()</code> 方法基本已经涵盖了所有。 其实最难的部分就是编写正则表达式模式，这个最好是留给作者自己去练习了。</p>
 <h1 id="26-字符串忽略大小写的搜索替换">2.6 字符串忽略大小写的搜索替换</h1>
 <h2 id="问题">问题</h2>
 <p>你需要以忽略大小写的方式搜索与替换文本字符串</p>
 <h2 id="解决方案">解决方案</h2>
 <p>为了在文本操作时忽略大小写，你需要在使用 <code>re</code> 模块的时候给这些操作提供 <code>re.IGNORECASE</code> 标志参数。比如：</p>
-<pre><code>&gt;&gt;&gt; text = 'UPPER PYTHON, lower python, Mixed Python'
-&gt;&gt;&gt; re.findall('python', text, flags=re.IGNORECASE)
-['PYTHON', 'python', 'Python']
-&gt;&gt;&gt; re.sub('python', 'snake', text, flags=re.IGNORECASE)
-'UPPER snake, lower snake, Mixed snake'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text = <span class="hljs-string">'UPPER PYTHON, lower python, Mixed Python'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.findall(<span class="hljs-string">'python'</span>, text, flags=re.IGNORECASE)
+[<span class="hljs-string">'PYTHON'</span>, <span class="hljs-string">'python'</span>, <span class="hljs-string">'Python'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.sub(<span class="hljs-string">'python'</span>, <span class="hljs-string">'snake'</span>, text, flags=re.IGNORECASE)
+<span class="hljs-string">'UPPER snake, lower snake, Mixed snake'</span>
 &gt;&gt;&gt;
-</code></pre><p>最后的那个例子揭示了一个小缺陷，替换字符串并不会自动跟被匹配字符串的大小写保持一致。 为了修复这个，你可能需要一个辅助函数，就像下面的这样：</p>
-<pre><code>def matchcase(word):
-    def replace(m):
+</code></pre>
+<p>最后的那个例子揭示了一个小缺陷，替换字符串并不会自动跟被匹配字符串的大小写保持一致。 为了修复这个，你可能需要一个辅助函数，就像下面的这样：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">matchcase</span>(<span class="hljs-params">word</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">replace</span>(<span class="hljs-params">m</span>):
         text = m.group()
-        if text.isupper():
-            return word.upper()
-        elif text.islower():
-            return word.lower()
-        elif text[0].isupper():
-            return word.capitalize()
-        else:
-            return word
-    return replace
-</code></pre><p>下面是使用上述函数的方法：</p>
-<pre><code>&gt;&gt;&gt; re.sub('python', matchcase('snake'), text, flags=re.IGNORECASE)
-'UPPER SNAKE, lower snake, Mixed Snake'
+        <span class="hljs-keyword">if</span> text.isupper():
+            <span class="hljs-keyword">return</span> word.upper()
+        <span class="hljs-keyword">elif</span> text.islower():
+            <span class="hljs-keyword">return</span> word.lower()
+        <span class="hljs-keyword">elif</span> text[<span class="hljs-number">0</span>].isupper():
+            <span class="hljs-keyword">return</span> word.capitalize()
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> word
+    <span class="hljs-keyword">return</span> replace
+</code></pre>
+<p>下面是使用上述函数的方法：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>re.sub(<span class="hljs-string">'python'</span>, matchcase(<span class="hljs-string">'snake'</span>), text, flags=re.IGNORECASE)
+<span class="hljs-string">'UPPER SNAKE, lower snake, Mixed Snake'</span>
 &gt;&gt;&gt;
-</code></pre><p>译者注： <code>matchcase('snake')</code> 返回了一个回调函数(参数必须是<code>match</code> 对象)，前面一节一节提到过， <code>sub()</code> 函数除了接受替换字符串外，还能接受一个回调函数。</p>
+</code></pre>
+<p>译者注： <code>matchcase('snake')</code> 返回了一个回调函数(参数必须是<code>match</code> 对象)，前面一节一节提到过， <code>sub()</code> 函数除了接受替换字符串外，还能接受一个回调函数。</p>
 <h2 id="讨论">讨论</h2>
 <p>对于一般的忽略大小写的匹配操作，简单的传递一个 <code>re.IGNORECASE</code> 标志参数就已经足够了。 但是需要注意的是，这个对于某些需要大小写转换的 Unicode 匹配可能还不够， 参考2.10小节了解更多细节。</p>
 <h1 id="27-最短匹配模式">2.7 最短匹配模式</h1>
@@ -675,21 +709,23 @@ no
 <p>你正在试着用正则表达式匹配某个文本模式，但是它找到的是模式的最长可能匹配。 而你想修改它变成查找最短的可能匹配。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>这个问题一般出现在需要匹配一对分隔符之间的文本的时候(比如引号包含的字符串)。 为了说明清楚，考虑如下的例子：</p>
-<pre><code>&gt;&gt;&gt; str_pat = re.compile(r'\"(.*)\"')
-&gt;&gt;&gt; text1 = 'Computer says "no."'
-&gt;&gt;&gt; str_pat.findall(text1)
-['no.']
-&gt;&gt;&gt; text2 = 'Computer says "no." Phone says "yes."'
-&gt;&gt;&gt; str_pat.findall(text2)
-['no." Phone says "yes.']
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>str_pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'\"(.*)\"'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>text1 = <span class="hljs-string">'Computer says "no."'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>str_pat.findall(text1)
+[<span class="hljs-string">'no.'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>text2 = <span class="hljs-string">'Computer says "no." Phone says "yes."'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>str_pat.findall(text2)
+[<span class="hljs-string">'no." Phone says "yes.'</span>]
 &gt;&gt;&gt;
-</code></pre><p>在这个例子中，模式 <code>r'\"(.*)\"'</code> 的意图是匹配被双引号包含的文本。 但是在正则表达式中*操作符是贪婪的，因此匹配操作会查找最长的可能匹配。 于是在第二个例子中搜索 <code>text2</code> 的时候返回结果并不是我们想要的。</p>
+</code></pre>
+<p>在这个例子中，模式 <code>r'\"(.*)\"'</code> 的意图是匹配被双引号包含的文本。 但是在正则表达式中*操作符是贪婪的，因此匹配操作会查找最长的可能匹配。 于是在第二个例子中搜索 <code>text2</code> 的时候返回结果并不是我们想要的。</p>
 <p>为了修正这个问题，可以在模式中的*操作符后面加上?修饰符，就像这样：</p>
-<pre><code>&gt;&gt;&gt; str_pat = re.compile(r'\"(.*?)\"')
-&gt;&gt;&gt; str_pat.findall(text2)
-['no.', 'yes.']
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>str_pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'\"(.*?)\"'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>str_pat.findall(text2)
+[<span class="hljs-string">'no.'</span>, <span class="hljs-string">'yes.'</span>]
 &gt;&gt;&gt;
-</code></pre><p>这样就使得匹配变成非贪婪模式，从而得到最短的匹配，也就是我们想要的结果。</p>
+</code></pre>
+<p>这样就使得匹配变成非贪婪模式，从而得到最短的匹配，也就是我们想要的结果。</p>
 <h2 id="讨论">讨论</h2>
 <p>这一节展示了在写包含点(.)字符的正则表达式的时候遇到的一些常见问题。 在一个模式字符串中，点(.)匹配除了换行外的任何字符。 然而，如果你将点(.)号放在开始与结束符(比如引号)之间的时候，那么匹配操作会查找符合模式的最长可能匹配。 这样通常会导致很多中间的被开始与结束符包含的文本被忽略掉，并最终被包含在匹配结果字符串中返回。 通过在 * 或者 + 这样的操作符后面添加一个 <code>?</code> 可以强制匹配算法改成寻找最短的可能匹配。</p>
 <h1 id="28-多行匹配模式">2.8 多行匹配模式</h1>
@@ -697,155 +733,169 @@ no
 <p>你正在试着使用正则表达式去匹配一大块的文本，而你需要跨越多行去匹配。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>这个问题很典型的出现在当你用点(.)去匹配任意字符的时候，忘记了点(.)不能匹配换行符的事实。 比如，假设你想试着去匹配 C 语言分割的注释：</p>
-<pre><code>&gt;&gt;&gt; comment = re.compile(r'/\*(.*?)\*/')
-&gt;&gt;&gt; text1 = '/* this is a comment */'
-&gt;&gt;&gt; text2 = '''/* this is a
-... multiline comment */
-... '''
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>comment = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'/\*(.*?)\*/'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>text1 = <span class="hljs-string">'/* this is a comment */'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text2 = <span class="hljs-string">'''/* this is a
+<span class="hljs-meta">... </span>multiline comment */
+<span class="hljs-meta">... </span>'''</span>
 &gt;&gt;&gt;
-&gt;&gt;&gt; comment.findall(text1)
-[' this is a comment ']
-&gt;&gt;&gt; comment.findall(text2)
+<span class="hljs-meta">&gt;&gt;&gt; </span>comment.findall(text1)
+[<span class="hljs-string">' this is a comment '</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>comment.findall(text2)
 []
 &gt;&gt;&gt;
-</code></pre><p>为了修正这个问题，你可以修改模式字符串，增加对换行的支持。比如：</p>
-<pre><code>&gt;&gt;&gt; comment = re.compile(r'/\*((?:.|\n)*?)\*/')
-&gt;&gt;&gt; comment.findall(text2)
-[' this is a\n multiline comment ']
+</code></pre>
+<p>为了修正这个问题，你可以修改模式字符串，增加对换行的支持。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>comment = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'/\*((?:.|\n)*?)\*/'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>comment.findall(text2)
+[<span class="hljs-string">' this is a\n multiline comment '</span>]
 &gt;&gt;&gt;
-</code></pre><p>在这个模式中， <code>(?:.|\n)</code>指定了一个非捕获组 (也就是它定义了一个仅仅用来做匹配，而不能通过单独捕获或者编号的组)。</p>
+</code></pre>
+<p>在这个模式中， <code>(?:.|\n)</code>指定了一个非捕获组 (也就是它定义了一个仅仅用来做匹配，而不能通过单独捕获或者编号的组)。</p>
 <h2 id="讨论">讨论</h2>
 <p><code>re.compile()</code> 函数接受一个标志参数叫 <code>re.DOTALL</code> ，在这里非常有用。 它可以让正则表达式中的点(.)匹配包括换行符在内的任意字符。比如：</p>
-<pre><code>&gt;&gt;&gt; comment = re.compile(r'/\*(.*?)\*/', re.DOTALL)
-&gt;&gt;&gt; comment.findall(text2)
-[' this is a\n multiline comment ']
-</code></pre><p>对于简单的情况使用<code>re.DOTALL</code> 标记参数工作的很好， 但是如果模式非常复杂或者是为了构造字符串令牌而将多个模式合并起来(2.18节有详细描述)， 这时候使用这个标记参数就可能出现一些问题。 如果让你选择的话，最好还是定义自己的正则表达式模式，这样它可以在不需要额外的标记参数下也能工作的很好。</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>comment = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r'/\*(.*?)\*/'</span>, re.DOTALL)
+<span class="hljs-meta">&gt;&gt;&gt; </span>comment.findall(text2)
+[<span class="hljs-string">' this is a\n multiline comment '</span>]
+</code></pre>
+<p>对于简单的情况使用<code>re.DOTALL</code> 标记参数工作的很好， 但是如果模式非常复杂或者是为了构造字符串令牌而将多个模式合并起来(2.18节有详细描述)， 这时候使用这个标记参数就可能出现一些问题。 如果让你选择的话，最好还是定义自己的正则表达式模式，这样它可以在不需要额外的标记参数下也能工作的很好。</p>
 <h1 id="29-将-unicode-文本标准化">2.9 将 Unicode 文本标准化</h1>
 <h2 id="问题">问题</h2>
 <p>你正在处理 Unicode 字符串，需要确保所有字符串在底层有相同的表示。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>在 Unicode 中，某些字符能够用多个合法的编码表示。为了说明，考虑下面的这个例子：</p>
-<pre><code>&gt;&gt;&gt; s1 = 'Spicy Jalape\u00f1o'
-&gt;&gt;&gt; s2 = 'Spicy Jalapen\u0303o'
-&gt;&gt;&gt; s1
-'Spicy Jalapeño'
-&gt;&gt;&gt; s2
-'Spicy Jalapeño'
-&gt;&gt;&gt; s1 == s2
-False
-&gt;&gt;&gt; len(s1)
-14
-&gt;&gt;&gt; len(s2)
-15
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s1 = <span class="hljs-string">'Spicy Jalape\u00f1o'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s2 = <span class="hljs-string">'Spicy Jalapen\u0303o'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s1
+<span class="hljs-string">'Spicy Jalapeño'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s2
+<span class="hljs-string">'Spicy Jalapeño'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s1 == s2
+<span class="hljs-literal">False</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">len</span>(s1)
+<span class="hljs-number">14</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">len</span>(s2)
+<span class="hljs-number">15</span>
 &gt;&gt;&gt;
-</code></pre><p>这里的文本”Spicy Jalapeño”使用了两种形式来表示。 第一种使用整体字符”ñ”(U+00F1)，第二种使用拉丁字母”n”后面跟一个”~”的组合字符(U+0303)。</p>
+</code></pre>
+<p>这里的文本”Spicy Jalapeño”使用了两种形式来表示。 第一种使用整体字符”ñ”(U+00F1)，第二种使用拉丁字母”n”后面跟一个”~”的组合字符(U+0303)。</p>
 <p>在需要比较字符串的程序中使用字符的多种表示会产生问题。 为了修正这个问题，你可以使用 unicodedata 模块先将文本标准化：</p>
-<pre><code>&gt;&gt;&gt; import unicodedata
-&gt;&gt;&gt; t1 = unicodedata.normalize('NFC', s1)
-&gt;&gt;&gt; t2 = unicodedata.normalize('NFC', s2)
-&gt;&gt;&gt; t1 == t2
-True
-&gt;&gt;&gt; print(ascii(t1))
-'Spicy Jalape\xf1o'
-&gt;&gt;&gt; t3 = unicodedata.normalize('NFD', s1)
-&gt;&gt;&gt; t4 = unicodedata.normalize('NFD', s2)
-&gt;&gt;&gt; t3 == t4
-True
-&gt;&gt;&gt; print(ascii(t3))
-'Spicy Jalapen\u0303o'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> unicodedata
+<span class="hljs-meta">&gt;&gt;&gt; </span>t1 = unicodedata.normalize(<span class="hljs-string">'NFC'</span>, s1)
+<span class="hljs-meta">&gt;&gt;&gt; </span>t2 = unicodedata.normalize(<span class="hljs-string">'NFC'</span>, s2)
+<span class="hljs-meta">&gt;&gt;&gt; </span>t1 == t2
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(<span class="hljs-built_in">ascii</span>(t1))
+<span class="hljs-string">'Spicy Jalape\xf1o'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>t3 = unicodedata.normalize(<span class="hljs-string">'NFD'</span>, s1)
+<span class="hljs-meta">&gt;&gt;&gt; </span>t4 = unicodedata.normalize(<span class="hljs-string">'NFD'</span>, s2)
+<span class="hljs-meta">&gt;&gt;&gt; </span>t3 == t4
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(<span class="hljs-built_in">ascii</span>(t3))
+<span class="hljs-string">'Spicy Jalapen\u0303o'</span>
 &gt;&gt;&gt;
-</code></pre><p><code>normalize()</code>第一个参数指定字符串标准化的方式。 NFC 表示字符应该是整体组成(比如可能的话就使用单一编码)，而 NFD 表示字符应该分解为多个组合字符表示。</p>
+</code></pre>
+<p><code>normalize()</code>第一个参数指定字符串标准化的方式。 NFC 表示字符应该是整体组成(比如可能的话就使用单一编码)，而 NFD 表示字符应该分解为多个组合字符表示。</p>
 <p>Python 同样支持扩展的标准化形式 NFKC 和 NFKD，它们在处理某些字符的时候增加了额外的兼容特性。比如：</p>
-<pre><code>&gt;&gt;&gt; s = '\ufb01' # A single character
-&gt;&gt;&gt; s
-'ﬁ'
-&gt;&gt;&gt; unicodedata.normalize('NFD', s)
-'ﬁ'
-# Notice how the combined letters are broken apart here
-&gt;&gt;&gt; unicodedata.normalize('NFKD', s)
-'fi'
-&gt;&gt;&gt; unicodedata.normalize('NFKC', s)
-'fi'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'\ufb01'</span> <span class="hljs-comment"># A single character</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s
+<span class="hljs-string">'ﬁ'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>unicodedata.normalize(<span class="hljs-string">'NFD'</span>, s)
+<span class="hljs-string">'ﬁ'</span>
+<span class="hljs-comment"># Notice how the combined letters are broken apart here</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>unicodedata.normalize(<span class="hljs-string">'NFKD'</span>, s)
+<span class="hljs-string">'fi'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>unicodedata.normalize(<span class="hljs-string">'NFKC'</span>, s)
+<span class="hljs-string">'fi'</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>标准化对于任何需要以一致的方式处理 Unicode 文本的程序都是非常重要的。 当处理来自用户输入的字符串而你很难去控制编码的时候尤其如此。</p>
 <p>在清理和过滤文本的时候字符的标准化也是很重要的。 比如，假设你想清除掉一些文本上面的变音符的时候(可能是为了搜索和匹配)：</p>
-<pre><code>&gt;&gt;&gt; t1 = unicodedata.normalize('NFD', s1)
-&gt;&gt;&gt; ''.join(c for c in t1 if not unicodedata.combining(c))
-'Spicy Jalapeno'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>t1 = unicodedata.normalize(<span class="hljs-string">'NFD'</span>, s1)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">''</span>.join(c <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> t1 <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> unicodedata.combining(c))
+<span class="hljs-string">'Spicy Jalapeno'</span>
 &gt;&gt;&gt;
-</code></pre><p>最后一个例子展示了 <code>unicodedata</code> 模块的另一个重要方面，也就是测试字符类的工具函数。 <code>combining()</code> 函数可以测试一个字符是否为和音字符。 在这个模块中还有其他函数用于查找字符类别，测试是否为数字字符等等。</p>
+</code></pre>
+<p>最后一个例子展示了 <code>unicodedata</code> 模块的另一个重要方面，也就是测试字符类的工具函数。 <code>combining()</code> 函数可以测试一个字符是否为和音字符。 在这个模块中还有其他函数用于查找字符类别，测试是否为数字字符等等。</p>
 <p>Unicode 显然是一个很大的主题。如果想更深入的了解关于标准化方面的信息， 请看考  <a href="http://www.unicode.org/faq/normalization.html" target="_blank">Unicode 官网中关于这部分的说明</a> Ned Batchelder 在<a href="http://nedbatchelder.com/text/unipain.html" target="_blank">他的网站</a>上对 Python 的 Unicode 处理问题也有一个很好的介绍。</p>
 <h1 id="210-在正则式中使用-unicode">2.10 在正则式中使用 Unicode</h1>
 <h2 id="问题">问题</h2>
 <p>你正在使用正则表达式处理文本，但是关注的是 Unicode 字符处理。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>默认情况下 <code>re</code> 模块已经对一些 Unicode 字符类有了基本的支持。 比如， <code>\\d</code>已经匹配任意的 unicode 数字字符了：</p>
-<pre><code>&gt;&gt;&gt; import re
-&gt;&gt;&gt; num = re.compile('\d+')
-&gt;&gt;&gt; # ASCII digits
-&gt;&gt;&gt; num.match('123')
-&lt;_sre.SRE_Match object at 0x1007d9ed0&gt;
-&gt;&gt;&gt; # Arabic digits
-&gt;&gt;&gt; num.match('\u0661\u0662\u0663')
-&lt;_sre.SRE_Match object at 0x101234030&gt;
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>num = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'\d+'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># ASCII digits</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>num.<span class="hljs-keyword">match</span>(<span class="hljs-string">'123'</span>)
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x1007d9ed0</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Arabic digits</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>num.<span class="hljs-keyword">match</span>(<span class="hljs-string">'\u0661\u0662\u0663'</span>)
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x101234030</span>&gt;
 &gt;&gt;&gt;
-</code></pre><p>如果你想在模式中包含指定的 Unicode 字符，你可以使用 Unicode 字符对应的转义序列(比如 <code>\uFFF</code> 或者 <code>\UFFFFFFF</code>)。 比如，下面是一个匹配几个不同阿拉伯编码页面中所有字符的正则表达式：</p>
-<pre><code>&gt;&gt;&gt; arabic = re.compile('[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]+')
+</code></pre>
+<p>如果你想在模式中包含指定的 Unicode 字符，你可以使用 Unicode 字符对应的转义序列(比如 <code>\uFFF</code> 或者 <code>\UFFFFFFF</code>)。 比如，下面是一个匹配几个不同阿拉伯编码页面中所有字符的正则表达式：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>arabic = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]+'</span>)
 &gt;&gt;&gt;
-</code></pre><p>当执行匹配和搜索操作的时候，最好是先标准化并且清理所有文本为标准化格式(参考2.9小节)。 但是同样也应该注意一些特殊情况，比如在忽略大小写匹配和大小写转换时的行为。</p>
-<pre><code>&gt;&gt;&gt; pat = re.compile('stra\u00dfe', re.IGNORECASE)
-&gt;&gt;&gt; s = 'straße'
-&gt;&gt;&gt; pat.match(s) # Matches
-&lt;_sre.SRE_Match object at 0x10069d370&gt;
-&gt;&gt;&gt; pat.match(s.upper()) # Doesn't match
-&gt;&gt;&gt; s.upper() # Case folds
-'STRASSE'
+</code></pre>
+<p>当执行匹配和搜索操作的时候，最好是先标准化并且清理所有文本为标准化格式(参考2.9小节)。 但是同样也应该注意一些特殊情况，比如在忽略大小写匹配和大小写转换时的行为。</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'stra\u00dfe'</span>, re.IGNORECASE)
+<span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'straße'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>pat.<span class="hljs-keyword">match</span>(s) <span class="hljs-comment"># Matches</span>
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x10069d370</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>pat.<span class="hljs-keyword">match</span>(s.upper()) <span class="hljs-comment"># Doesn't match</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.upper() <span class="hljs-comment"># Case folds</span>
+<span class="hljs-string">'STRASSE'</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>混合使用 Unicode 和正则表达式通常会让你抓狂。 如果你真的打算这样做的话，最好考虑下安装第三方正则式库， 它们会为 Unicode 的大小写转换和其他大量有趣特性提供全面的支持，包括模糊匹配。</p>
 <h1 id="211-删除字符串中不需要的字符">2.11 删除字符串中不需要的字符</h1>
 <h2 id="问题">问题</h2>
 <p>你想去掉文本字符串开头，结尾或者中间不想要的字符，比如空白。</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>strip()</code> 方法能用于删除开始或结尾的字符。<code>lstrip()</code>和<code>rstrip()</code> 分别从左和从右执行删除操作。 默认情况下，这些方法会去除空白字符，但是你也可以指定其他字符。比如：</p>
-<pre><code>&gt;&gt;&gt; # Whitespace stripping
-&gt;&gt;&gt; s = ' hello world \n'
-&gt;&gt;&gt; s.strip()
-'hello world'
-&gt;&gt;&gt; s.lstrip()
-'hello world \n'
-&gt;&gt;&gt; s.rstrip()
-' hello world'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Whitespace stripping</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">' hello world \n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.strip()
+<span class="hljs-string">'hello world'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.lstrip()
+<span class="hljs-string">'hello world \n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.rstrip()
+<span class="hljs-string">' hello world'</span>
 &gt;&gt;&gt;
-&gt;&gt;&gt; # Character stripping
-&gt;&gt;&gt; t = '-----hello====='
-&gt;&gt;&gt; t.lstrip('-')
-'hello====='
-&gt;&gt;&gt; t.strip('-=')
-'hello'
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Character stripping</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>t = <span class="hljs-string">'-----hello====='</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>t.lstrip(<span class="hljs-string">'-'</span>)
+<span class="hljs-string">'hello====='</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>t.strip(<span class="hljs-string">'-='</span>)
+<span class="hljs-string">'hello'</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>这些 <code>strip()</code> 方法在读取和清理数据以备后续处理的时候是经常会被用到的。 比如，你可以用它们来去掉空格，引号和完成其他任务。</p>
 <p>但是需要注意的是去除操作不会对字符串的中间的文本产生任何影响。比如：</p>
-<pre><code>&gt;&gt;&gt; s = ' hello     world \n'
-&gt;&gt;&gt; s = s.strip()
-&gt;&gt;&gt; s
-'hello     world'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">' hello     world \n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s = s.strip()
+<span class="hljs-meta">&gt;&gt;&gt; </span>s
+<span class="hljs-string">'hello     world'</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你想处理中间的空格，那么你需要求助其他技术。比如使用 <code>replace()</code> 方法或者是用正则表达式替换。示例如下：</p>
-<pre><code>&gt;&gt;&gt; s.replace(' ', '')
-'helloworld'
-&gt;&gt;&gt; import re
-&gt;&gt;&gt; re.sub('\s+', ' ', s)
-'hello world'
+</code></pre>
+<p>如果你想处理中间的空格，那么你需要求助其他技术。比如使用 <code>replace()</code> 方法或者是用正则表达式替换。示例如下：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s.replace(<span class="hljs-string">' '</span>, <span class="hljs-string">''</span>)
+<span class="hljs-string">'helloworld'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.sub(<span class="hljs-string">'\s+'</span>, <span class="hljs-string">' '</span>, s)
+<span class="hljs-string">'hello world'</span>
 &gt;&gt;&gt;
-</code></pre><p>通常情况下你想将字符串 <code>strip</code> 操作和其他迭代操作相结合，比如从文件中读取多行数据。 如果是这样的话，那么生成器表达式就可以大显身手了。比如：</p>
-<pre><code>with open(filename) as f:
-    lines = (line.strip() for line in f)
-    for line in lines:
-        print(line)
-</code></pre><p>在这里，表达式<code>lines = (line.strip() for line in f)</code>执行数据转换操作。 这种方式非常高效，因为它不需要预先读取所有数据放到一个临时的列表中去。 它仅仅只是创建一个生成器，并且每次返回行之前会先执行 strip 操作。</p>
+</code></pre>
+<p>通常情况下你想将字符串 <code>strip</code> 操作和其他迭代操作相结合，比如从文件中读取多行数据。 如果是这样的话，那么生成器表达式就可以大显身手了。比如：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(filename) <span class="hljs-keyword">as</span> f:
+    lines = (line.strip() <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f)
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines:
+        <span class="hljs-built_in">print</span>(line)
+</code></pre>
+<p>在这里，表达式<code>lines = (line.strip() for line in f)</code>执行数据转换操作。 这种方式非常高效，因为它不需要预先读取所有数据放到一个临时的列表中去。 它仅仅只是创建一个生成器，并且每次返回行之前会先执行 strip 操作。</p>
 <p>对于更高阶的 strip，你可能需要使用 <code>translate()</code> 方法。请参阅下一节了解更多关于字符串清理的内容。</p>
 <h1 id="212-审查清理文本字符串">2.12 审查清理文本字符串</h1>
 <h2 id="问题">问题</h2>
@@ -853,63 +903,69 @@ True
 <h2 id="解决方案">解决方案</h2>
 <p>文本清理问题会涉及到包括文本解析与数据处理等一系列问题。 在非常简单的情形下，你可能会选择使用字符串函数(比如 <code>str.upper()</code>和 <code>str.lower()</code> )将文本转为标准格式。 使用 <code>str.replace()</code> 或者 <code>re.sub()</code> 的简单替换操作能删除或者改变指定的字符序列。 你同样还可以使用2.9小节的 <code>unicodedata.normalize()</code> 函数将 unicode 文本标准化。</p>
 <p>然后，有时候你可能还想在清理操作上更进一步。比如，你可能想消除整个区间上的字符或者去除变音符。 为了这样做，你可以使用经常会被忽视的 <code>str.translate()</code> 方法。 为了演示，假设你现在有下面这个凌乱的字符串：</p>
-<pre><code>&gt;&gt;&gt; s = 'pýtĥöñ\fis\tawesome\r\n'
-&gt;&gt;&gt; s
-'pýtĥöñ\x0cis\tawesome\r\n'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'pýtĥöñ\fis\tawesome\r\n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s
+<span class="hljs-string">'pýtĥöñ\x0cis\tawesome\r\n'</span>
 &gt;&gt;&gt;
-</code></pre><p>第一步是清理空白字符。为了这样做，先创建一个小的转换表格然后使用 <code>translate()</code> 方法：</p>
-<pre><code>&gt;&gt;&gt; remap = {
-...     ord('\t') : ' ',
-...     ord('\f') : ' ',
-...     ord('\r') : None # Deleted
-... }
-&gt;&gt;&gt; a = s.translate(remap)
-&gt;&gt;&gt; a
-'pýtĥöñ is awesome\n'
+</code></pre>
+<p>第一步是清理空白字符。为了这样做，先创建一个小的转换表格然后使用 <code>translate()</code> 方法：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>remap = {
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">ord</span>(<span class="hljs-string">'\t'</span>) : <span class="hljs-string">' '</span>,
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">ord</span>(<span class="hljs-string">'\f'</span>) : <span class="hljs-string">' '</span>,
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">ord</span>(<span class="hljs-string">'\r'</span>) : <span class="hljs-literal">None</span> <span class="hljs-comment"># Deleted</span>
+<span class="hljs-meta">... </span>}
+<span class="hljs-meta">&gt;&gt;&gt; </span>a = s.translate(remap)
+<span class="hljs-meta">&gt;&gt;&gt; </span>a
+<span class="hljs-string">'pýtĥöñ is awesome\n'</span>
 &gt;&gt;&gt;
-</code></pre><p>正如你看的那样，空白字符 <code>\t</code> 和 <code>\f</code> 已经被重新映射到一个空格。回车字符 r 直接被删除。</p>
+</code></pre>
+<p>正如你看的那样，空白字符 <code>\t</code> 和 <code>\f</code> 已经被重新映射到一个空格。回车字符 r 直接被删除。</p>
 <p>你可以以这个表格为基础进一步构建更大的表格。比如，让我们删除所有的和音符：</p>
-<pre><code>&gt;&gt;&gt; import unicodedata
-&gt;&gt;&gt; import sys
-&gt;&gt;&gt; cmb_chrs = dict.fromkeys(c for c in range(sys.maxunicode)
-...                         if unicodedata.combining(chr(c)))
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> unicodedata
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> sys
+<span class="hljs-meta">&gt;&gt;&gt; </span>cmb_chrs = <span class="hljs-built_in">dict</span>.fromkeys(c <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(sys.maxunicode)
+<span class="hljs-meta">... </span>                        <span class="hljs-keyword">if</span> unicodedata.combining(<span class="hljs-built_in">chr</span>(c)))
 ...
-&gt;&gt;&gt; b = unicodedata.normalize('NFD', a)
-&gt;&gt;&gt; b
-'pýtĥöñ is awesome\n'
-&gt;&gt;&gt; b.translate(cmb_chrs)
-'python is awesome\n'
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = unicodedata.normalize(<span class="hljs-string">'NFD'</span>, a)
+<span class="hljs-meta">&gt;&gt;&gt; </span>b
+<span class="hljs-string">'pýtĥöñ is awesome\n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>b.translate(cmb_chrs)
+<span class="hljs-string">'python is awesome\n'</span>
 &gt;&gt;&gt;
-</code></pre><p>上面例子中，通过使用 <code>dict.fromkeys()</code> 方法构造一个字典，每个 Unicode 和音符作为键，对于的值全部为 <code>None</code> 。</p>
+</code></pre>
+<p>上面例子中，通过使用 <code>dict.fromkeys()</code> 方法构造一个字典，每个 Unicode 和音符作为键，对于的值全部为 <code>None</code> 。</p>
 <p>然后使用 <code>unicodedata.normalize()</code> 将原始输入标准化为分解形式字符。 然后再调用 <code>translate</code> 函数删除所有重音符。 同样的技术也可以被用来删除其他类型的字符(比如控制字符等)。</p>
 <p>作为另一个例子，这里构造一个将所有 Unicode 数字字符映射到对应的 ASCII 字符上的表格：</p>
-<pre><code>&gt;&gt;&gt; digitmap = { c: ord('0') + unicodedata.digit(chr(c))
-...         for c in range(sys.maxunicode)
-...         if unicodedata.category(chr(c)) == 'Nd' }
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>digitmap = { c: <span class="hljs-built_in">ord</span>(<span class="hljs-string">'0'</span>) + unicodedata.digit(<span class="hljs-built_in">chr</span>(c))
+<span class="hljs-meta">... </span>        <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(sys.maxunicode)
+<span class="hljs-meta">... </span>        <span class="hljs-keyword">if</span> unicodedata.category(<span class="hljs-built_in">chr</span>(c)) == <span class="hljs-string">'Nd'</span> }
 ...
-&gt;&gt;&gt; len(digitmap)
-460
-&gt;&gt;&gt; # Arabic digits
-&gt;&gt;&gt; x = '\u0661\u0662\u0663'
-&gt;&gt;&gt; x.translate(digitmap)
-'123'
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">len</span>(digitmap)
+<span class="hljs-number">460</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Arabic digits</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>x = <span class="hljs-string">'\u0661\u0662\u0663'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>x.translate(digitmap)
+<span class="hljs-string">'123'</span>
 &gt;&gt;&gt;
-</code></pre><p>另一种清理文本的技术涉及到 I/O 解码与编码函数。这里的思路是先对文本做一些初步的清理， 然后再结合 <code>encode()</code> 或者 <code>decode()</code>操作来清除或修改它。比如：</p>
-<pre><code>&gt;&gt;&gt; a
-'pýtĥöñ is awesome\n'
-&gt;&gt;&gt; b = unicodedata.normalize('NFD', a)
-&gt;&gt;&gt; b.encode('ascii', 'ignore').decode('ascii')
-'python is awesome\n'
+</code></pre>
+<p>另一种清理文本的技术涉及到 I/O 解码与编码函数。这里的思路是先对文本做一些初步的清理， 然后再结合 <code>encode()</code> 或者 <code>decode()</code>操作来清除或修改它。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a
+<span class="hljs-string">'pýtĥöñ is awesome\n'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = unicodedata.normalize(<span class="hljs-string">'NFD'</span>, a)
+<span class="hljs-meta">&gt;&gt;&gt; </span>b.encode(<span class="hljs-string">'ascii'</span>, <span class="hljs-string">'ignore'</span>).decode(<span class="hljs-string">'ascii'</span>)
+<span class="hljs-string">'python is awesome\n'</span>
 &gt;&gt;&gt;
-</code></pre><p>这里的标准化操作将原来的文本分解为单独的和音符。接下来的 ASCII 编码/解码只是简单的一下子丢弃掉那些字符。 当然，这种方法仅仅只在最后的目标就是获取到文本对应 ACSII 表示的时候生效。</p>
+</code></pre>
+<p>这里的标准化操作将原来的文本分解为单独的和音符。接下来的 ASCII 编码/解码只是简单的一下子丢弃掉那些字符。 当然，这种方法仅仅只在最后的目标就是获取到文本对应 ACSII 表示的时候生效。</p>
 <h2 id="讨论">讨论</h2>
 <p>文本字符清理一个最主要的问题应该是运行的性能。一般来讲，代码越简单运行越快。 对于简单的替换操作， <code>str.replace()</code> 方法通常是最快的，甚至在你需要多次调用的时候。 比如，为了清理空白字符，你可以这样做：</p>
-<pre><code>def clean_spaces(s):
-    s = s.replace('\r', '')
-    s = s.replace('\t', ' ')
-    s = s.replace('\f', ' ')
-    return s
-</code></pre><p>如果你去测试的话，你就会发现这种方式会比使用 <code>translate()</code> 或者正则表达式要快很多。</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">clean_spaces</span>(<span class="hljs-params">s</span>):
+    s = s.replace(<span class="hljs-string">'\r'</span>, <span class="hljs-string">''</span>)
+    s = s.replace(<span class="hljs-string">'\t'</span>, <span class="hljs-string">' '</span>)
+    s = s.replace(<span class="hljs-string">'\f'</span>, <span class="hljs-string">' '</span>)
+    <span class="hljs-keyword">return</span> s
+</code></pre>
+<p>如果你去测试的话，你就会发现这种方式会比使用 <code>translate()</code> 或者正则表达式要快很多。</p>
 <p>另一方面，如果你需要执行任何复杂字符对字符的重新映射或者删除操作的话， <code>tanslate()</code> 方法会非常的快。</p>
 <p>从大的方面来讲，对于你的应用程序来说性能是你不得不去自己研究的东西。 不幸的是，我们不可能给你建议一个特定的技术，使它能够适应所有的情况。 因此实际情况中需要你自己去尝试不同的方法并评估它。</p>
 <p>尽管这一节集中讨论的是文本，但是类似的技术也可以适用于字节，包括简单的替换，转换和正则表达式。</p>
@@ -918,208 +974,237 @@ True
 <p>你想通过某种对齐方式来格式化字符串</p>
 <h2 id="解决方案">解决方案</h2>
 <p>对于基本的字符串对齐操作，可以使用字符串的 <code>ljust()</code> , <code>rjust()</code> 和 <code>center()</code> 方法。比如：</p>
-<pre><code>&gt;&gt;&gt; text = 'Hello World'
-&gt;&gt;&gt; text.ljust(20)
-'Hello World         '
-&gt;&gt;&gt; text.rjust(20)
-'         Hello World'
-&gt;&gt;&gt; text.center(20)
-'    Hello World     '
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text = <span class="hljs-string">'Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.ljust(<span class="hljs-number">20</span>)
+<span class="hljs-string">'Hello World         '</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.rjust(<span class="hljs-number">20</span>)
+<span class="hljs-string">'         Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.center(<span class="hljs-number">20</span>)
+<span class="hljs-string">'    Hello World     '</span>
 &gt;&gt;&gt;
-</code></pre><p>所有这些方法都能接受一个可选的填充字符。比如：</p>
-<pre><code>&gt;&gt;&gt; text.rjust(20,'=')
-'=========Hello World'
-&gt;&gt;&gt; text.center(20,'*')
-'****Hello World*****'
+</code></pre>
+<p>所有这些方法都能接受一个可选的填充字符。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>text.rjust(<span class="hljs-number">20</span>,<span class="hljs-string">'='</span>)
+<span class="hljs-string">'=========Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>text.center(<span class="hljs-number">20</span>,<span class="hljs-string">'*'</span>)
+<span class="hljs-string">'****Hello World*****'</span>
 &gt;&gt;&gt;
-</code></pre><p>函数 <code>format()</code> 同样可以用来很容易的对齐字符串。 你要做的就是使用 <code>&lt;,&gt;</code>或者 <code>^</code> 字符后面紧跟一个指定的宽度。比如：</p>
-<pre><code>&gt;&gt;&gt; format(text, '&gt;20')
-'         Hello World'
-&gt;&gt;&gt; format(text, '&lt;20')
-'Hello World         '
-&gt;&gt;&gt; format(text, '^20')
-'    Hello World     '
+</code></pre>
+<p>函数 <code>format()</code> 同样可以用来很容易的对齐字符串。 你要做的就是使用 <code>&lt;,&gt;</code>或者 <code>^</code> 字符后面紧跟一个指定的宽度。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(text, <span class="hljs-string">'&gt;20'</span>)
+<span class="hljs-string">'         Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(text, <span class="hljs-string">'&lt;20'</span>)
+<span class="hljs-string">'Hello World         '</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(text, <span class="hljs-string">'^20'</span>)
+<span class="hljs-string">'    Hello World     '</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你想指定一个非空格的填充字符，将它写到对齐字符的前面即可：</p>
-<pre><code>&gt;&gt;&gt; format(text, '=&gt;20s')
-'=========Hello World'
-&gt;&gt;&gt; format(text, '*^20s')
-'****Hello World*****'
+</code></pre>
+<p>如果你想指定一个非空格的填充字符，将它写到对齐字符的前面即可：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(text, <span class="hljs-string">'=&gt;20s'</span>)
+<span class="hljs-string">'=========Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(text, <span class="hljs-string">'*^20s'</span>)
+<span class="hljs-string">'****Hello World*****'</span>
 &gt;&gt;&gt;
-</code></pre><p>当格式化多个值的时候，这些格式代码也可以被用在 <code>format()</code>方法中。比如：</p>
-<pre><code>&gt;&gt;&gt; '{:&gt;10s} {:&gt;10s}'.format('Hello', 'World')
-'     Hello      World'
+</code></pre>
+<p>当格式化多个值的时候，这些格式代码也可以被用在 <code>format()</code>方法中。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">'{:&gt;10s} {:&gt;10s}'</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">'Hello'</span>, <span class="hljs-string">'World'</span>)
+<span class="hljs-string">'     Hello      World'</span>
 &gt;&gt;&gt;
-</code></pre><p><code>format()</code> 函数的一个好处是它不仅适用于字符串。它可以用来格式化任何值，使得它非常的通用。 比如，你可以用它来格式化数字：</p>
-<pre><code>&gt;&gt;&gt; x = 1.2345
-&gt;&gt;&gt; format(x, '&gt;10')
-'    1.2345'
-&gt;&gt;&gt; format(x, '^10.2f')
-'   1.23   '
+</code></pre>
+<p><code>format()</code> 函数的一个好处是它不仅适用于字符串。它可以用来格式化任何值，使得它非常的通用。 比如，你可以用它来格式化数字：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>x = <span class="hljs-number">1.2345</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(x, <span class="hljs-string">'&gt;10'</span>)
+<span class="hljs-string">'    1.2345'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">format</span>(x, <span class="hljs-string">'^10.2f'</span>)
+<span class="hljs-string">'   1.23   '</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>在老的代码中，你经常会看到被用来格式化文本的<code>%</code> 操作符。比如：</p>
-<pre><code>&gt;&gt;&gt; '%-20s' % text
-'Hello World         '
-&gt;&gt;&gt; '%20s' % text
-'         Hello World'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">'%-20s'</span> % text
+<span class="hljs-string">'Hello World         '</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">'%20s'</span> % text
+<span class="hljs-string">'         Hello World'</span>
 &gt;&gt;&gt;
-</code></pre><p>但是，在新版本代码中，你应该优先选择 <code>format()</code> 函数或者方法。 <code>format()</code> 要比 <code>%</code> 操作符的功能更为强大。 并且 <code>format()</code>也比使用 <code>ljust()</code>, <code>rjust()</code>或 <code>center()</code>方法更通用， 因为它可以用来格式化任意对象，而不仅仅是字符串。</p>
+</code></pre>
+<p>但是，在新版本代码中，你应该优先选择 <code>format()</code> 函数或者方法。 <code>format()</code> 要比 <code>%</code> 操作符的功能更为强大。 并且 <code>format()</code>也比使用 <code>ljust()</code>, <code>rjust()</code>或 <code>center()</code>方法更通用， 因为它可以用来格式化任意对象，而不仅仅是字符串。</p>
 <p>如果想要完全了解 <code>format()</code>函数的有用特性， 请参考<a href="https://docs.python.org/3/library/string.html#formatspec" target="_blank">在线 Python 文档</a></p>
 <h1 id="214-合并拼接字符串">2.14 合并拼接字符串</h1>
 <h2 id="问题">问题</h2>
 <p>你想将几个小的字符串合并为一个大的字符串</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你想要合并的字符串是在一个序列或者 <code>iterable</code> 中，那么最快的方式就是使用 <code>join()</code> 方法。比如：</p>
-<pre><code>&gt;&gt;&gt; parts = ['Is', 'Chicago', 'Not', 'Chicago?']
-&gt;&gt;&gt; ' '.join(parts)
-'Is Chicago Not Chicago?'
-&gt;&gt;&gt; ','.join(parts)
-'Is,Chicago,Not,Chicago?'
-&gt;&gt;&gt; ''.join(parts)
-'IsChicagoNotChicago?'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>parts = [<span class="hljs-string">'Is'</span>, <span class="hljs-string">'Chicago'</span>, <span class="hljs-string">'Not'</span>, <span class="hljs-string">'Chicago?'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">' '</span>.join(parts)
+<span class="hljs-string">'Is Chicago Not Chicago?'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">','</span>.join(parts)
+<span class="hljs-string">'Is,Chicago,Not,Chicago?'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">''</span>.join(parts)
+<span class="hljs-string">'IsChicagoNotChicago?'</span>
 &gt;&gt;&gt;
-</code></pre><p>初看起来，这种语法看上去会比较怪，但是 <code>join()</code>被指定为字符串的一个方法。 这样做的部分原因是你想去连接的对象可能来自各种不同的数据序列(比如列表，元组，字典，文件，集合或生成器等)， 如果在所有这些对象上都定义一个 <code>join()</code> 方法明显是冗余的。 因此你只需要指定你想要的分割字符串并调用他的 <code>join()</code> 方法去将文本片段组合起来。</p>
+</code></pre>
+<p>初看起来，这种语法看上去会比较怪，但是 <code>join()</code>被指定为字符串的一个方法。 这样做的部分原因是你想去连接的对象可能来自各种不同的数据序列(比如列表，元组，字典，文件，集合或生成器等)， 如果在所有这些对象上都定义一个 <code>join()</code> 方法明显是冗余的。 因此你只需要指定你想要的分割字符串并调用他的 <code>join()</code> 方法去将文本片段组合起来。</p>
 <p>如果你仅仅只是合并少数几个字符串，使用加号(+)通常已经足够了：</p>
-<pre><code>&gt;&gt;&gt; a = 'Is Chicago'
-&gt;&gt;&gt; b = 'Not Chicago?'
-&gt;&gt;&gt; a + ' ' + b
-'Is Chicago Not Chicago?'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = <span class="hljs-string">'Is Chicago'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = <span class="hljs-string">'Not Chicago?'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>a + <span class="hljs-string">' '</span> + b
+<span class="hljs-string">'Is Chicago Not Chicago?'</span>
 &gt;&gt;&gt;
-</code></pre><p>加号(+)操作符在作为一些复杂字符串格式化的替代方案的时候通常也工作的很好，比如：</p>
-<pre><code>&gt;&gt;&gt; print('{} {}'.format(a,b))
+</code></pre>
+<p>加号(+)操作符在作为一些复杂字符串格式化的替代方案的时候通常也工作的很好，比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(<span class="hljs-string">'{} {}'</span>.<span class="hljs-built_in">format</span>(a,b))
 Is Chicago Not Chicago?
-&gt;&gt;&gt; print(a + ' ' + b)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(a + <span class="hljs-string">' '</span> + b)
 Is Chicago Not Chicago?
 &gt;&gt;&gt;
-</code></pre><p>如果你想在源码中将两个字面字符串合并起来，你只需要简单的将它们放到一起，不需要用加号(+)。比如：</p>
-<pre><code>&gt;&gt;&gt; a = 'Hello' 'World'
-&gt;&gt;&gt; a
-'HelloWorld'
+</code></pre>
+<p>如果你想在源码中将两个字面字符串合并起来，你只需要简单的将它们放到一起，不需要用加号(+)。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = <span class="hljs-string">'Hello'</span> <span class="hljs-string">'World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>a
+<span class="hljs-string">'HelloWorld'</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>字符串合并可能看上去并不需要用一整节来讨论。 但是不应该小看这个问题，程序员通常在字符串格式化的时候因为选择不当而给应用程序带来严重性能损失。</p>
 <p>最重要的需要引起注意的是，当我们使用加号(+)操作符去连接大量的字符串的时候是非常低效率的， 因为加号连接会引起内存复制以及垃圾回收操作。 特别的，你永远都不应像下面这样写字符串连接代码：</p>
-<pre><code>s = ''
-for p in parts:
+<pre><code class="lang-python">s = <span class="hljs-string">''</span>
+<span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> parts:
     s += p
-</code></pre><p>这种写法会比使用 <code>join()</code> 方法运行的要慢一些，因为每一次执行+=操作的时候会创建一个新的字符串对象。 你最好是先收集所有的字符串片段然后再将它们连接起来。</p>
+</code></pre>
+<p>这种写法会比使用 <code>join()</code> 方法运行的要慢一些，因为每一次执行+=操作的时候会创建一个新的字符串对象。 你最好是先收集所有的字符串片段然后再将它们连接起来。</p>
 <p>一个相对比较聪明的技巧是利用生成器表达式(参考1.19小节)转换数据为字符串的同时合并字符串，比如：</p>
-<pre><code>&gt;&gt;&gt; data = ['ACME', 50, 91.1]
-&gt;&gt;&gt; ','.join(str(d) for d in data)
-'ACME,50,91.1'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>data = [<span class="hljs-string">'ACME'</span>, <span class="hljs-number">50</span>, <span class="hljs-number">91.1</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">','</span>.join(<span class="hljs-built_in">str</span>(d) <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> data)
+<span class="hljs-string">'ACME,50,91.1'</span>
 &gt;&gt;&gt;
-</code></pre><p>同样还得注意不必要的字符串连接操作。有时候程序员在没有必要做连接操作的时候仍然多此一举。比如在打印的时候：</p>
-<pre><code>print(a + ':' + b + ':' + c) # Ugly
-print(':'.join([a, b, c])) # Still ugly
-print(a, b, c, sep=':') # Better
-</code></pre><p>当混合使用 I/O 操作和字符串连接操作的时候，有时候需要仔细研究你的程序。 比如，考虑下面的两端代码片段：</p>
-<pre><code># Version 1 (string concatenation)
+</code></pre>
+<p>同样还得注意不必要的字符串连接操作。有时候程序员在没有必要做连接操作的时候仍然多此一举。比如在打印的时候：</p>
+<pre><code class="lang-python"><span class="hljs-built_in">print</span>(a + <span class="hljs-string">':'</span> + b + <span class="hljs-string">':'</span> + c) <span class="hljs-comment"># Ugly</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">':'</span>.join([a, b, c])) <span class="hljs-comment"># Still ugly</span>
+<span class="hljs-built_in">print</span>(a, b, c, sep=<span class="hljs-string">':'</span>) <span class="hljs-comment"># Better</span>
+</code></pre>
+<p>当混合使用 I/O 操作和字符串连接操作的时候，有时候需要仔细研究你的程序。 比如，考虑下面的两端代码片段：</p>
+<pre><code class="lang-python"><span class="hljs-comment"># Version 1 (string concatenation)</span>
 f.write(chunk1 + chunk2)
 
-# Version 2 (separate I/O operations)
+<span class="hljs-comment"># Version 2 (separate I/O operations)</span>
 f.write(chunk1)
 f.write(chunk2)
-</code></pre><p>如果两个字符串很小，那么第一个版本性能会更好些，因为 I/O 系统调用天生就慢。 另外一方面，如果两个字符串很大，那么第二个版本可能会更加高效， 因为它避免了创建一个很大的临时结果并且要复制大量的内存块数据。 还是那句话，有时候是需要根据你的应用程序特点来决定应该使用哪种方案。</p>
+</code></pre>
+<p>如果两个字符串很小，那么第一个版本性能会更好些，因为 I/O 系统调用天生就慢。 另外一方面，如果两个字符串很大，那么第二个版本可能会更加高效， 因为它避免了创建一个很大的临时结果并且要复制大量的内存块数据。 还是那句话，有时候是需要根据你的应用程序特点来决定应该使用哪种方案。</p>
 <p>最后谈一下，如果你准备编写构建大量小字符串的输出代码， 你最好考虑下使用生成器函数，利用 yield 语句产生输出片段。比如：</p>
-<pre><code>def sample():
-    yield 'Is'
-    yield 'Chicago'
-    yield 'Not'
-    yield 'Chicago?'
-</code></pre><p>这种方法一个有趣的方面是它并没有对输出片段到底要怎样组织做出假设。 例如，你可以简单的使用 <code>join()</code> 方法将这些片段合并起来：</p>
-<pre><code>text = ''.join(sample())
-</code></pre><p>或者你也可以将字符串片段重定向到 I/O：</p>
-<pre><code>for part in sample():
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>():
+    <span class="hljs-keyword">yield</span> <span class="hljs-string">'Is'</span>
+    <span class="hljs-keyword">yield</span> <span class="hljs-string">'Chicago'</span>
+    <span class="hljs-keyword">yield</span> <span class="hljs-string">'Not'</span>
+    <span class="hljs-keyword">yield</span> <span class="hljs-string">'Chicago?'</span>
+</code></pre>
+<p>这种方法一个有趣的方面是它并没有对输出片段到底要怎样组织做出假设。 例如，你可以简单的使用 <code>join()</code> 方法将这些片段合并起来：</p>
+<pre><code class="lang-python">text = <span class="hljs-string">''</span>.join(sample())
+</code></pre>
+<p>或者你也可以将字符串片段重定向到 I/O：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">for</span> part <span class="hljs-keyword">in</span> sample():
     f.write(part)
-</code></pre><p>再或者你还可以写出一些结合I/O操作的混合方案：</p>
-<pre><code>def combine(source, maxsize):
+</code></pre>
+<p>再或者你还可以写出一些结合I/O操作的混合方案：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">combine</span>(<span class="hljs-params">source, maxsize</span>):
     parts = []
-    size = 0
-    for part in source:
+    size = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">for</span> part <span class="hljs-keyword">in</span> source:
         parts.append(part)
-        size += len(part)
-        if size &gt; maxsize:
-            yield ''.join(parts)
+        size += <span class="hljs-built_in">len</span>(part)
+        <span class="hljs-keyword">if</span> size &gt; maxsize:
+            <span class="hljs-keyword">yield</span> <span class="hljs-string">''</span>.join(parts)
             parts = []
-            size = 0
-        yield ''.join(parts)
+            size = <span class="hljs-number">0</span>
+        <span class="hljs-keyword">yield</span> <span class="hljs-string">''</span>.join(parts)
 
-# 结合文件操作
-with open('filename', 'w') as f:
-    for part in combine(sample(), 32768):
+<span class="hljs-comment"># 结合文件操作</span>
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'filename'</span>, <span class="hljs-string">'w'</span>) <span class="hljs-keyword">as</span> f:
+    <span class="hljs-keyword">for</span> part <span class="hljs-keyword">in</span> combine(sample(), <span class="hljs-number">32768</span>):
         f.write(part)
-</code></pre><p>这里的关键点在于原始的生成器函数并不需要知道使用细节，它只负责生成字符串片段就行了。</p>
+</code></pre>
+<p>这里的关键点在于原始的生成器函数并不需要知道使用细节，它只负责生成字符串片段就行了。</p>
 <h1 id="215-字符串中插入变量">2.15 字符串中插入变量</h1>
 <h2 id="问题">问题</h2>
 <p>你想创建一个内嵌变量的字符串，变量被它的值所表示的字符串替换掉。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>Python 并没有对在字符串中简单替换变量值提供直接的支持。 但是通过使用字符串的 <code>format()</code> 方法来解决这个问题。比如：</p>
-<pre><code>&gt;&gt;&gt; s = '{name} has {n} messages.'
-&gt;&gt;&gt; s.format(name='Guido', n=37)
-'Guido has 37 messages.'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'{name} has {n} messages.'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.<span class="hljs-built_in">format</span>(name=<span class="hljs-string">'Guido'</span>, n=<span class="hljs-number">37</span>)
+<span class="hljs-string">'Guido has 37 messages.'</span>
 &gt;&gt;&gt;
-</code></pre><p>或者，如果要被替换的变量能在变量域中找到， 那么你可以结合使用 <code>format_map()</code>和 <code>vars()</code> 。就像下面这样：</p>
-<pre><code>&gt;&gt;&gt; name = 'Guido'
-&gt;&gt;&gt; n = 37
-&gt;&gt;&gt; s.format_map(vars())
-'Guido has 37 messages.'
+</code></pre>
+<p>或者，如果要被替换的变量能在变量域中找到， 那么你可以结合使用 <code>format_map()</code>和 <code>vars()</code> 。就像下面这样：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>name = <span class="hljs-string">'Guido'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>n = <span class="hljs-number">37</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.format_map(<span class="hljs-built_in">vars</span>())
+<span class="hljs-string">'Guido has 37 messages.'</span>
 &gt;&gt;&gt;
-</code></pre><p><code>vars()</code>还有一个有意思的特性就是它也适用于对象实例。比如：</p>
-<pre><code>&gt;&gt;&gt; class Info:
-...     def __init__(self, name, n):
-...         self.name = name
-...         self.n = n
+</code></pre>
+<p><code>vars()</code>还有一个有意思的特性就是它也适用于对象实例。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">class</span> <span class="hljs-title class_">Info</span>:
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name, n</span>):
+<span class="hljs-meta">... </span>        <span class="hljs-variable language_">self</span>.name = name
+<span class="hljs-meta">... </span>        <span class="hljs-variable language_">self</span>.n = n
 ...
-&gt;&gt;&gt; a = Info('Guido',37)
-&gt;&gt;&gt; s.format_map(vars(a))
-'Guido has 37 messages.'
+<span class="hljs-meta">&gt;&gt;&gt; </span>a = Info(<span class="hljs-string">'Guido'</span>,<span class="hljs-number">37</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.format_map(<span class="hljs-built_in">vars</span>(a))
+<span class="hljs-string">'Guido has 37 messages.'</span>
 &gt;&gt;&gt;
-</code></pre><p><code>format</code> 和 <code>format_map()</code> 的一个缺陷就是它们并不能很好的处理变量缺失的情况，比如：</p>
-<pre><code>&gt;&gt;&gt; s.format(name='Guido')
+</code></pre>
+<p><code>format</code> 和 <code>format_map()</code> 的一个缺陷就是它们并不能很好的处理变量缺失的情况，比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s.<span class="hljs-built_in">format</span>(name=<span class="hljs-string">'Guido'</span>)
 Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-KeyError: 'n'
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+KeyError: <span class="hljs-string">'n'</span>
 &gt;&gt;&gt;
-</code></pre><p>一种避免这种错误的方法是另外定义一个含有 <code>__missing__()</code> 方法的字典对象，就像下面这样：</p>
-<pre><code>class safesub(dict):
-"""防止key找不到"""
-def __missing__(self, key):
-    return '{' + key + '}'
-</code></pre><p>现在你可以利用这个类包装输入后传递给 <code>format_map()</code> ：</p>
-<pre><code>&gt;&gt;&gt; del n # Make sure n is undefined
-&gt;&gt;&gt; s.format_map(safesub(vars()))
-'Guido has {n} messages.'
+</code></pre>
+<p>一种避免这种错误的方法是另外定义一个含有 <code>__missing__()</code> 方法的字典对象，就像下面这样：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">safesub</span>(<span class="hljs-title class_ inherited__">dict</span>):
+<span class="hljs-string">"""防止key找不到"""</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">__missing__</span>(<span class="hljs-params">self, key</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-string">'{'</span> + key + <span class="hljs-string">'}'</span>
+</code></pre>
+<p>现在你可以利用这个类包装输入后传递给 <code>format_map()</code> ：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">del</span> n <span class="hljs-comment"># Make sure n is undefined</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.format_map(safesub(<span class="hljs-built_in">vars</span>()))
+<span class="hljs-string">'Guido has {n} messages.'</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你发现自己在代码中频繁的执行这些步骤，你可以将变量替换步骤用一个工具函数封装起来。就像下面这样：</p>
-<pre><code>import sys
+</code></pre>
+<p>如果你发现自己在代码中频繁的执行这些步骤，你可以将变量替换步骤用一个工具函数封装起来。就像下面这样：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> sys
 
-def sub(text):
-    return text.format_map(safesub(sys._getframe(1).f_locals))
-</code></pre><p>现在你可以像下面这样写了：</p>
-<pre><code>&gt;&gt;&gt; name = 'Guido'
-&gt;&gt;&gt; n = 37
-&gt;&gt;&gt; print(sub('Hello {name}'))
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">sub</span>(<span class="hljs-params">text</span>):
+    <span class="hljs-keyword">return</span> text.format_map(safesub(sys._getframe(<span class="hljs-number">1</span>).f_locals))
+</code></pre>
+<p>现在你可以像下面这样写了：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>name = <span class="hljs-string">'Guido'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>n = <span class="hljs-number">37</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(sub(<span class="hljs-string">'Hello {name}'</span>))
 Hello Guido
-&gt;&gt;&gt; print(sub('You have {n} messages.'))
-You have 37 messages.
-&gt;&gt;&gt; print(sub('Your favorite color is {color}'))
-Your favorite color is {color}
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(sub(<span class="hljs-string">'You have {n} messages.'</span>))
+You have <span class="hljs-number">37</span> messages.
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(sub(<span class="hljs-string">'Your favorite color is {color}'</span>))
+Your favorite color <span class="hljs-keyword">is</span> {color}
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>多年以来由于 Python 缺乏对变量替换的内置支持而导致了各种不同的解决方案。 作为本节中展示的一个可能的解决方案，你可以有时候会看到像下面这样的字符串格式化代码：</p>
-<pre><code>&gt;&gt;&gt; name = 'Guido'
-&gt;&gt;&gt; n = 37
-&gt;&gt;&gt; '%(name) has %(n) messages.' % vars()
-'Guido has 37 messages.'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>name = <span class="hljs-string">'Guido'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>n = <span class="hljs-number">37</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">'%(name) has %(n) messages.'</span> % <span class="hljs-built_in">vars</span>()
+<span class="hljs-string">'Guido has 37 messages.'</span>
 &gt;&gt;&gt;
-</code></pre><p>你可能还会看到字符串模板的使用：</p>
-<pre><code>&gt;&gt;&gt; import string
-&gt;&gt;&gt; s = string.Template('$name has $n messages.')
-&gt;&gt;&gt; s.substitute(vars())
-'Guido has 37 messages.'
+</code></pre>
+<p>你可能还会看到字符串模板的使用：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> string
+<span class="hljs-meta">&gt;&gt;&gt; </span>s = string.Template(<span class="hljs-string">'$name has $n messages.'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.substitute(<span class="hljs-built_in">vars</span>())
+<span class="hljs-string">'Guido has 37 messages.'</span>
 &gt;&gt;&gt;
-</code></pre><p>然而， <code>format()</code> 和 <code>format_map()</code> 相比较上面这些方案而已更加先进，因此应该被优先选择。 使用 <code>format()</code> 方法还有一个好处就是你可以获得对字符串格式化的所有支持(对齐，填充，数字格式化等待)， 而这些特性是使用像模板字符串之类的方案不可能获得的。</p>
+</code></pre>
+<p>然而， <code>format()</code> 和 <code>format_map()</code> 相比较上面这些方案而已更加先进，因此应该被优先选择。 使用 <code>format()</code> 方法还有一个好处就是你可以获得对字符串格式化的所有支持(对齐，填充，数字格式化等待)， 而这些特性是使用像模板字符串之类的方案不可能获得的。</p>
 <p>本机还部分介绍了一些高级特性。映射或者字典类中鲜为人知的 <code>__missing__()</code> 方法可以让你定义如何处理缺失的值。 在 <code>SafeSub</code> 类中，这个方法被定义为对缺失的值返回一个占位符。 你可以发现缺失的值会出现在结果字符串中(在调试的时候可能很有用)，而不是产生一个 <code>KeyError</code> 异常。</p>
 <p><code>sub()</code>函数使用<code>sys._getframe(1)</code>返回调用者的栈帧。可以从中访问属性 <code>f_locals</code>来获得局部变量。 毫无疑问绝大部分情况下在代码中去直接操作栈帧应该是不推荐的。 但是，对于像字符串替换工具函数而言它是非常有用的。 另外，值得注意的是 <code>f_locals</code> 是一个复制调用函数的本地变量的字典。 尽管你可以改变<code>f_locals</code> 的内容，但是这个修改对于后面的变量访问没有任何影响。 所以，虽说访问一个栈帧看上去很邪恶，但是对它的任何操作不会覆盖和改变调用者本地变量的值。</p>
 <h1 id="216-以指定列宽格式化字符串">2.16 以指定列宽格式化字符串</h1>
@@ -1127,76 +1212,82 @@ Your favorite color is {color}
 <p>你有一些长字符串，想以指定的列宽将它们重新格式化。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>使用<code>textwrap</code> 模块来格式化字符串的输出。比如，假如你有下列的长字符串：</p>
-<pre><code>s = "Look into my eyes, look into my eyes, the eyes, the eyes, \
+<pre><code class="lang-python">s = <span class="hljs-string">"Look into my eyes, look into my eyes, the eyes, the eyes, \
 the eyes, not around the eyes, don't look around the eyes, \
-look into my eyes, you're under."
-</code></pre><p>下面演示使用 <code>textwrap</code> 格式化字符串的多种方式：</p>
-<pre><code>&gt;&gt;&gt; import textwrap
-&gt;&gt;&gt; print(textwrap.fill(s, 70))
+look into my eyes, you're under."</span>
+</code></pre>
+<p>下面演示使用 <code>textwrap</code> 格式化字符串的多种方式：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> textwrap
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(textwrap.fill(s, <span class="hljs-number">70</span>))
 Look into my eyes, look into my eyes, the eyes, the eyes, the eyes,
-not around the eyes, don't look around the eyes, look into my eyes,
-you're under.
+<span class="hljs-keyword">not</span> around the eyes, don<span class="hljs-string">'t look around the eyes, look into my eyes,
+you'</span>re under.
 
-&gt;&gt;&gt; print(textwrap.fill(s, 40))
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(textwrap.fill(s, <span class="hljs-number">40</span>))
 Look into my eyes, look into my eyes,
-the eyes, the eyes, the eyes, not around
-the eyes, don't look around the eyes,
-look into my eyes, you're under.
+the eyes, the eyes, the eyes, <span class="hljs-keyword">not</span> around
+the eyes, don<span class="hljs-string">'t look around the eyes,
+look into my eyes, you'</span>re under.
 
-&gt;&gt;&gt; print(textwrap.fill(s, 40, initial_indent='    '))
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(textwrap.fill(s, <span class="hljs-number">40</span>, initial_indent=<span class="hljs-string">'    '</span>))
     Look into my eyes, look into my
-eyes, the eyes, the eyes, the eyes, not
-around the eyes, don't look around the
-eyes, look into my eyes, you're under.
+eyes, the eyes, the eyes, the eyes, <span class="hljs-keyword">not</span>
+around the eyes, don<span class="hljs-string">'t look around the
+eyes, look into my eyes, you'</span>re under.
 
-&gt;&gt;&gt; print(textwrap.fill(s, 40, subsequent_indent='    '))
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(textwrap.fill(s, <span class="hljs-number">40</span>, subsequent_indent=<span class="hljs-string">'    '</span>))
 Look into my eyes, look into my eyes,
-    the eyes, the eyes, the eyes, not
-    around the eyes, don't look around
-    the eyes, look into my eyes, you're
+    the eyes, the eyes, the eyes, <span class="hljs-keyword">not</span>
+    around the eyes, don<span class="hljs-string">'t look around
+    the eyes, look into my eyes, you'</span>re
     under.
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>textwrap</code> 模块对于字符串打印是非常有用的，特别是当你希望输出自动匹配终端大小的时候。 你可以使用 <code>os.get_terminal_size()</code> 方法来获取终端的大小尺寸。比如：</p>
-<pre><code>&gt;&gt;&gt; import os
-&gt;&gt;&gt; os.get_terminal_size().columns
-80
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> os
+<span class="hljs-meta">&gt;&gt;&gt; </span>os.get_terminal_size().columns
+<span class="hljs-number">80</span>
 &gt;&gt;&gt;
-</code></pre><p><code>fill()</code>方法接受一些其他可选参数来控制 tab，语句结尾等。 参阅 <a href="https://docs.python.org/3.3/library/textwrap.html#textwrap.TextWrapper" target="_blank">textwrap.TextWrapper 文档</a>获取更多内容。</p>
+</code></pre>
+<p><code>fill()</code>方法接受一些其他可选参数来控制 tab，语句结尾等。 参阅 <a href="https://docs.python.org/3.3/library/textwrap.html#textwrap.TextWrapper" target="_blank">textwrap.TextWrapper 文档</a>获取更多内容。</p>
 <h1 id="217-在字符串中处理-html-和-xml">2.17 在字符串中处理 html 和 xml</h1>
 <h2 id="问题">问题</h2>
 <p>你想将 HTML 或者 XML 实体如 <code>&amp;entity;</code> 或 <code>&amp;#code;</code> 替换为对应的文本。 再者，你需要转换文本中特定的字符(比如&lt;, &gt;, 或 &amp;)。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你想替换文本字符串中的 ‘&lt;’ 或者 ‘&gt;’ ，使用 <code>html.escape()</code> 函数可以很容易的完成。比如：</p>
-<pre><code>&gt;&gt;&gt; s = 'Elements are written as "&lt;tag&gt;text&lt;/tag&gt;".'
-&gt;&gt;&gt; import html
-&gt;&gt;&gt; print(s)
-Elements are written as "&lt;tag&gt;text&lt;/tag&gt;".
-&gt;&gt;&gt; print(html.escape(s))
-Elements are written as &amp;quot;&amp;lt;tag&amp;gt;text&amp;lt;/tag&amp;gt;&amp;quot;.
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'Elements are written as "&lt;tag&gt;text&lt;/tag&gt;".'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> html
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(s)
+Elements are written <span class="hljs-keyword">as</span> <span class="hljs-string">"&lt;tag&gt;text&lt;/tag&gt;"</span>.
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(html.escape(s))
+Elements are written <span class="hljs-keyword">as</span> &amp;quot;&amp;lt;tag&amp;gt;text&amp;lt;/tag&amp;gt;&amp;quot;.
 
-&gt;&gt;&gt; # Disable escaping of quotes
-&gt;&gt;&gt; print(html.escape(s, quote=False))
-Elements are written as "&amp;lt;tag&amp;gt;text&amp;lt;/tag&amp;gt;".
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Disable escaping of quotes</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(html.escape(s, quote=<span class="hljs-literal">False</span>))
+Elements are written <span class="hljs-keyword">as</span> <span class="hljs-string">"&amp;lt;tag&amp;gt;text&amp;lt;/tag&amp;gt;"</span>.
 &gt;&gt;&gt;
-</code></pre><p>如果你正在处理的是 ASCII 文本，并且想将非 ASCII 文本对应的编码实体嵌入进去， 可以给某些 I/O 函数传递参数 <code>errors='xmlcharrefreplace'</code>来达到这个目。比如：</p>
-<pre><code>&gt;&gt;&gt; s = 'Spicy Jalapeño'
-&gt;&gt;&gt; s.encode('ascii', errors='xmlcharrefreplace')
-b'Spicy Jalape&amp;#241;o'
+</code></pre>
+<p>如果你正在处理的是 ASCII 文本，并且想将非 ASCII 文本对应的编码实体嵌入进去， 可以给某些 I/O 函数传递参数 <code>errors='xmlcharrefreplace'</code>来达到这个目。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'Spicy Jalapeño'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>s.encode(<span class="hljs-string">'ascii'</span>, errors=<span class="hljs-string">'xmlcharrefreplace'</span>)
+<span class="hljs-string">b'Spicy Jalape&amp;#241;o'</span>
 &gt;&gt;&gt;
-</code></pre><p>为了替换文本中的编码实体，你需要使用另外一种方法。 如果你正在处理 HTML 或者 XML 文本，试着先使用一个合适的 HTML 或者 XML 解析器。 通常情况下，这些工具会自动替换这些编码值，你无需担心。</p>
+</code></pre>
+<p>为了替换文本中的编码实体，你需要使用另外一种方法。 如果你正在处理 HTML 或者 XML 文本，试着先使用一个合适的 HTML 或者 XML 解析器。 通常情况下，这些工具会自动替换这些编码值，你无需担心。</p>
 <p>有时候，如果你接收到了一些含有编码值的原始文本，需要手动去做替换， 通常你只需要使用 HTML 或者 XML 解析器的一些相关工具函数/方法即可。比如：</p>
-<pre><code>&gt;&gt;&gt; s = 'Spicy &amp;quot;Jalape&amp;#241;o&amp;quot.'
-&gt;&gt;&gt; from html.parser import HTMLParser
-&gt;&gt;&gt; p = HTMLParser()
-&gt;&gt;&gt; p.unescape(s)
-'Spicy "Jalapeño".'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">'Spicy &amp;quot;Jalape&amp;#241;o&amp;quot.'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> html.parser <span class="hljs-keyword">import</span> HTMLParser
+<span class="hljs-meta">&gt;&gt;&gt; </span>p = HTMLParser()
+<span class="hljs-meta">&gt;&gt;&gt; </span>p.unescape(s)
+<span class="hljs-string">'Spicy "Jalapeño".'</span>
 &gt;&gt;&gt;
-&gt;&gt;&gt; t = 'The prompt is &amp;gt;&amp;gt;&amp;gt;'
-&gt;&gt;&gt; from xml.sax.saxutils import unescape
-&gt;&gt;&gt; unescape(t)
-'The prompt is &gt;&gt;&gt;'
+<span class="hljs-meta">&gt;&gt;&gt; </span>t = <span class="hljs-string">'The prompt is &amp;gt;&amp;gt;&amp;gt;'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> xml.sax.saxutils <span class="hljs-keyword">import</span> unescape
+<span class="hljs-meta">&gt;&gt;&gt; </span>unescape(t)
+<span class="hljs-string">'The prompt is &gt;&gt;&gt;'</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>在生成 HTML 或者 XML 文本的时候，如果正确的转换特殊标记字符是一个很容易被忽视的细节。 特别是当你使用 <code>print()</code> 函数或者其他字符串格式化来产生输出的时候。 使用像 <code>html.escape()</code> 的工具函数可以很容易的解决这类问题。</p>
 <p>如果你想以其他方式处理文本，还有一些其他的工具函数比如 <code>xml.sax.saxutils.unescapge()</code> 可以帮助你。 然而，你应该先调研清楚怎样使用一个合适的解析器。 比如，如果你在处理 HTML 或 XML 文本， 使用某个解析模块比如 <code>html.parse</code> 或 <code>xml.etree.ElementTree</code> 已经帮你自动处理了相关的替换细节。</p>
 <h1 id="218-字符串令牌解析">2.18 字符串令牌解析</h1>
@@ -1204,95 +1295,103 @@ b'Spicy Jalape&amp;#241;o'
 <p>你有一个字符串，想从左至右将其解析为一个令牌流。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>假如你有下面这样一个文本字符串：</p>
-<pre><code>text = 'foo = 23 + 42 * 10'
-</code></pre><p>为了令牌化字符串，你不仅需要匹配模式，还得指定模式的类型。 比如，你可能想将字符串像下面这样转换为序列对：</p>
-<pre><code>tokens = [('NAME', 'foo'), ('EQ','='), ('NUM', '23'), ('PLUS','+'),
-    ('NUM', '42'), ('TIMES', '*'), ('NUM', 10')]
-</code></pre><p>为了执行这样的切分，第一步就是像下面这样利用命名捕获组的正则表达式来定义所有可能的令牌，包括空格：</p>
-<pre><code>import re
-NAME = r'(?P&lt;NAME&gt;[a-zA-Z_][a-zA-Z_0-9]*)'
-NUM = r'(?P&lt;NUM&gt;\d+)'
-PLUS = r'(?P&lt;PLUS&gt;\+)'
-TIMES = r'(?P&lt;TIMES&gt;\*)'
-EQ = r'(?P&lt;EQ&gt;=)'
-WS = r'(?P&lt;WS&gt;\s+)'
+<pre><code class="lang-python">text = <span class="hljs-string">'foo = 23 + 42 * 10'</span>
+</code></pre>
+<p>为了令牌化字符串，你不仅需要匹配模式，还得指定模式的类型。 比如，你可能想将字符串像下面这样转换为序列对：</p>
+<pre><code class="lang-python">tokens = [(<span class="hljs-string">'NAME'</span>, <span class="hljs-string">'foo'</span>), (<span class="hljs-string">'EQ'</span>,<span class="hljs-string">'='</span>), (<span class="hljs-string">'NUM'</span>, <span class="hljs-string">'23'</span>), (<span class="hljs-string">'PLUS'</span>,<span class="hljs-string">'+'</span>),
+    (<span class="hljs-string">'NUM'</span>, <span class="hljs-string">'42'</span>), (<span class="hljs-string">'TIMES'</span>, <span class="hljs-string">'*'</span>), (<span class="hljs-string">'NUM'</span>, <span class="hljs-number">10</span><span class="hljs-string">')]
+</span></code></pre>
+<p>为了执行这样的切分，第一步就是像下面这样利用命名捕获组的正则表达式来定义所有可能的令牌，包括空格：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> re
+NAME = <span class="hljs-string">r'(?P&lt;NAME&gt;[a-zA-Z_][a-zA-Z_0-9]*)'</span>
+NUM = <span class="hljs-string">r'(?P&lt;NUM&gt;\d+)'</span>
+PLUS = <span class="hljs-string">r'(?P&lt;PLUS&gt;\+)'</span>
+TIMES = <span class="hljs-string">r'(?P&lt;TIMES&gt;\*)'</span>
+EQ = <span class="hljs-string">r'(?P&lt;EQ&gt;=)'</span>
+WS = <span class="hljs-string">r'(?P&lt;WS&gt;\s+)'</span>
 
-master_pat = re.compile('|'.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
-</code></pre><p>在上面的模式中， <code>?P&lt;TOKENNAME&gt;</code>用于给一个模式命名，供后面使用。</p>
+master_pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'|'</span>.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
+</code></pre>
+<p>在上面的模式中， <code>?P&lt;TOKENNAME&gt;</code>用于给一个模式命名，供后面使用。</p>
 <p>下一步，为了令牌化，使用模式对象很少被人知道的<code>scanner()</code>方法。 这个方法会创建一个 <code>scanner</code>对象， 在这个对象上不断的调用 <code>match()</code> 方法会一步步的扫描目标文本，每步一个匹配。 下面是演示一个 <code>scanner</code> 对象如何工作的交互式例子：</p>
-<pre><code>&gt;&gt;&gt; scanner = master_pat.scanner('foo = 42')
-&gt;&gt;&gt; scanner.match()
-&lt;_sre.SRE_Match object at 0x100677738&gt;
-&gt;&gt;&gt; _.lastgroup, _.group()
-('NAME', 'foo')
-&gt;&gt;&gt; scanner.match()
-&lt;_sre.SRE_Match object at 0x100677738&gt;
-&gt;&gt;&gt; _.lastgroup, _.group()
-('WS', ' ')
-&gt;&gt;&gt; scanner.match()
-&lt;_sre.SRE_Match object at 0x100677738&gt;
-&gt;&gt;&gt; _.lastgroup, _.group()
-('EQ', '=')
-&gt;&gt;&gt; scanner.match()
-&lt;_sre.SRE_Match object at 0x100677738&gt;
-&gt;&gt;&gt; _.lastgroup, _.group()
-('WS', ' ')
-&gt;&gt;&gt; scanner.match()
-&lt;_sre.SRE_Match object at 0x100677738&gt;
-&gt;&gt;&gt; _.lastgroup, _.group()
-('NUM', '42')
-&gt;&gt;&gt; scanner.match()
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>scanner = master_pat.scanner(<span class="hljs-string">'foo = 42'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>scanner.<span class="hljs-keyword">match</span>()
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x100677738</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>_.lastgroup, _.group()
+(<span class="hljs-string">'NAME'</span>, <span class="hljs-string">'foo'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>scanner.<span class="hljs-keyword">match</span>()
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x100677738</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>_.lastgroup, _.group()
+(<span class="hljs-string">'WS'</span>, <span class="hljs-string">' '</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>scanner.<span class="hljs-keyword">match</span>()
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x100677738</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>_.lastgroup, _.group()
+(<span class="hljs-string">'EQ'</span>, <span class="hljs-string">'='</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>scanner.<span class="hljs-keyword">match</span>()
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x100677738</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>_.lastgroup, _.group()
+(<span class="hljs-string">'WS'</span>, <span class="hljs-string">' '</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>scanner.<span class="hljs-keyword">match</span>()
+&lt;_sre.SRE_Match <span class="hljs-built_in">object</span> at <span class="hljs-number">0x100677738</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>_.lastgroup, _.group()
+(<span class="hljs-string">'NUM'</span>, <span class="hljs-string">'42'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>scanner.<span class="hljs-keyword">match</span>()
 &gt;&gt;&gt;
-</code></pre><p>实际使用这种技术的时候，可以很容易的像下面这样将上述代码打包到一个生成器中：</p>
-<pre><code>def generate_tokens(pat, text):
-Token = namedtuple('Token', ['type', 'value'])
+</code></pre>
+<p>实际使用这种技术的时候，可以很容易的像下面这样将上述代码打包到一个生成器中：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_tokens</span>(<span class="hljs-params">pat, text</span>):
+Token = namedtuple(<span class="hljs-string">'Token'</span>, [<span class="hljs-string">'type'</span>, <span class="hljs-string">'value'</span>])
 scanner = pat.scanner(text)
-for m in iter(scanner.match, None):
-    yield Token(m.lastgroup, m.group())
+<span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> <span class="hljs-built_in">iter</span>(scanner.<span class="hljs-keyword">match</span>, <span class="hljs-literal">None</span>):
+    <span class="hljs-keyword">yield</span> Token(m.lastgroup, m.group())
 
-# Example use
-for tok in generate_tokens(master_pat, 'foo = 42'):
-    print(tok)
-# Produces output
-# Token(type='NAME', value='foo')
-# Token(type='WS', value=' ')
-# Token(type='EQ', value='=')
-# Token(type='WS', value=' ')
-# Token(type='NUM', value='42')
-</code></pre><p>如果你想过滤令牌流，你可以定义更多的生成器函数或者使用一个生成器表达式。 比如，下面演示怎样过滤所有的空白令牌：</p>
-<pre><code>tokens = (tok for tok in generate_tokens(master_pat, text)
-            if tok.type != 'WS')
-for tok in tokens:
-    print(tok)
-</code></pre><h2 id="讨论">讨论</h2>
+<span class="hljs-comment"># Example use</span>
+<span class="hljs-keyword">for</span> tok <span class="hljs-keyword">in</span> generate_tokens(master_pat, <span class="hljs-string">'foo = 42'</span>):
+    <span class="hljs-built_in">print</span>(tok)
+<span class="hljs-comment"># Produces output</span>
+<span class="hljs-comment"># Token(type='NAME', value='foo')</span>
+<span class="hljs-comment"># Token(type='WS', value=' ')</span>
+<span class="hljs-comment"># Token(type='EQ', value='=')</span>
+<span class="hljs-comment"># Token(type='WS', value=' ')</span>
+<span class="hljs-comment"># Token(type='NUM', value='42')</span>
+</code></pre>
+<p>如果你想过滤令牌流，你可以定义更多的生成器函数或者使用一个生成器表达式。 比如，下面演示怎样过滤所有的空白令牌：</p>
+<pre><code class="lang-python">tokens = (tok <span class="hljs-keyword">for</span> tok <span class="hljs-keyword">in</span> generate_tokens(master_pat, text)
+            <span class="hljs-keyword">if</span> tok.<span class="hljs-built_in">type</span> != <span class="hljs-string">'WS'</span>)
+<span class="hljs-keyword">for</span> tok <span class="hljs-keyword">in</span> tokens:
+    <span class="hljs-built_in">print</span>(tok)
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>通常来讲令牌化是很多高级文本解析与处理的第一步。 为了使用上面的扫描方法，你需要记住这里一些重要的几点。 第一点就是你必须确认你使用正则表达式指定了所有输入中可能出现的文本序列。 如果有任何不可匹配的文本出现了，扫描就会直接停止。这也是为什么上面例子中必须指定空白字符令牌的原因。</p>
 <p>令牌的顺序也是有影响的。 <code>re</code> 模块会按照指定好的顺序去做匹配。 因此，如果一个模式恰好是另一个更长模式的子字符串，那么你需要确定长模式写在前面。比如：</p>
-<pre><code>LT = r'(?P&lt;LT&gt;&lt;)'
-LE = r'(?P&lt;LE&gt;&lt;=)'
-EQ = r'(?P&lt;EQ&gt;=)'
+<pre><code class="lang-python">LT = <span class="hljs-string">r'(?P&lt;LT&gt;&lt;)'</span>
+LE = <span class="hljs-string">r'(?P&lt;LE&gt;&lt;=)'</span>
+EQ = <span class="hljs-string">r'(?P&lt;EQ&gt;=)'</span>
 
-master_pat = re.compile('|'.join([LE, LT, EQ])) # Correct
-# master_pat = re.compile('|'.join([LT, LE, EQ])) # Incorrect
-</code></pre><p>第二个模式是错的，因为它会将文本&lt;=匹配为令牌 LT 紧跟着 EQ，而不是单独的令牌 LE，这个并不是我们想要的结果。</p>
+master_pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'|'</span>.join([LE, LT, EQ])) <span class="hljs-comment"># Correct</span>
+<span class="hljs-comment"># master_pat = re.compile('|'.join([LT, LE, EQ])) # Incorrect</span>
+</code></pre>
+<p>第二个模式是错的，因为它会将文本&lt;=匹配为令牌 LT 紧跟着 EQ，而不是单独的令牌 LE，这个并不是我们想要的结果。</p>
 <p>最后，你需要留意下子字符串形式的模式。比如，假设你有如下两个模式：</p>
-<pre><code>PRINT = r'(P&lt;PRINT&gt;print)'
-NAME = r'(P&lt;NAME&gt;[a-zA-Z_][a-zA-Z_0-9]*)'
+<pre><code class="lang-python">PRINT = <span class="hljs-string">r'(P&lt;PRINT&gt;print)'</span>
+NAME = <span class="hljs-string">r'(P&lt;NAME&gt;[a-zA-Z_][a-zA-Z_0-9]*)'</span>
 
-master_pat = re.compile('|'.join([PRINT, NAME]))
+master_pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'|'</span>.join([PRINT, NAME]))
 
-for tok in generate_tokens(master_pat, 'printer'):
-    print(tok)
+<span class="hljs-keyword">for</span> tok <span class="hljs-keyword">in</span> generate_tokens(master_pat, <span class="hljs-string">'printer'</span>):
+    <span class="hljs-built_in">print</span>(tok)
 
-# Outputs :
-# Token(type='PRINT', value='print')
-# Token(type='NAME', value='er')
-</code></pre><p>关于更高阶的令牌化技术，你可能需要查看 <a href="http://pyparsing.wikispaces.com/" target="_blank">PyParsing</a> 或者 <a href="http://www.dabeaz.com/ply/index.html" target="_blank">PLY</a> 包。 一个调用 PLY 的例子在下一节会有演示。</p>
+<span class="hljs-comment"># Outputs :</span>
+<span class="hljs-comment"># Token(type='PRINT', value='print')</span>
+<span class="hljs-comment"># Token(type='NAME', value='er')</span>
+</code></pre>
+<p>关于更高阶的令牌化技术，你可能需要查看 <a href="http://pyparsing.wikispaces.com/" target="_blank">PyParsing</a> 或者 <a href="http://www.dabeaz.com/ply/index.html" target="_blank">PLY</a> 包。 一个调用 PLY 的例子在下一节会有演示。</p>
 <h1 id="219-实现一个简单的递归下降分析器">2.19 实现一个简单的递归下降分析器</h1>
 <h2 id="问题">问题</h2>
 <p>你想根据一组语法规则解析文本并执行命令，或者构造一个代表输入的抽象语法树。 如果语法非常简单，你可以自己写这个解析器，而不是使用一些框架。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>在这个问题中，我们集中讨论根据特殊语法去解析文本的问题。 为了这样做，你首先要以 BNF 或者 EBNF 形式指定一个标准语法。 比如，一个简单数学表达式语法可能像下面这样：</p>
-<pre><code>expr ::= expr + term
+<pre><code class="lang-python">expr ::= expr + term
     |   expr - term
     |   term
 
@@ -1302,18 +1401,21 @@ term ::= term * factor
 
 factor ::= ( expr )
     |   NUM
-</code></pre><p>或者，以 EBNF 形式：</p>
-<pre><code>expr ::= term { (+|-) term }*
+</code></pre>
+<p>或者，以 EBNF 形式：</p>
+<pre><code class="lang-python">expr ::= term { (+|-) term }*
 
 term ::= factor { (*|/) factor }*
 
 factor ::= ( expr )
     |   NUM
-</code></pre><p>在 EBNF 中，被包含在 <code>{...}*</code>中的规则是可选的。*代表0次或多次重复(跟正则表达式中意义是一样的)。</p>
+</code></pre>
+<p>在 EBNF 中，被包含在 <code>{...}*</code>中的规则是可选的。*代表0次或多次重复(跟正则表达式中意义是一样的)。</p>
 <p>现在，如果你对 BNF 的工作机制还不是很明白的话，就把它当做是一组左右符号可相互替换的规则。 一般来讲，解析的原理就是你利用 BNF 完成多个替换和扩展以匹配输入文本和语法规则。 为了演示，假设你正在解析形如 <code>3 + 4 * 5</code> 的表达式。 这个表达式先要通过使用2.18节中介绍的技术分解为一组令牌流。 结果可能是像下列这样的令牌序列：</p>
-<pre><code>NUM + NUM * NUM
-</code></pre><p>在此基础上， 解析动作会试着去通过替换操作匹配语法到输入令牌：</p>
-<pre><code>expr
+<pre><code class="lang-python">NUM + NUM * NUM
+</code></pre>
+<p>在此基础上， 解析动作会试着去通过替换操作匹配语法到输入令牌：</p>
+<pre><code class="lang-python">expr
 expr ::= term { (+|-) term }*
 expr ::= factor { (*|/) factor }* { (+|-) term }*
 expr ::= NUM { (*|/) factor }* { (+|-) term }*
@@ -1325,159 +1427,163 @@ expr ::= NUM + NUM * factor { (*|/) factor }* { (+|-) term }*
 expr ::= NUM + NUM * NUM { (*|/) factor }* { (+|-) term }*
 expr ::= NUM + NUM * NUM { (+|-) term }*
 expr ::= NUM + NUM * NUM
-</code></pre><p>下面所有的解析步骤可能需要花点时间弄明白，但是它们原理都是查找输入并试着去匹配语法规则。 第一个输入令牌是 NUM，因此替换首先会匹配那个部分。 一旦匹配成功，就会进入下一个令牌+，以此类推。 当已经确定不能匹配下一个令牌的时候，右边的部分(比如 <code>{ (*/) factor }*</code>)就会被清理掉。 在一个成功的解析中，整个右边部分会完全展开来匹配输入令牌流。</p>
+</code></pre>
+<p>下面所有的解析步骤可能需要花点时间弄明白，但是它们原理都是查找输入并试着去匹配语法规则。 第一个输入令牌是 NUM，因此替换首先会匹配那个部分。 一旦匹配成功，就会进入下一个令牌+，以此类推。 当已经确定不能匹配下一个令牌的时候，右边的部分(比如 <code>{ (*/) factor }*</code>)就会被清理掉。 在一个成功的解析中，整个右边部分会完全展开来匹配输入令牌流。</p>
 <p>有了前面的知识背景，下面我们举一个简单示例来展示如何构建一个递归下降表达式求值程序：</p>
-<pre><code>#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-"""
+<pre><code class="lang-python"><span class="hljs-comment">#!/usr/bin/env python</span>
+<span class="hljs-comment"># -*- encoding: utf-8 -*-</span>
+<span class="hljs-string">"""
 Topic: 下降解析器
 Desc :
-"""
-import re
-import collections
+"""</span>
+<span class="hljs-keyword">import</span> re
+<span class="hljs-keyword">import</span> collections
 
-# Token specification
-NUM = r'(?P&lt;NUM&gt;\d+)'
-PLUS = r'(?P&lt;PLUS&gt;\+)'
-MINUS = r'(?P&lt;MINUS&gt;-)'
-TIMES = r'(?P&lt;TIMES&gt;\*)'
-DIVIDE = r'(?P&lt;DIVIDE&gt;/)'
-LPAREN = r'(?P&lt;LPAREN&gt;\()'
-RPAREN = r'(?P&lt;RPAREN&gt;\))'
-WS = r'(?P&lt;WS&gt;\s+)'
+<span class="hljs-comment"># Token specification</span>
+NUM = <span class="hljs-string">r'(?P&lt;NUM&gt;\d+)'</span>
+PLUS = <span class="hljs-string">r'(?P&lt;PLUS&gt;\+)'</span>
+MINUS = <span class="hljs-string">r'(?P&lt;MINUS&gt;-)'</span>
+TIMES = <span class="hljs-string">r'(?P&lt;TIMES&gt;\*)'</span>
+DIVIDE = <span class="hljs-string">r'(?P&lt;DIVIDE&gt;/)'</span>
+LPAREN = <span class="hljs-string">r'(?P&lt;LPAREN&gt;\()'</span>
+RPAREN = <span class="hljs-string">r'(?P&lt;RPAREN&gt;\))'</span>
+WS = <span class="hljs-string">r'(?P&lt;WS&gt;\s+)'</span>
 
-master_pat = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
+master_pat = re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">'|'</span>.join([NUM, PLUS, MINUS, TIMES,
                                   DIVIDE, LPAREN, RPAREN, WS]))
-# Tokenizer
-Token = collections.namedtuple('Token', ['type', 'value'])
+<span class="hljs-comment"># Tokenizer</span>
+Token = collections.namedtuple(<span class="hljs-string">'Token'</span>, [<span class="hljs-string">'type'</span>, <span class="hljs-string">'value'</span>])
 
 
-def generate_tokens(text):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_tokens</span>(<span class="hljs-params">text</span>):
     scanner = master_pat.scanner(text)
-    for m in iter(scanner.match, None):
+    <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> <span class="hljs-built_in">iter</span>(scanner.<span class="hljs-keyword">match</span>, <span class="hljs-literal">None</span>):
         tok = Token(m.lastgroup, m.group())
-        if tok.type != 'WS':
-            yield tok
+        <span class="hljs-keyword">if</span> tok.<span class="hljs-built_in">type</span> != <span class="hljs-string">'WS'</span>:
+            <span class="hljs-keyword">yield</span> tok
 
 
-# Parser
-class ExpressionEvaluator:
-    '''
+<span class="hljs-comment"># Parser</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ExpressionEvaluator</span>:
+    <span class="hljs-string">'''
     Implementation of a recursive descent parser. Each method
     implements a single grammar rule. Use the ._accept() method
     to test and accept the current lookahead token. Use the ._expect()
     method to exactly match and discard the next token on on the input
     (or raise a SyntaxError if it doesn't match).
-    '''
+    '''</span>
 
-    def parse(self, text):
-        self.tokens = generate_tokens(text)
-        self.tok = None  # Last symbol consumed
-        self.nexttok = None  # Next symbol tokenized
-        self._advance()  # Load first lookahead token
-        return self.expr()
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">parse</span>(<span class="hljs-params">self, text</span>):
+        <span class="hljs-variable language_">self</span>.tokens = generate_tokens(text)
+        <span class="hljs-variable language_">self</span>.tok = <span class="hljs-literal">None</span>  <span class="hljs-comment"># Last symbol consumed</span>
+        <span class="hljs-variable language_">self</span>.nexttok = <span class="hljs-literal">None</span>  <span class="hljs-comment"># Next symbol tokenized</span>
+        <span class="hljs-variable language_">self</span>._advance()  <span class="hljs-comment"># Load first lookahead token</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.expr()
 
-    def _advance(self):
-        'Advance one token ahead'
-        self.tok, self.nexttok = self.nexttok, next(self.tokens, None)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_advance</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">'Advance one token ahead'</span>
+        <span class="hljs-variable language_">self</span>.tok, <span class="hljs-variable language_">self</span>.nexttok = <span class="hljs-variable language_">self</span>.nexttok, <span class="hljs-built_in">next</span>(<span class="hljs-variable language_">self</span>.tokens, <span class="hljs-literal">None</span>)
 
-    def _accept(self, toktype):
-        'Test and consume the next token if it matches toktype'
-        if self.nexttok and self.nexttok.type == toktype:
-            self._advance()
-            return True
-        else:
-            return False
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_accept</span>(<span class="hljs-params">self, toktype</span>):
+        <span class="hljs-string">'Test and consume the next token if it matches toktype'</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.nexttok <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>.nexttok.<span class="hljs-built_in">type</span> == toktype:
+            <span class="hljs-variable language_">self</span>._advance()
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
 
-    def _expect(self, toktype):
-        'Consume next token if it matches toktype or raise SyntaxError'
-        if not self._accept(toktype):
-            raise SyntaxError('Expected ' + toktype)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_expect</span>(<span class="hljs-params">self, toktype</span>):
+        <span class="hljs-string">'Consume next token if it matches toktype or raise SyntaxError'</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-variable language_">self</span>._accept(toktype):
+            <span class="hljs-keyword">raise</span> SyntaxError(<span class="hljs-string">'Expected '</span> + toktype)
 
-    # Grammar rules follow
-    def expr(self):
-        "expression ::= term { ('+'|'-') term }*"
-        exprval = self.term()
-        while self._accept('PLUS') or self._accept('MINUS'):
-            op = self.tok.type
-            right = self.term()
-            if op == 'PLUS':
+    <span class="hljs-comment"># Grammar rules follow</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">expr</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">"expression ::= term { ('+'|'-') term }*"</span>
+        exprval = <span class="hljs-variable language_">self</span>.term()
+        <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">'PLUS'</span>) <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">'MINUS'</span>):
+            op = <span class="hljs-variable language_">self</span>.tok.<span class="hljs-built_in">type</span>
+            right = <span class="hljs-variable language_">self</span>.term()
+            <span class="hljs-keyword">if</span> op == <span class="hljs-string">'PLUS'</span>:
                 exprval += right
-            elif op == 'MINUS':
+            <span class="hljs-keyword">elif</span> op == <span class="hljs-string">'MINUS'</span>:
                 exprval -= right
-        return exprval
+        <span class="hljs-keyword">return</span> exprval
 
-    def term(self):
-        "term ::= factor { ('*'|'/') factor }*"
-        termval = self.factor()
-        while self._accept('TIMES') or self._accept('DIVIDE'):
-            op = self.tok.type
-            right = self.factor()
-            if op == 'TIMES':
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">term</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">"term ::= factor { ('*'|'/') factor }*"</span>
+        termval = <span class="hljs-variable language_">self</span>.factor()
+        <span class="hljs-keyword">while</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">'TIMES'</span>) <span class="hljs-keyword">or</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">'DIVIDE'</span>):
+            op = <span class="hljs-variable language_">self</span>.tok.<span class="hljs-built_in">type</span>
+            right = <span class="hljs-variable language_">self</span>.factor()
+            <span class="hljs-keyword">if</span> op == <span class="hljs-string">'TIMES'</span>:
                 termval *= right
-            elif op == 'DIVIDE':
+            <span class="hljs-keyword">elif</span> op == <span class="hljs-string">'DIVIDE'</span>:
                 termval /= right
-        return termval
+        <span class="hljs-keyword">return</span> termval
 
-    def factor(self):
-        "factor ::= NUM | ( expr )"
-        if self._accept('NUM'):
-            return int(self.tok.value)
-        elif self._accept('LPAREN'):
-            exprval = self.expr()
-            self._expect('RPAREN')
-            return exprval
-        else:
-            raise SyntaxError('Expected NUMBER or LPAREN')
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">factor</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-string">"factor ::= NUM | ( expr )"</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">'NUM'</span>):
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.tok.value)
+        <span class="hljs-keyword">elif</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">'LPAREN'</span>):
+            exprval = <span class="hljs-variable language_">self</span>.expr()
+            <span class="hljs-variable language_">self</span>._expect(<span class="hljs-string">'RPAREN'</span>)
+            <span class="hljs-keyword">return</span> exprval
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-keyword">raise</span> SyntaxError(<span class="hljs-string">'Expected NUMBER or LPAREN'</span>)
 
 
-def descent_parser():
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">descent_parser</span>():
     e = ExpressionEvaluator()
-    print(e.parse('2'))
-    print(e.parse('2 + 3'))
-    print(e.parse('2 + 3 * 4'))
-    print(e.parse('2 + (3 + 4) * 5'))
-    # print(e.parse('2 + (3 + * 4)'))
-    # Traceback (most recent call last):
-    #    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-    #    File "exprparse.py", line 40, in parse
-    #    return self.expr()
-    #    File "exprparse.py", line 67, in expr
-    #    right = self.term()
-    #    File "exprparse.py", line 77, in term
-    #    termval = self.factor()
-    #    File "exprparse.py", line 93, in factor
-    #    exprval = self.expr()
-    #    File "exprparse.py", line 67, in expr
-    #    right = self.term()
-    #    File "exprparse.py", line 77, in term
-    #    termval = self.factor()
-    #    File "exprparse.py", line 97, in factor
-    #    raise SyntaxError("Expected NUMBER or LPAREN")
-    #    SyntaxError: Expected NUMBER or LPAREN
+    <span class="hljs-built_in">print</span>(e.parse(<span class="hljs-string">'2'</span>))
+    <span class="hljs-built_in">print</span>(e.parse(<span class="hljs-string">'2 + 3'</span>))
+    <span class="hljs-built_in">print</span>(e.parse(<span class="hljs-string">'2 + 3 * 4'</span>))
+    <span class="hljs-built_in">print</span>(e.parse(<span class="hljs-string">'2 + (3 + 4) * 5'</span>))
+    <span class="hljs-comment"># print(e.parse('2 + (3 + * 4)'))</span>
+    <span class="hljs-comment"># Traceback (most recent call last):</span>
+    <span class="hljs-comment">#    File "&lt;stdin&gt;", line 1, in &lt;module&gt;</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 40, in parse</span>
+    <span class="hljs-comment">#    return self.expr()</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 67, in expr</span>
+    <span class="hljs-comment">#    right = self.term()</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 77, in term</span>
+    <span class="hljs-comment">#    termval = self.factor()</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 93, in factor</span>
+    <span class="hljs-comment">#    exprval = self.expr()</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 67, in expr</span>
+    <span class="hljs-comment">#    right = self.term()</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 77, in term</span>
+    <span class="hljs-comment">#    termval = self.factor()</span>
+    <span class="hljs-comment">#    File "exprparse.py", line 97, in factor</span>
+    <span class="hljs-comment">#    raise SyntaxError("Expected NUMBER or LPAREN")</span>
+    <span class="hljs-comment">#    SyntaxError: Expected NUMBER or LPAREN</span>
 
 
-if __name__ == '__main__':
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
     descent_parser()
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>文本解析是一个很大的主题， 一般会占用学生学习编译课程时刚开始的三周时间。 如果你在找寻关于语法，解析算法等相关的背景知识的话，你应该去看一下编译器书籍。 很显然，关于这方面的内容太多，不可能在这里全部展开。</p>
 <p>尽管如此，编写一个递归下降解析器的整体思路是比较简单的。 开始的时候，你先获得所有的语法规则，然后将其转换为一个函数或者方法。 因此如果你的语法类似这样：</p>
-<pre><code>expr ::= term { ('+'|'-') term }*
+<pre><code class="lang-python">expr ::= term { (<span class="hljs-string">'+'</span>|<span class="hljs-string">'-'</span>) term }*
 
-term ::= factor { ('*'|'/') factor }*
+term ::= factor { (<span class="hljs-string">'*'</span>|<span class="hljs-string">'/'</span>) factor }*
 
-factor ::= '(' expr ')'
+factor ::= <span class="hljs-string">'('</span> expr <span class="hljs-string">')'</span>
     | NUM
-</code></pre><p>你应该首先将它们转换成一组像下面这样的方法：</p>
-<pre><code>class ExpressionEvaluator:
+</code></pre>
+<p>你应该首先将它们转换成一组像下面这样的方法：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ExpressionEvaluator</span>:
     ...
-    def expr(self):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">expr</span>(<span class="hljs-params">self</span>):
     ...
-    def term(self):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">term</span>(<span class="hljs-params">self</span>):
     ...
-    def factor(self):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">factor</span>(<span class="hljs-params">self</span>):
     ...
-</code></pre><p>每个方法要完成的任务很简单 - 它必须从左至右遍历语法规则的每一部分，处理每个令牌。 从某种意义上讲，方法的目的就是要么处理完语法规则，要么产生一个语法错误。 为了这样做，需采用下面的这些实现方法：</p>
+</code></pre>
+<p>每个方法要完成的任务很简单 - 它必须从左至右遍历语法规则的每一部分，处理每个令牌。 从某种意义上讲，方法的目的就是要么处理完语法规则，要么产生一个语法错误。 为了这样做，需采用下面的这些实现方法：</p>
 <ul>
 <li>如果规则中的下个符号是另外一个语法规则的名字(比如 term 或 factor)，就简单的调用同名的方法即可。 这就是该算法中”下降”的由来 - 控制下降到另一个语法规则中去。 有时候规则会调用已经执行的方法(比如，在 <code>factor ::= '('expr ')'</code> 中对 expr 的调用)。 这就是算法中”递归”的由来。</li>
 <li>如果规则中下一个符号是个特殊符号(比如()，你得查找下一个令牌并确认是一个精确匹配)。 如果不匹配，就产生一个语法错误。这一节中的 <code>_expect()</code> 方法就是用来做这一步的。</li>
@@ -1487,200 +1593,213 @@ factor ::= '(' expr ')'
 尽管向你演示的是一个简单的例子，递归下降解析器可以用来实现非常复杂的解析。 比如，Python 语言本身就是通过一个递归下降解析器去解释的。 如果你对此感兴趣，你可以通过查看 Python 源码文件 Grammar/Grammar 来研究下底层语法机制。 看完你会发现，通过手动方式去实现一个解析器其实会有很多的局限和不足之处。</li>
 </ul>
 <p>其中一个局限就是它们不能被用于包含任何左递归的语法规则中。比如，加入你需要翻译下面这样一个规则：</p>
-<pre><code>items ::= items ',' item
+<pre><code class="lang-python">items ::= items <span class="hljs-string">','</span> item
     | item
-</code></pre><p>为了这样做，你可能会像下面这样使用 <code>items()</code> 方法：</p>
-<pre><code>def items(self):
-    itemsval = self.items()
-    if itemsval and self._accept(','):
-        itemsval.append(self.item())
-    else:
-        itemsval = [ self.item() ]
-</code></pre><p>唯一的问题是这个方法根本不能工作，事实上，它会产生一个无限递归错误。</p>
+</code></pre>
+<p>为了这样做，你可能会像下面这样使用 <code>items()</code> 方法：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">items</span>(<span class="hljs-params">self</span>):
+    itemsval = <span class="hljs-variable language_">self</span>.items()
+    <span class="hljs-keyword">if</span> itemsval <span class="hljs-keyword">and</span> <span class="hljs-variable language_">self</span>._accept(<span class="hljs-string">','</span>):
+        itemsval.append(<span class="hljs-variable language_">self</span>.item())
+    <span class="hljs-keyword">else</span>:
+        itemsval = [ <span class="hljs-variable language_">self</span>.item() ]
+</code></pre>
+<p>唯一的问题是这个方法根本不能工作，事实上，它会产生一个无限递归错误。</p>
 <p>关于语法规则本身你可能也会碰到一些棘手的问题。 比如，你可能想知道下面这个简单扼语法是否表述得当：</p>
-<pre><code>expr ::= factor { ('+'|'-'|'*'|'/') factor }*
+<pre><code class="lang-python">expr ::= factor { (<span class="hljs-string">'+'</span>|<span class="hljs-string">'-'</span>|<span class="hljs-string">'*'</span>|<span class="hljs-string">'/'</span>) factor }*
 
-factor ::= '(' expression ')'
+factor ::= <span class="hljs-string">'('</span> expression <span class="hljs-string">')'</span>
     | NUM
-</code></pre><p>这个语法看上去没啥问题，但是它却不能察觉到标准四则运算中的运算符优先级。 比如，表达式 <code>"3 + 4 * 5"</code>会得到35而不是期望的23. 分开使用”expr”和”term”规则可以让它正确的工作。</p>
+</code></pre>
+<p>这个语法看上去没啥问题，但是它却不能察觉到标准四则运算中的运算符优先级。 比如，表达式 <code>"3 + 4 * 5"</code>会得到35而不是期望的23. 分开使用”expr”和”term”规则可以让它正确的工作。</p>
 <p>对于复杂的语法，你最好是选择某个解析工具比如 PyParsing 或者是 PLY。 下面是使用 PLY 来重写表达式求值程序的代码：</p>
-<pre><code>from ply.lex import lex
-from ply.yacc import yacc
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> ply.lex <span class="hljs-keyword">import</span> lex
+<span class="hljs-keyword">from</span> ply.yacc <span class="hljs-keyword">import</span> yacc
 
-# Token list
-tokens = [ 'NUM', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN' ]
-# Ignored characters
-t_ignore = ' \t\n'
-# Token specifications (as regexs)
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIVIDE = r'/'
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
+<span class="hljs-comment"># Token list</span>
+tokens = [ <span class="hljs-string">'NUM'</span>, <span class="hljs-string">'PLUS'</span>, <span class="hljs-string">'MINUS'</span>, <span class="hljs-string">'TIMES'</span>, <span class="hljs-string">'DIVIDE'</span>, <span class="hljs-string">'LPAREN'</span>, <span class="hljs-string">'RPAREN'</span> ]
+<span class="hljs-comment"># Ignored characters</span>
+t_ignore = <span class="hljs-string">' \t\n'</span>
+<span class="hljs-comment"># Token specifications (as regexs)</span>
+t_PLUS = <span class="hljs-string">r'\+'</span>
+t_MINUS = <span class="hljs-string">r'-'</span>
+t_TIMES = <span class="hljs-string">r'\*'</span>
+t_DIVIDE = <span class="hljs-string">r'/'</span>
+t_LPAREN = <span class="hljs-string">r'\('</span>
+t_RPAREN = <span class="hljs-string">r'\)'</span>
 
-# Token processing functions
-def t_NUM(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
+<span class="hljs-comment"># Token processing functions</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">t_NUM</span>(<span class="hljs-params">t</span>):
+    <span class="hljs-string">r'\d+'</span>
+    t.value = <span class="hljs-built_in">int</span>(t.value)
+    <span class="hljs-keyword">return</span> t
 
-# Error handler
-def t_error(t):
-    print('Bad character: {!r}'.format(t.value[0]))
-    t.skip(1)
+<span class="hljs-comment"># Error handler</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">t_error</span>(<span class="hljs-params">t</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">'Bad character: {!r}'</span>.<span class="hljs-built_in">format</span>(t.value[<span class="hljs-number">0</span>]))
+    t.skip(<span class="hljs-number">1</span>)
 
-# Build the lexer
+<span class="hljs-comment"># Build the lexer</span>
 lexer = lex()
 
-# Grammar rules and handler functions
-def p_expr(p):
-    '''
+<span class="hljs-comment"># Grammar rules and handler functions</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_expr</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-string">'''
     expr : expr PLUS term
         | expr MINUS term
-    '''
-    if p[2] == '+':
-        p[0] = p[1] + p[3]
-    elif p[2] == '-':
-        p[0] = p[1] - p[3]
+    '''</span>
+    <span class="hljs-keyword">if</span> p[<span class="hljs-number">2</span>] == <span class="hljs-string">'+'</span>:
+        p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>] + p[<span class="hljs-number">3</span>]
+    <span class="hljs-keyword">elif</span> p[<span class="hljs-number">2</span>] == <span class="hljs-string">'-'</span>:
+        p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>] - p[<span class="hljs-number">3</span>]
 
 
-def p_expr_term(p):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_expr_term</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-string">'''
     expr : term
-    '''
-    p[0] = p[1]
+    '''</span>
+    p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>]
 
 
-def p_term(p):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_term</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-string">'''
     term : term TIMES factor
     | term DIVIDE factor
-    '''
-    if p[2] == '*':
-        p[0] = p[1] * p[3]
-    elif p[2] == '/':
-        p[0] = p[1] / p[3]
+    '''</span>
+    <span class="hljs-keyword">if</span> p[<span class="hljs-number">2</span>] == <span class="hljs-string">'*'</span>:
+        p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>] * p[<span class="hljs-number">3</span>]
+    <span class="hljs-keyword">elif</span> p[<span class="hljs-number">2</span>] == <span class="hljs-string">'/'</span>:
+        p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>] / p[<span class="hljs-number">3</span>]
 
-def p_term_factor(p):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_term_factor</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-string">'''
     term : factor
-    '''
-    p[0] = p[1]
+    '''</span>
+    p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>]
 
-def p_factor(p):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_factor</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-string">'''
     factor : NUM
-    '''
-    p[0] = p[1]
+    '''</span>
+    p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">1</span>]
 
-def p_factor_group(p):
-    '''
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_factor_group</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-string">'''
     factor : LPAREN expr RPAREN
-    '''
-    p[0] = p[2]
+    '''</span>
+    p[<span class="hljs-number">0</span>] = p[<span class="hljs-number">2</span>]
 
-def p_error(p):
-    print('Syntax error')
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">p_error</span>(<span class="hljs-params">p</span>):
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">'Syntax error'</span>)
 
 parser = yacc()
-</code></pre><p>这个程序中，所有代码都位于一个比较高的层次。你只需要为令牌写正则表达式和规则匹配时的高阶处理函数即可。 而实际的运行解析器，接受令牌等等底层动作已经被库函数实现了。</p>
+</code></pre>
+<p>这个程序中，所有代码都位于一个比较高的层次。你只需要为令牌写正则表达式和规则匹配时的高阶处理函数即可。 而实际的运行解析器，接受令牌等等底层动作已经被库函数实现了。</p>
 <p>下面是一个怎样使用得到的解析对象的例子：</p>
-<pre><code>&gt;&gt;&gt; parser.parse('2')
-2
-&gt;&gt;&gt; parser.parse('2+3')
-5
-&gt;&gt;&gt; parser.parse('2+(3+4)*5')
-37
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>parser.parse(<span class="hljs-string">'2'</span>)
+<span class="hljs-number">2</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>parser.parse(<span class="hljs-string">'2+3'</span>)
+<span class="hljs-number">5</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>parser.parse(<span class="hljs-string">'2+(3+4)*5'</span>)
+<span class="hljs-number">37</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你想在你的编程过程中来点挑战和刺激，编写解析器和编译器是个不错的选择。 再次，一本编译器的书籍会包含很多底层的理论知识。不过很多好的资源也可以在网上找到。 Python 自己的 ast 模块也值得去看一下。</p>
+</code></pre>
+<p>如果你想在你的编程过程中来点挑战和刺激，编写解析器和编译器是个不错的选择。 再次，一本编译器的书籍会包含很多底层的理论知识。不过很多好的资源也可以在网上找到。 Python 自己的 ast 模块也值得去看一下。</p>
 <h1 id="220-字节字符串上的字符串操作">2.20 字节字符串上的字符串操作</h1>
 <h2 id="问题">问题</h2>
 <p>你想在字节字符串上执行普通的文本操作(比如移除，搜索和替换)。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>字节字符串同样也支持大部分和文本字符串一样的内置操作。比如：</p>
-<pre><code>&gt;&gt;&gt; data = b'Hello World'
-&gt;&gt;&gt; data[0:5]
-b'Hello'
-&gt;&gt;&gt; data.startswith(b'Hello')
-True
-&gt;&gt;&gt; data.split()
-[b'Hello', b'World']
-&gt;&gt;&gt; data.replace(b'Hello', b'Hello Cruel')
-b'Hello Cruel World'
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>data = <span class="hljs-string">b'Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>data[<span class="hljs-number">0</span>:<span class="hljs-number">5</span>]
+<span class="hljs-string">b'Hello'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>data.startswith(<span class="hljs-string">b'Hello'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>data.split()
+[<span class="hljs-string">b'Hello'</span>, <span class="hljs-string">b'World'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>data.replace(<span class="hljs-string">b'Hello'</span>, <span class="hljs-string">b'Hello Cruel'</span>)
+<span class="hljs-string">b'Hello Cruel World'</span>
 &gt;&gt;&gt;
-</code></pre><p>这些操作同样也适用于字节数组。比如：</p>
-<pre><code>&gt;&gt;&gt; data = bytearray(b'Hello World')
-&gt;&gt;&gt; data[0:5]
-bytearray(b'Hello')
-&gt;&gt;&gt; data.startswith(b'Hello')
-True
-&gt;&gt;&gt; data.split()
-[bytearray(b'Hello'), bytearray(b'World')]
-&gt;&gt;&gt; data.replace(b'Hello', b'Hello Cruel')
-bytearray(b'Hello Cruel World')
+</code></pre>
+<p>这些操作同样也适用于字节数组。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>data = <span class="hljs-built_in">bytearray</span>(<span class="hljs-string">b'Hello World'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>data[<span class="hljs-number">0</span>:<span class="hljs-number">5</span>]
+<span class="hljs-built_in">bytearray</span>(<span class="hljs-string">b'Hello'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>data.startswith(<span class="hljs-string">b'Hello'</span>)
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>data.split()
+[<span class="hljs-built_in">bytearray</span>(<span class="hljs-string">b'Hello'</span>), <span class="hljs-built_in">bytearray</span>(<span class="hljs-string">b'World'</span>)]
+<span class="hljs-meta">&gt;&gt;&gt; </span>data.replace(<span class="hljs-string">b'Hello'</span>, <span class="hljs-string">b'Hello Cruel'</span>)
+<span class="hljs-built_in">bytearray</span>(<span class="hljs-string">b'Hello Cruel World'</span>)
 &gt;&gt;&gt;
-</code></pre><p>你可以使用正则表达式匹配字节字符串，但是正则表达式本身必须也是字节串。比如：</p>
-<pre><code>&gt;&gt;&gt;
-&gt;&gt;&gt; data = b'FOO:BAR,SPAM'
-&gt;&gt;&gt; import re
-&gt;&gt;&gt; re.split('[:,]',data)
+</code></pre>
+<p>你可以使用正则表达式匹配字节字符串，但是正则表达式本身必须也是字节串。比如：</p>
+<pre><code class="lang-python">&gt;&gt;&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>data = <span class="hljs-string">b'FOO:BAR,SPAM'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> re
+<span class="hljs-meta">&gt;&gt;&gt; </span>re.split(<span class="hljs-string">'[:,]'</span>,data)
 Traceback (most recent call last):
-File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-File "/usr/local/lib/python3.3/re.py", line 191, in split
-return _compile(pattern, flags).split(string, maxsplit)
-TypeError: can't use a string pattern on a bytes-like object
-&gt;&gt;&gt; re.split(b'[:,]',data) # Notice: pattern as bytes
-[b'FOO', b'BAR', b'SPAM']
+File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+File <span class="hljs-string">"/usr/local/lib/python3.3/re.py"</span>, line <span class="hljs-number">191</span>, <span class="hljs-keyword">in</span> split
+<span class="hljs-keyword">return</span> _<span class="hljs-built_in">compile</span>(pattern, flags).split(string, maxsplit)
+TypeError: can<span class="hljs-string">'t use a string pattern on a bytes-like object
+&gt;&gt;&gt; re.split(b'</span>[:,]<span class="hljs-string">',data) # Notice: pattern as bytes
+[b'</span>FOO<span class="hljs-string">', b'</span>BA<span class="hljs-string">R', b'</span>SPAM<span class="hljs-string">']
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</span></code></pre>
+<h2 id="讨论">讨论</h2>
 <p>大多数情况下，在文本字符串上的操作均可用于字节字符串。 然而，这里也有一些需要注意的不同点。首先，字节字符串的索引操作返回整数而不是单独字符。比如：</p>
-<pre><code>&gt;&gt;&gt; a = 'Hello World' # Text string
-&gt;&gt;&gt; a[0]
-'H'
-&gt;&gt;&gt; a[1]
-'e'
-&gt;&gt;&gt; b = b'Hello World' # Byte string
-&gt;&gt;&gt; b[0]
-72
-&gt;&gt;&gt; b[1]
-101
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>a = <span class="hljs-string">'Hello World'</span> <span class="hljs-comment"># Text string</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>a[<span class="hljs-number">0</span>]
+<span class="hljs-string">'H'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>a[<span class="hljs-number">1</span>]
+<span class="hljs-string">'e'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>b = <span class="hljs-string">b'Hello World'</span> <span class="hljs-comment"># Byte string</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>b[<span class="hljs-number">0</span>]
+<span class="hljs-number">72</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>b[<span class="hljs-number">1</span>]
+<span class="hljs-number">101</span>
 &gt;&gt;&gt;
-</code></pre><p>这种语义上的区别会对于处理面向字节的字符数据有影响。</p>
+</code></pre>
+<p>这种语义上的区别会对于处理面向字节的字符数据有影响。</p>
 <p>第二点，字节字符串不会提供一个美观的字符串表示，也不能很好的打印出来，除非它们先被解码为一个文本字符串。比如：</p>
-<pre><code>&gt;&gt;&gt; s = b'Hello World'
-&gt;&gt;&gt; print(s)
-b'Hello World' # Observe b'...'
-&gt;&gt;&gt; print(s.decode('ascii'))
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>s = <span class="hljs-string">b'Hello World'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(s)
+<span class="hljs-string">b'Hello World'</span> <span class="hljs-comment"># Observe b'...'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-built_in">print</span>(s.decode(<span class="hljs-string">'ascii'</span>))
 Hello World
 &gt;&gt;&gt;
-</code></pre><p>类似的，也不存在任何适用于字节字符串的格式化操作：</p>
-<pre><code>&gt;&gt;&gt; b'%10s %10d %10.2f' % (b'ACME', 100, 490.1)
+</code></pre>
+<p>类似的，也不存在任何适用于字节字符串的格式化操作：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">b'%10s %10d %10.2f'</span> % (<span class="hljs-string">b'ACME'</span>, <span class="hljs-number">100</span>, <span class="hljs-number">490.1</span>)
 Traceback (most recent call last):
-    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-TypeError: unsupported operand type(s) for %: 'bytes' and 'tuple'
-&gt;&gt;&gt; b'{} {} {}'.format(b'ACME', 100, 490.1)
+    File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+TypeError: unsupported operand <span class="hljs-built_in">type</span>(s) <span class="hljs-keyword">for</span> %: <span class="hljs-string">'bytes'</span> <span class="hljs-keyword">and</span> <span class="hljs-string">'tuple'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">b'{} {} {}'</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">b'ACME'</span>, <span class="hljs-number">100</span>, <span class="hljs-number">490.1</span>)
 Traceback (most recent call last):
-    File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-AttributeError: 'bytes' object has no attribute 'format'
+    File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+AttributeError: <span class="hljs-string">'bytes'</span> <span class="hljs-built_in">object</span> has no attribute <span class="hljs-string">'format'</span>
 &gt;&gt;&gt;
-</code></pre><p>如果你想格式化字节字符串，你得先使用标准的文本字符串，然后将其编码为字节字符串。比如：</p>
-<pre><code>&gt;&gt;&gt; '{:10s} {:10d} {:10.2f}'.format('ACME', 100, 490.1).encode('ascii')
-b'ACME 100 490.10'
+</code></pre>
+<p>如果你想格式化字节字符串，你得先使用标准的文本字符串，然后将其编码为字节字符串。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-string">'{:10s} {:10d} {:10.2f}'</span>.<span class="hljs-built_in">format</span>(<span class="hljs-string">'ACME'</span>, <span class="hljs-number">100</span>, <span class="hljs-number">490.1</span>).encode(<span class="hljs-string">'ascii'</span>)
+<span class="hljs-string">b'ACME 100 490.10'</span>
 &gt;&gt;&gt;
-</code></pre><p>最后需要注意的是，使用字节字符串可能会改变一些操作的语义，特别是那些跟文件系统有关的操作。 比如，如果你使用一个编码为字节的文件名，而不是一个普通的文本字符串，会禁用文件名的编码/解码。比如：</p>
-<pre><code>&gt;&gt;&gt; # Write a UTF-8 filename
-&gt;&gt;&gt; with open('jalape\xf1o.txt', 'w') as f:
-...     f.write('spicy')
+</code></pre>
+<p>最后需要注意的是，使用字节字符串可能会改变一些操作的语义，特别是那些跟文件系统有关的操作。 比如，如果你使用一个编码为字节的文件名，而不是一个普通的文本字符串，会禁用文件名的编码/解码。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Write a UTF-8 filename</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'jalape\xf1o.txt'</span>, <span class="hljs-string">'w'</span>) <span class="hljs-keyword">as</span> f:
+<span class="hljs-meta">... </span>    f.write(<span class="hljs-string">'spicy'</span>)
 ...
-&gt;&gt;&gt; # Get a directory listing
-&gt;&gt;&gt; import os
-&gt;&gt;&gt; os.listdir('.') # Text string (names are decoded)
-['jalapeño.txt']
-&gt;&gt;&gt; os.listdir(b'.') # Byte string (names left as bytes)
-[b'jalapen\xcc\x83o.txt']
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-comment"># Get a directory listing</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> os
+<span class="hljs-meta">&gt;&gt;&gt; </span>os.listdir(<span class="hljs-string">'.'</span>) <span class="hljs-comment"># Text string (names are decoded)</span>
+[<span class="hljs-string">'jalapeño.txt'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>os.listdir(<span class="hljs-string">b'.'</span>) <span class="hljs-comment"># Byte string (names left as bytes)</span>
+[<span class="hljs-string">b'jalapen\xcc\x83o.txt'</span>]
 &gt;&gt;&gt;
-</code></pre><p>注意例子中的最后部分给目录名传递一个字节字符串是怎样导致结果中文件名以未解码字节返回的。 在目录中的文件名包含原始的 UTF-8 编码。 参考5.15小节获取更多文件名相关的内容。</p>
+</code></pre>
+<p>注意例子中的最后部分给目录名传递一个字节字符串是怎样导致结果中文件名以未解码字节返回的。 在目录中的文件名包含原始的 UTF-8 编码。 参考5.15小节获取更多文件名相关的内容。</p>
 <p>最后提一点，一些程序员为了提升程序执行的速度会倾向于使用字节字符串而不是文本字符串。 尽管操作字节字符串确实会比文本更加高效(因为处理文本固有的 Unicode 相关开销)。 这样做通常会导致非常杂乱的代码。你会经常发现字节字符串并不能和 Python 的其他部分工作的很好， 并且你还得手动处理所有的编码/解码操作。 坦白讲，如果你在处理文本的话，就直接在程序中使用普通的文本字符串而不是字节字符串。不做死就不会死！</p>
 
                                 
@@ -1725,7 +1844,7 @@ b'ACME 100 490.10'
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"第二章：字符串和文本","level":"1.3","depth":1,"next":{"title":"第三章：数字日期和时间","level":"1.4","depth":1,"path":"digital-date-and-time.md","ref":"digital-date-and-time.md","articles":[]},"previous":{"title":"第一章：数据结构和算法","level":"1.2","depth":1,"path":"data-structures-and-algorithms.md","ref":"data-structures-and-algorithms.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"string-and-text.md","mtime":"2025-01-05T10:56:44.746Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2025-01-05T12:14:20.822Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"第二章：字符串和文本","level":"1.3","depth":1,"next":{"title":"第三章：数字日期和时间","level":"1.4","depth":1,"path":"digital-date-and-time.md","ref":"digital-date-and-time.md","articles":[]},"previous":{"title":"第一章：数据结构和算法","level":"1.2","depth":1,"path":"data-structures-and-algorithms.md","ref":"data-structures-and-algorithms.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"string-and-text.md","mtime":"2025-01-05T18:01:57.042Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2025-01-05T18:02:08.648Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

@@ -8,7 +8,7 @@
 ## 解决方案
 为了手动的遍历可迭代对象，使用 `next() `函数并在代码中捕获 `StopIteration` 异常。 比如，下面的例子手动读取一个文件中的所有行：
 
-```
+```python
 def manual_iter():
     with open('/etc/passwd') as f:
         try:
@@ -21,7 +21,7 @@ def manual_iter():
 
 通常来讲， `StopIteration` 用来指示迭代的结尾。 然而，如果你手动使用上面演示的 `next() `函数的话，你还可以通过返回一个指定值来标记结尾，比如 `None `。 下面是示例：
 
-```
+```python
 with open('/etc/passwd') as f:
     while True:
         line = next(f)
@@ -35,7 +35,7 @@ with open('/etc/passwd') as f:
 
 下面的交互示例向我们演示了迭代期间所发生的基本细节：
 
-```
+```python
 >>> items = [1, 2, 3]
 >>> # Get the iterator
 >>> it = iter(items) # Invokes items.__iter__()
@@ -62,7 +62,7 @@ StopIteration
 ## 解决方案
 实际上你只需要定义一个 `__iter__()` 方法，将迭代操作代理到容器内部的对象上去。比如：
 
-```
+```python
 class Node:
     def __init__(self, value):
         self._value = value
@@ -103,7 +103,7 @@ Python 的迭代器协议需要` __iter__() `方法返回一个实现了 `__next
 ## 解决方案
 如果你想实现一种新的迭代模式，使用一个生成器函数来定义它。 下面是一个生产某个范围内浮点数的生成器：
 
-```
+```python
 def frange(start, stop, increment):
     x = start
     while x < stop:
@@ -113,7 +113,7 @@ def frange(start, stop, increment):
 
 为了使用这个函数， 你可以用 for 循环迭代它或者使用其他接受一个可迭代对象的函数(比如 `sum()`, `list()` 等)。示例如下：
 
-```
+```python
 >>> for n in frange(0, 4, 0.5):
 ...     print(n)
 ...
@@ -133,7 +133,7 @@ def frange(start, stop, increment):
 ## 讨论
 一个函数中需要有一个 `yield` 语句即可将其转换为一个生成器。 跟普通函数不同的是，生成器只能用于迭代操作。 下面是一个实验，向你展示这样的函数底层工作机制：
 
-```
+```python
 >>> def countdown(n):
 ...     print('Starting to count from', n)
 ...     while n > 0:
@@ -178,7 +178,7 @@ StopIteration
 ## 解决方案
 目前为止，在一个对象上实现迭代最简单的方式是使用一个生成器函数。 在4.2小节中，使用 Node 类来表示树形数据结构。你可能想实现一个以深度优先方式遍历树形节点的生成器。 下面是代码示例：
 
-```
+```python
 class Node:
     def __init__(self, value):
         self._value = value
@@ -219,7 +219,7 @@ if __name__ == '__main__':
 ## 讨论
 Python 的迭代协议要求一个 `__iter__()` 方法返回一个特殊的迭代器对象， 这个迭代器对象实现了 `__next__()` 方法并通过 `StopIteration` 异常标识迭代的完成。 但是，实现这些通常会比较繁琐。 下面我们演示下这种方式，如何使用一个关联迭代器类重新实现 `depth_first()` 方法：
 
-```
+```python
 class Node2:
     def __init__(self, value):
         self._value = value
@@ -279,7 +279,7 @@ class DepthFirstIterator(object):
 ## 解决方案
 使用内置的 `reversed() `函数，比如：
 
-```
+```python
 >>> a = [1, 2, 3, 4]
 >>> for x in reversed(a):
 ...     print(x)
@@ -292,7 +292,7 @@ class DepthFirstIterator(object):
 
 反向迭代仅仅当对象的大小可预先确定或者对象实现了 `__reversed__()` 的特殊方法时才能生效。 如果两者都不符合，那你必须先将对象转换为一个列表才行，比如：
 
-```
+```python
 # Print a file backwards
 f = open('somefile')
 for line in reversed(list(f)):
@@ -304,7 +304,7 @@ for line in reversed(list(f)):
 ## 讨论
 很多程序员并不知道可以通过在自定义类上实现` __reversed__()` 方法来实现反向迭代。比如：
 
-```
+```python
 class Countdown:
     def __init__(self, start):
         self.start = start
@@ -338,7 +338,7 @@ for rr in Countdown(30):
 ## 解决方案
 如果你想让你的生成器暴露外部状态给用户， 别忘了你可以简单的将它实现为一个类，然后把生成器函数放到 `__iter__()` 方法中过去。比如：
 
-```
+```python
 from collections import deque
 
 class linehistory:
@@ -357,7 +357,7 @@ class linehistory:
 
 为了使用这个类，你可以将它当做是一个普通的生成器函数。 然而，由于可以创建一个实例对象，于是你可以访问内部属性值， 比如 `history` 属性或者是 `clear()` 方法。代码示例如下：
 
-```
+```python
 with open('somefile.txt') as f:
     lines = linehistory(f)
     for line in lines:
@@ -371,7 +371,7 @@ with open('somefile.txt') as f:
 
 一个需要注意的小地方是，如果你在迭代操作时不使用 for 循环语句，那么你得先调用 `iter() `函数。比如：
 
-```
+```python
 >>> f = open('somefile.txt')
 >>> lines = linehistory(f)
 >>> next(lines)
@@ -395,7 +395,7 @@ TypeError: 'linehistory' object is not an iterator
 ## 解决方案
 函数 `itertools.islice() `正好适用于在迭代器和生成器上做切片操作。比如：
 
-```
+```python
 >>> def count(n):
 ...     while True:
 ...         yield n
@@ -439,7 +439,7 @@ TypeError: 'generator' object is not subscriptable
 
 为了演示，假定你在读取一个开始部分是几行注释的源文件。比如：
 
-```
+```python
 >>> with open('/etc/passwd') as f:
 ... for line in f:
 ...     print(line, end='')
@@ -460,7 +460,7 @@ root:*:0:0:System Administrator:/var/root:/bin/sh
 
 如果你想跳过开始部分的注释行的话，可以这样做：
 
-```
+```python
 >>> from itertools import dropwhile
 >>> with open('/etc/passwd') as f:
 ...     for line in dropwhile(lambda line: line.startswith('#'), f):
@@ -474,7 +474,7 @@ root:*:0:0:System Administrator:/var/root:/bin/sh
 
 这个例子是基于根据某个测试函数跳过开始的元素。 如果你已经明确知道了要跳过的元素的个数的话，那么可以使用 `itertools.islice()` 来代替。比如：
 
-```
+```python
 >>> from itertools import islice
 >>> items = ['a', 'b', 'c', 1, 4, 10, 15]
 >>> for x in islice(items, 3, None):
@@ -492,7 +492,7 @@ root:*:0:0:System Administrator:/var/root:/bin/sh
 ## 讨论
 函数 `dropwhile()` 和 `islice()` 其实就是两个帮助函数，为的就是避免写出下面这种冗余代码：
 
-```
+```python
 with open('/etc/passwd') as f:
     # Skip over initial comments
     while True:
@@ -509,7 +509,7 @@ with open('/etc/passwd') as f:
 
 跳过一个可迭代对象的开始部分跟通常的过滤是不同的。 比如，上述代码的第一个部分可能会这样重写：
 
-```
+```python
 with open('/etc/passwd') as f:
     lines = (line for line in f if not line.startswith('#'))
     for line in lines:
@@ -527,7 +527,7 @@ with open('/etc/passwd') as f:
 ## 解决方案
 itertools 模块提供了三个函数来解决这类问题。 其中一个是 `itertools.permutations() `， 它接受一个集合并产生一个元组序列，每个元组由集合中所有元素的一个可能排列组成。 也就是说通过打乱集合中元素排列顺序生成一个元组，比如：
 
-```
+```python
 >>> items = ['a', 'b', 'c']
 >>> from itertools import permutations
 >>> for p in permutations(items):
@@ -544,7 +544,7 @@ itertools 模块提供了三个函数来解决这类问题。 其中一个是 `i
 
 如果你想得到指定长度的所有排列，你可以传递一个可选的长度参数。就像这样：
 
-```
+```python
 >>> for p in permutations(items, 2):
 ...     print(p)
 ...
@@ -559,7 +559,7 @@ itertools 模块提供了三个函数来解决这类问题。 其中一个是 `i
 
 使用 `itertools.combinations() `可得到输入集合中元素的所有的组合。比如：
 
-```
+```python
 >>> from itertools import combinations
 >>> for c in combinations(items, 3):
 ...     print(c)
@@ -586,7 +586,7 @@ itertools 模块提供了三个函数来解决这类问题。 其中一个是 `i
 
 在计算组合的时候，一旦元素被选取就会从候选中剔除掉(比如如果元素’a’已经被选取了，那么接下来就不会再考虑它了)。 而函数 `itertools.combinations_with_replacement() `允许同一个元素被选择多次，比如：
 
-```
+```python
 >>> for c in combinations_with_replacement(items, 3):
 ...     print(c)
 ...
@@ -613,7 +613,7 @@ itertools 模块提供了三个函数来解决这类问题。 其中一个是 `i
 ## 解决方案
 内置的 `enumerate()` 函数可以很好的解决这个问题：
 
-```
+```python
 >>> my_list = ['a', 'b', 'c']
 >>> for idx, val in enumerate(my_list):
 ...     print(idx, val)
@@ -625,7 +625,7 @@ itertools 模块提供了三个函数来解决这类问题。 其中一个是 `i
 
 为了按传统行号输出(行号从1开始)，你可以传递一个开始参数：
 
-```
+```python
 >>> my_list = ['a', 'b', 'c']
 >>> for idx, val in enumerate(my_list, 1):
 ...     print(idx, val)
@@ -637,7 +637,7 @@ itertools 模块提供了三个函数来解决这类问题。 其中一个是 `i
 
 这种情况在你遍历文件时想在错误消息中使用行号定位时候非常有用：
 
-```
+```python
 def parse_data(filename):
     with open(filename, 'rt') as f:
         for lineno, line in enumerate(f, 1):
@@ -651,7 +651,7 @@ def parse_data(filename):
 
 `enumerate()` 对于跟踪某些值在列表中出现的位置是很有用的。 所以，如果你想将一个文件中出现的单词映射到它出现的行号上去，可以很容易的利用 `enumerate() `来完成：
 
-```
+```python
 word_summary = defaultdict(list)
 
 with open('myfile.txt', 'r') as f:
@@ -669,7 +669,7 @@ for idx, line in enumerate(lines):
 ## 讨论
 当你想额外定义一个计数变量的时候，使用 `enumerate()` 函数会更加简单。你可能会像下面这样写代码：
 
-```
+```python
 lineno = 1
 for line in f:
     # Process line
@@ -679,7 +679,7 @@ for line in f:
 
 但是如果使用 `enumerate()` 函数来代替就显得更加优雅了：
 
-```
+```python
 for lineno, line in enumerate(f):
     # Process line
     ...
@@ -689,7 +689,7 @@ for lineno, line in enumerate(f):
 
 还有一点可能并不很重要，但是也值得注意， 有时候当你在一个已经解压后的元组序列上使用 `enumerate()` 函数时很容易调入陷阱。 你得像下面正确的方式这样写：
 
-```
+```python
 data = [ (1, 2), (3, 4), (5, 6), (7, 8) ]
 
 # Correct!
@@ -707,7 +707,7 @@ for n, x, y in enumerate(data):
 ## 解决方案
 为了同时迭代多个序列，使用 `zip()` 函数。比如：
 
-```
+```python
 >>> xpts = [1, 5, 4, 2, 10, 7]
 >>> ypts = [101, 78, 37, 15, 62, 99]
 >>> for x, y in zip(xpts, ypts):
@@ -724,7 +724,7 @@ for n, x, y in enumerate(data):
 
 `zip(a, b) `会生成一个可返回元组 `(x, y)` 的迭代器，其中 x 来自 a，y 来自 b。 一旦其中某个序列到底结尾，迭代宣告结束。 因此迭代长度跟参数中最短序列长度一致。
 
-```
+```python
 >>> a = [1, 2, 3]
 >>> b = ['w', 'x', 'y', 'z']
 >>> for i in zip(a,b):
@@ -738,7 +738,7 @@ for n, x, y in enumerate(data):
 
 如果这个不是你想要的效果，那么还可以使用 `itertools.zip_longest()` 函数来代替。比如：
 
-```
+```python
 >>> from itertools import zip_longest
 >>> for i in zip_longest(a,b):
 ...     print(i)
@@ -761,27 +761,27 @@ for n, x, y in enumerate(data):
 ## 讨论
 当你想成对处理数据的时候 `zip()` 函数是很有用的。 比如，假设你头列表和一个值列表，就像下面这样：
 
-```
+```python
 headers = ['name', 'shares', 'price']
 values = ['ACME', 100, 490.1]
 ```
 
 使用 zip() 可以让你将它们打包并生成一个字典：
 
-```
+```python
 s = dict(zip(headers,values))
 ```
 
 或者你也可以像下面这样产生输出：
 
-```
+```python
 for name, val in zip(headers, values):
     print(name, '=', val)
 ```
 
 虽然不常见，但是 `zip() `可以接受多于两个的序列的参数。 这时候所生成的结果元组中元素个数跟输入序列个数一样。比如;
 
-```
+```python
 >>> a = [1, 2, 3]
 >>> b = [10, 11, 12]
 >>> c = ['x','y','z']
@@ -796,7 +796,7 @@ for name, val in zip(headers, values):
 
 最后强调一点就是，` zip()` 会创建一个迭代器来作为结果返回。 如果你需要将结对的值存储在列表中，要使用` list()` 函数。比如：
 
-```
+```python
 >>> zip(a, b)
 <zip object at 0x1007001b8>
 >>> list(zip(a, b))
@@ -811,7 +811,7 @@ for name, val in zip(headers, values):
 ## 解决方案
 `itertools.chain()` 方法可以用来简化这个任务。 它接受一个可迭代对象列表作为输入，并返回一个迭代器，有效的屏蔽掉在多个容器中迭代细节。 为了演示清楚，考虑下面这个例子：
 
-```
+```python
 >>> from itertools import chain
 >>> a = [1, 2, 3, 4]
 >>> b = ['x', 'y', 'z']
@@ -830,7 +830,7 @@ z
 
 使用 `chain()` 的一个常见场景是当你想对不同的集合中所有元素执行某些操作的时候。比如：
 
-```
+```python
 # Various working sets of items
 active_items = set()
 inactive_items = set()
@@ -842,7 +842,7 @@ for item in chain(active_items, inactive_items):
 
 这种解决方案要比像下面这样使用两个单独的循环更加优雅，
 
-```
+```python
 for item in active_items:
     # Process item
     ...
@@ -855,7 +855,7 @@ for item in inactive_items:
 ## 讨论
 `itertools.chain()` 接受一个或多个可迭代对象最为输入参数。 然后创建一个迭代器，依次连续的返回每个可迭代对象中的元素。 这种方式要比先将序列合并再迭代要高效的多。比如：
 
-```
+```python
 # Inefficent
 for x in a + b:
     ...
@@ -874,7 +874,7 @@ for x in chain(a, b):
 ## 解决方案
 生成器函数是一个实现管道机制的好办法。 为了演示，假定你要处理一个非常大的日志文件目录：
 
-```
+```python
 foo/
     access-log-012007.gz
     access-log-022007.gz
@@ -889,7 +889,7 @@ bar/
 
 假设每个日志文件包含这样的数据：
 
-```
+```python
 124.115.6.12 - - [10/Jul/2012:00:18:50 -0500] "GET /robots.txt ..." 200 71
 210.212.209.67 - - [10/Jul/2012:00:18:51 -0500] "GET /ply/ ..." 200 11875
 210.212.209.67 - - [10/Jul/2012:00:18:51 -0500] "GET /favicon.ico ..." 404 369
@@ -899,7 +899,7 @@ bar/
 
 为了处理这些文件，你可以定义一个由多个执行特定任务独立任务的简单生成器函数组成的容器。就像这样：
 
-```
+```python
 import os
 import fnmatch
 import gzip
@@ -948,7 +948,7 @@ def gen_grep(pattern, lines):
 
 现在你可以很容易的将这些函数连起来创建一个处理管道。 比如，为了查找包含单词 python 的所有日志行，你可以这样做：
 
-```
+```python
 lognames = gen_find('access-log*', 'www')
 files = gen_opener(lognames)
 lines = gen_concatenate(files)
@@ -959,7 +959,7 @@ for line in pylines:
 
 如果将来的时候你想扩展管道，你甚至可以在生成器表达式中包装数据。 比如，下面这个版本计算出传输的字节数并计算其总和。
 
-```
+```python
 lognames = gen_find('access-log*', 'www')
 files = gen_opener(lognames)
 lines = gen_concatenate(files)
@@ -993,7 +993,7 @@ David Beazley 在他的 [Generator Tricks for Systems Programmers](http://www.da
 ## 解决方案
 可以写一个包含 `yield from` 语句的递归生成器来轻松解决这个问题。比如：
 
-```
+```python
 from collections import Iterable
 
 def flatten(items, ignore_types=(str, bytes)):
@@ -1013,7 +1013,7 @@ for x in flatten(items):
 
 额外的参数 `ignore_types` 和检测语句 `isinstance(x, ignore_types)` 用来将字符串和字节排除在可迭代对象外，防止将它们再展开成单个的字符。 这样的话字符串数组就能最终返回我们所期望的结果了。比如：
 
-```
+```python
 >>> items = ['Dave', 'Paula', ['Thomas', 'Lewis']]
 >>> for x in flatten(items):
 ...     print(x)
@@ -1028,7 +1028,7 @@ Lewis
 ## 讨论
 语句 `yield from` 在你想在生成器中调用其他生成器作为子例程的时候非常有用。 如果你不使用它的话，那么就必须写额外的` for` 循环了。比如：
 
-```
+```python
 def flatten(items, ignore_types=(str, bytes)):
     for x in items:
         if isinstance(x, Iterable) and not isinstance(x, ignore_types):
@@ -1051,7 +1051,7 @@ def flatten(items, ignore_types=(str, bytes)):
 ## 解决方案
 `heapq.merge()` 函数可以帮你解决这个问题。比如：
 
-```
+```python
 >>> import heapq
 >>> a = [1, 4, 7, 10]
 >>> b = [2, 5, 6, 11]
@@ -1071,7 +1071,7 @@ def flatten(items, ignore_types=(str, bytes)):
 ## 讨论
 `heapq.merge` 可迭代特性意味着它不会立马读取所有序列。 这就意味着你可以在非常长的序列中使用它，而不会有太大的开销。 比如，下面是一个例子来演示如何合并两个排序文件：
 
-```
+```python
 with open('sorted_file_1', 'rt') as file1, \
     open('sorted_file_2', 'rt') as file2, \
     open('merged_file', 'wt') as outf:
@@ -1089,7 +1089,7 @@ with open('sorted_file_1', 'rt') as file1, \
 ## 解决方案
 一个常见的 IO 操作程序可能会想下面这样：
 
-```
+```python
 CHUNKSIZE = 8192
 
 def reader(s):
@@ -1102,7 +1102,7 @@ def reader(s):
 
 这种代码通常可以使用 `iter() `来代替，如下所示：
 
-```
+```python
 def reader2(s):
     for chunk in iter(lambda: s.recv(CHUNKSIZE), b''):
         pass
@@ -1111,7 +1111,7 @@ def reader2(s):
 
 如果你怀疑它到底能不能正常工作，可以试验下一个简单的例子。比如：
 
-```
+```python
 >>> import sys
 >>> f = open('/etc/passwd')
 >>> for chunk in iter(lambda: f.read(10), ''):

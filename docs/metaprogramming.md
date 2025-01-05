@@ -8,7 +8,7 @@
 ## 解决方案
 如果你想使用额外的代码包装一个函数，可以定义一个装饰器函数，例如：
 
-```
+```python
 import time
 from functools import wraps
 
@@ -28,7 +28,7 @@ def timethis(func):
 
 下面是使用装饰器的例子：
 
-```
+```python
 >>> @timethis
 ... def countdown(n):
 ...     '''
@@ -47,7 +47,7 @@ countdown 0.87188299392912
 ## 讨论
 一个装饰器就是一个函数，它接受一个函数作为参数并返回一个新的函数。 当你像下面这样写：
 
-```
+```python
 @timethis
 def countdown(n):
     pass
@@ -55,7 +55,7 @@ def countdown(n):
 
 跟像下面这样写其实效果是一样的：
 
-```
+```python
 def countdown(n):
     pass
 countdown = timethis(countdown)
@@ -63,7 +63,7 @@ countdown = timethis(countdown)
 
 顺便说一下，内置的装饰器比如 `@staticmethod, @classmethod,@property `原理也是一样的。 例如，下面这两个代码片段是等价的：
 
-```
+```python
 class A:
     @classmethod
     def method(cls):
@@ -89,7 +89,7 @@ class B:
 ## 解决方案
 任何时候你定义装饰器的时候，都应该使用 `functools` 库中的 `@wraps `装饰器来注解底层包装函数。例如：
 
-```
+```python
 import time
 from functools import wraps
 def timethis(func):
@@ -108,7 +108,7 @@ def timethis(func):
 
 下面我们使用这个被包装后的函数并检查它的元信息：
 
-```
+```python
 >>> @timethis
 ... def countdown(n:int):
 ...     '''
@@ -131,7 +131,7 @@ countdown 0.008917808532714844
 ## 讨论
 在编写装饰器的时候复制元信息是一个非常重要的部分。如果你忘记了使用 `@wrap` ， 那么你会发现被装饰函数丢失了所有有用的信息。比如如果忽略 `@wrap` 后的效果是下面这样的：
 
-```
+```python
 >>> countdown.__name__
 'wrapper'
 >>> countdown.__doc__
@@ -142,14 +142,14 @@ countdown 0.008917808532714844
 
 `@wraps` 有一个重要特征是它能让你通过属性` __wrapped__` 直接访问被包装函数。例如:
 
-```
+```python
 >>> countdown.__wrapped__(100000)
 >>>
 ```
 
 `__wrapped__` 属性还能让被装饰函数正确暴露底层的参数签名信息。例如：
 
-```
+```python
 >>> from inspect import signature
 >>> print(signature(countdown))
 (n:int)
@@ -165,7 +165,7 @@ countdown 0.008917808532714844
 ## 解决方案
 假设装饰器是通过 `@wraps` (参考9.2小节)来实现的，那么你可以通过访问 `__wrapped__ `属性来访问原始函数：
 
-```
+```python
 >>> @somedecorator
 >>> def add(x, y):
 ...     return x + y
@@ -181,7 +181,7 @@ countdown 0.008917808532714844
 
 如果有多个包装器，那么访问 `__wrapped__` 属性的行为是不可预知的，应该避免这样做。 在 Python3.3 中，它会略过所有的包装层，比如，假如你有如下的代码：
 
-```
+```python
 from functools import wraps
 
 def decorator1(func):
@@ -206,7 +206,7 @@ def add(x, y):
 
 下面我们在 Python3.3 下测试：
 
-```
+```python
 >>> add(2, 3)
 Decorator 1
 Decorator 2
@@ -218,7 +218,7 @@ Decorator 2
 
 下面我们在 Python3.4 下测试：
 
-```
+```python
 >>> add(2, 3)
 Decorator 1
 Decorator 2
@@ -238,7 +238,7 @@ Decorator 2
 ## 解决方案
 我们用一个例子详细阐述下接受参数的处理过程。 假设你想写一个装饰器，给函数添加日志功能，当时允许用户指定日志的级别和其他的选项。 下面是这个装饰器的定义和使用示例：
 
-```
+```python
 from functools import wraps
 import logging
 
@@ -276,7 +276,7 @@ def spam():
 ## 讨论
 定义一个接受参数的包装器看上去比较复杂主要是因为底层的调用序列。特别的，如果你有下面这个代码：
 
-```
+```python
 @decorator(x, y, z)
 def func(a, b):
     pass
@@ -284,7 +284,7 @@ def func(a, b):
 
 装饰器处理过程跟下面的调用是等效的;
 
-```
+```python
 def func(a, b):
     pass
 func = decorator(x, y, z)(func)
@@ -299,7 +299,7 @@ func = decorator(x, y, z)(func)
 ## 解决方案
 引入一个访问函数，使用 `nolocal` 来修改内部变量。 然后这个访问函数被作为一个属性赋值给包装函数。
 
-```
+```python
 from functools import wraps, partial
 import logging
 # Utility decorator to attach a function as an attribute of obj
@@ -353,7 +353,7 @@ def spam():
 
 下面是交互环境下的使用例子：
 
-```
+```python
 >>> import logging
 >>> logging.basicConfig(level=logging.DEBUG)
 >>> add(2, 3)
@@ -377,7 +377,7 @@ WARNING:__main__:Add called
 
 还有一个令人吃惊的地方是访问函数会在多层装饰器间传播(如果你的装饰器都使用了 `@functools.wraps` 注解)。 例如，假设你引入另外一个装饰器，比如9.2小节中的 `@timethis `，像下面这样：
 
-```
+```python
 @timethis
 @logged(logging.DEBUG)
 def countdown(n):
@@ -387,7 +387,7 @@ def countdown(n):
 
 你会发现访问函数依旧有效：
 
-```
+```python
 >>> countdown(10000000)
 DEBUG:__main__:countdown
 countdown 0.8198461532592773
@@ -401,7 +401,7 @@ countdown 0.8225970268249512
 
 你还会发现即使装饰器像下面这样以相反的方向排放，效果也是一样的：
 
-```
+```python
 @logged(logging.DEBUG)
 @timethis
 def countdown(n):
@@ -411,7 +411,7 @@ def countdown(n):
 
 还能通过使用 lambda 表达式代码来让访问函数的返回不同的设定值：
 
-```
+```python
 @attach_wrapper(wrapper)
 def get_level():
     return level
@@ -422,7 +422,7 @@ wrapper.get_level = lambda: level
 
 一个比较难理解的地方就是对于访问函数的首次使用。例如，你可能会考虑另外一个方法直接访问函数的属性，如下：
 
-```
+```python
 @wraps(func)
 def wrapper(*args, **kwargs):
     wrapper.log.log(wrapper.level, wrapper.logmsg)
@@ -445,7 +445,7 @@ wrapper.log = log
 ## 解决方案
 下面是9.5小节中日志装饰器的一个修改版本：
 
-```
+```python
 from functools import wraps, partial
 import logging
 
@@ -479,7 +479,7 @@ def spam():
 ## 讨论
 这里提到的这个问题就是通常所说的编程一致性问题。 当我们使用装饰器的时候，大部分程序员习惯了要么不给它们传递任何参数，要么给它们传递确切参数。 其实从技术上来讲，我们可以定义一个所有参数都是可选的装饰器，就像下面这样：
 
-```
+```python
 @logged()
 def add(x, y):
     return x+y
@@ -489,7 +489,7 @@ def add(x, y):
 
 为了理解代码是如何工作的，你需要非常熟悉装饰器是如何作用到函数上以及它们的调用规则。 对于一个像下面这样的简单装饰器：
 
-```
+```python
 # Example use
 @logged
 def add(x, y):
@@ -498,7 +498,7 @@ def add(x, y):
 
 这个调用序列跟下面等价：
 
-```
+```python
 def add(x, y):
     return x + y
 
@@ -509,7 +509,7 @@ add = logged(add)
 
 而对于一个下面这样有参数的装饰器：
 
-```
+```python
 @logged(level=logging.CRITICAL, name='example')
 def spam():
     print('Spam!')
@@ -517,7 +517,7 @@ def spam():
 
 调用序列跟下面等价：
 
-```
+```python
 def spam():
     print('Spam!')
 spam = logged(level=logging.CRITICAL, name='example')(spam)
@@ -532,7 +532,7 @@ spam = logged(level=logging.CRITICAL, name='example')(spam)
 ## 解决方案
 在演示实际代码前，先说明我们的目标：能对函数参数类型进行断言，类似下面这样：
 
-```
+```python
 >>> @typeassert(int, int)
 ... def add(x, y):
 ...     return x + y
@@ -550,7 +550,7 @@ TypeError: Argument y must be <class 'int'>
 
 下面是使用装饰器技术来实现 `@typeassert `：
 
-```
+```python
 from inspect import signature
 from functools import wraps
 
@@ -581,7 +581,7 @@ def typeassert(*ty_args, **ty_kwargs):
 
 可以看出这个装饰器非常灵活，既可以指定所有参数类型，也可以只指定部分。 并且可以通过位置或关键字来指定参数类型。下面是使用示例：
 
-```
+```python
 >>> @typeassert(int, z=int)
 ... def spam(x, y, z=42):
 ...     print(x, y, z)
@@ -603,7 +603,7 @@ TypeError: Argument z must be <class 'int'>
 
 首先，装饰器只会在函数定义时被调用一次。 有时候你去掉装饰器的功能，那么你只需要简单的返回被装饰函数即可。 下面的代码中，如果全局变量　`__debug__` 被设置成了 False(当你使用-O 或-OO 参数的优化模式执行程序时)， 那么就直接返回未修改过的函数本身：
 
-```
+```python
 def decorate(func):
     # If in optimized mode, disable type checking
     if not __debug__:
@@ -612,7 +612,7 @@ def decorate(func):
 
 其次，这里还对被包装函数的参数签名进行了检查，我们使用了 `inspect.signature() `函数。 简单来讲，它运行你提取一个可调用对象的参数签名信息。例如：
 
-```
+```python
 >>> from inspect import signature
 >>> def spam(x, y, z=42):
 ...     pass
@@ -634,7 +634,7 @@ mappingproxy(OrderedDict([('x', <Parameter at 0x10077a050 'x'>),
 
 装饰器的开始部分，我们使用了 `bind_partial()` 方法来执行从指定类型到名称的部分绑定。 下面是例子演示：
 
-```
+```python
 >>> bound_types = sig.bind_partial(int,z=int)
 >>> bound_types
 <inspect.BoundArguments object at 0x10069bb50>
@@ -647,7 +647,7 @@ OrderedDict([('x', <class 'int'>), ('z', <class 'int'>)])
 
 在装饰器创建的实际包装函数中使用到了 `sig.bind() `方法。` bind()` 跟 `bind_partial() `类似，但是它不允许忽略任何参数。因此有了下面的结果：
 
-```
+```python
 >>> bound_values = sig.bind(1, 2, 3)
 >>> bound_values.arguments
 OrderedDict([('x', 1), ('y', 2), ('z', 3)])
@@ -656,7 +656,7 @@ OrderedDict([('x', 1), ('y', 2), ('z', 3)])
 
 使用这个映射我们可以很轻松的实现我们的强制类型检查：
 
-```
+```python
 >>> for name, value in bound_values.arguments.items():
 ...     if name in bound_types.arguments:
 ...         if not isinstance(value, bound_types.arguments[name]):
@@ -667,7 +667,7 @@ OrderedDict([('x', 1), ('y', 2), ('z', 3)])
 
 不过这个方案还有点小瑕疵，它对于有默认值的参数并不适用。 比如下面的代码可以正常工作，尽管 items 的类型是错误的：
 
-```
+```python
 >>> @typeassert(int, list)
 ... def bar(x, items=None):
 ...     if items is None:
@@ -688,7 +688,7 @@ TypeError: Argument items must be <class 'list'>
 
 最后一点是关于适用装饰器参数和函数注解之间的争论。 例如，为什么不像下面这样写一个装饰器来查找函数中的注解呢？
 
-```
+```python
 @typeassert
 def spam(x:int, y, z:int = 42):
     print(x,y,z)
@@ -705,7 +705,7 @@ def spam(x:int, y, z:int = 42):
 ## 解决方案
 在类里面定义装饰器很简单，但是你首先要确认它的使用方式。比如到底是作为一个实例方法还是类方法。 下面我们用例子来阐述它们的不同：
 
-```
+```python
 from functools import wraps
 
 class A:
@@ -729,7 +729,7 @@ class A:
 
 下面是一使用例子：
 
-```
+```python
 # As an instance method
 a = A()
 @a.decorator1
@@ -746,7 +746,7 @@ def grok():
 ## 讨论
 在类中定义装饰器初看上去好像很奇怪，但是在标准库中有很多这样的例子。 特别的，`@property` 装饰器实际上是一个类，它里面定义了三个方法 `getter(), setter(), deleter() , `每一个方法都是一个装饰器。例如：
 
-```
+```python
 class Person:
     # Create a property instance
     first_name = property()
@@ -769,7 +769,7 @@ class Person:
 
 对于类里面定义的包装器还有一点比较难理解，就是在涉及到继承的时候。 例如，假设你想让在 A 中定义的装饰器作用在子类 B 中。你需要像下面这样写：
 
-```
+```python
 class B(A):
     @A.decorator2
     def bar(self):
@@ -785,7 +785,7 @@ class B(A):
 ## 解决方案
 为了将装饰器定义成一个实例，你需要确保它实现了 `__call__() `和` __get__()` 方法。 例如，下面的代码定义了一个类，它在其他函数上放置一个简单的记录层：
 
-```
+```python
 import types
 from functools import wraps
 
@@ -807,7 +807,7 @@ class Profiled:
 
 你可以将它当做一个普通的装饰器来使用，在类里面或外面都可以：
 
-```
+```python
 @Profiled
 def add(x, y):
     return x + y
@@ -820,7 +820,7 @@ class Spam:
 
 在交互环境中的使用示例：
 
-```
+```python
 >>> add(2, 3)
 5
 >>> add(4, 5)
@@ -845,7 +845,7 @@ class Spam:
 
 其次，通常很容易会忽视上面的 `__get__()` 方法。如果你忽略它，保持其他代码不变再次运行， 你会发现当你去调用被装饰实例方法时出现很奇怪的问题。例如：
 
-```
+```python
 >>> s = Spam()
 >>> s.bar(3)
 Traceback (most recent call last):
@@ -855,7 +855,7 @@ TypeError: bar() missing 1 required positional argument: 'x'
 
 出错原因是当方法函数在一个类中被查找时，它们的 `__get__()` 方法依据描述器协议被调用， 在8.9小节已经讲述过描述器协议了。在这里，`__get__() `的目的是创建一个绑定方法对象 (最终会给这个方法传递 self 参数)。下面是一个例子来演示底层原理：
 
-```
+```python
 >>> s = Spam()
 >>> def grok(self, x):
 ...     pass
@@ -869,7 +869,7 @@ TypeError: bar() missing 1 required positional argument: 'x'
 
 如果你想避免一些混乱，也可以考虑另外一个使用闭包和 `nonlocal` 变量实现的装饰器，这个在9.5小节有讲到。例如：
 
-```
+```python
 import types
 from functools import wraps
 
@@ -891,7 +891,7 @@ def add(x, y):
 
 这个方式跟之前的效果几乎一样，除了对于 `ncalls `的访问现在是通过一个被绑定为属性的函数来实现，例如：
 
-```
+```python
 >>> add(2, 3)
 5
 >>> add(4, 5)
@@ -908,7 +908,7 @@ def add(x, y):
 ## 解决方案
 给类或静态方法提供装饰器是很简单的，不过要确保装饰器在 `@classmethod `或 `@staticmethod `之前。例如：
 
-```
+```python
 import time
 from functools import wraps
 
@@ -948,7 +948,7 @@ class Spam:
 
 装饰后的类和静态方法可正常工作，只不过增加了额外的计时功能：
 
-```
+```python
 >>> s = Spam()
 >>> s.instance_method(1000000)
 <__main__.Spam object at 0x1006a6050> 1000000
@@ -965,7 +965,7 @@ class Spam:
 ## 讨论
 如果你把装饰器的顺序写错了就会出错。例如，假设你像下面这样写：
 
-```
+```python
 class Spam:
     @timethis
     @staticmethod
@@ -977,7 +977,7 @@ class Spam:
 
 那么你调用这个镜头方法时就会报错：
 
-```
+```python
 >>> Spam.static_method(1000000)
 Traceback (most recent call last):
 File "<stdin>", line 1, in <module>
@@ -991,7 +991,7 @@ TypeError: 'staticmethod' object is not callable
 
 当我们在抽象基类中定义类方法和静态方法(参考8.12小节)时，这里讲到的知识就很有用了。 例如，如果你想定义一个抽象类方法，可以使用类似下面的代码：
 
-```
+```python
 from abc import ABCMeta, abstractmethod
 class A(metaclass=ABCMeta):
     @classmethod
@@ -1009,7 +1009,7 @@ class A(metaclass=ABCMeta):
 ## 解决方案
 可以使用关键字参数来给被包装函数增加额外参数。考虑下面的装饰器：
 
-```
+```python
 from functools import wraps
 
 def optional_debug(func):
@@ -1022,7 +1022,7 @@ def optional_debug(func):
     return wrapper
 ```
 
-```
+```python
 >>> @optional_debug
 ... def spam(a,b,c):
 ... print(a,b,c)
@@ -1038,7 +1038,7 @@ Calling spam
 ## 讨论
 通过装饰器来给被包装函数增加参数的做法并不常见。 尽管如此，有时候它可以避免一些重复代码。例如，如果你有下面这样的代码：
 
-```
+```python
 def a(x, debug=False):
     if debug:
         print('Calling a')
@@ -1054,7 +1054,7 @@ def c(x, y, debug=False):
 
 那么你可以将其重构成这样：
 
-```
+```python
 from functools import wraps
 import inspect
 
@@ -1088,7 +1088,7 @@ def c(x, y):
 
 上面的方案还可以更完美一点，因为精明的程序员应该发现了被包装函数的函数签名其实是错误的。例如：
 
-```
+```python
 >>> @optional_debug
 ... def add(x,y):
 ...     return x+y
@@ -1101,7 +1101,7 @@ def c(x, y):
 
 通过如下的修改，可以解决这个问题：
 
-```
+```python
 from functools import wraps
 import inspect
 
@@ -1126,7 +1126,7 @@ def optional_debug(func):
 
 通过这样的修改，包装后的函数签名就能正确的显示 `debug` 参数的存在了。例如：
 
-```
+```python
 >>> @optional_debug
 ... def add(x,y):
 ...     return x+y
@@ -1147,7 +1147,7 @@ def optional_debug(func):
 ## 解决方案
 这种情况可能是类装饰器最好的使用场景了。例如，下面是一个重写了特殊方法 `__getattribute__ `的类装饰器， 可以打印日志：
 
-```
+```python
 def log_getattribute(cls):
     # Get the original implementation
     orig_getattribute = cls.__getattribute__
@@ -1172,7 +1172,7 @@ class A:
 
 下面是使用效果：
 
-```
+```python
 >>> a = A(42)
 >>> a.x
 getting: x
@@ -1185,7 +1185,7 @@ getting: spam
 ## 讨论
 类装饰器通常可以作为其他高级技术比如混入或元类的一种非常简洁的替代方案。 比如，上面示例中的另外一种实现使用到继承：
 
-```
+```python
 class LoggedGetattribute:
     def __getattribute__(self, name):
         print('getting:', name)
@@ -1212,7 +1212,7 @@ class A(LoggedGetattribute):
 ## 解决方案
 Python 程序员都知道，如果你定义了一个类，就能像函数一样的调用它来创建实例，例如：
 
-```
+```python
 class Spam:
     def __init__(self, name):
         self.name = name
@@ -1225,7 +1225,7 @@ b = Spam('Diana')
 
 为了演示，假设你不想任何人创建这个类的实例：
 
-```
+```python
 class NoInstances(type):
     def __call__(self, *args, **kwargs):
         raise TypeError("Can't instantiate directly")
@@ -1239,7 +1239,7 @@ class Spam(metaclass=NoInstances):
 
 这样的话，用户只能调用这个类的静态方法，而不能使用通常的方法来创建它的实例。例如：
 
-```
+```python
 >>> Spam.grok(42)
 Spam.grok
 >>> s = Spam()
@@ -1253,7 +1253,7 @@ TypeError: Can't instantiate directly
 
 现在，假如你想实现单例模式（只能创建唯一实例的类），实现起来也很简单：
 
-```
+```python
 class Singleton(type):
     def __init__(self, *args, **kwargs):
         self.__instance = None
@@ -1274,7 +1274,7 @@ class Spam(metaclass=Singleton):
 
 那么 Spam 类就只能创建唯一的实例了，演示如下：
 
-```
+```python
 >>> a = Spam()
 Creating Spam
 >>> b = Spam()
@@ -1288,7 +1288,7 @@ True
 
 最后，假设你想创建8.25小节中那样的缓存实例。下面我们可以通过元类来实现：
 
-```
+```python
 import weakref
 
 class Cached(type):
@@ -1313,7 +1313,7 @@ class Spam(metaclass=Cached):
 
 然后我也来测试一下：
 
-```
+```python
 >>> a = Spam('Guido')
 Creating Spam('Guido')
 >>> b = Spam('Diana')
@@ -1331,7 +1331,7 @@ True
 
 假设你不使用元类，你可能需要将类隐藏在某些工厂函数后面。 比如为了实现一个单例，你你可能会像下面这样写：
 
-```
+```python
 class _Spam:
     def __init__(self):
         print('Creating Spam')
@@ -1359,7 +1359,7 @@ def Spam():
 ## 解决方案
 利用元类可以很容易的捕获类的定义信息。下面是一个例子，使用了一个 OrderedDict 来记录描述器的定义顺序：
 
-```
+```python
 from collections import OrderedDict
 
 # A set of descriptors for various types
@@ -1401,7 +1401,7 @@ class OrderedMeta(type):
 
 在这个元类中，执行类主体时描述器的定义顺序会被一个` OrderedDict`捕获到， 生成的有序名称从字典中提取出来并放入类属性 `_order `中。这样的话类中的方法可以通过多种方式来使用它。 例如，下面是一个简单的类，使用这个排序字典来实现将一个类实例的数据序列化为一行 CSV 数据：
 
-```
+```python
 class Structure(metaclass=OrderedMeta):
     def as_csv(self):
         return ','.join(str(getattr(self,name)) for name in self._order)
@@ -1420,7 +1420,7 @@ class Stock(Structure):
 
 我们在交互式环境中测试一下这个 Stock 类：
 
-```
+```python
 >>> s = Stock('GOOG',100,490.1)
 >>> s.name
 'GOOG'
@@ -1439,7 +1439,7 @@ TypeError: shares expects <class 'int'>
 
 如果你想构造自己的类字典对象，可以很容易的扩展这个功能。比如，下面的这个修改方案可以防止重复的定义：
 
-```
+```python
 from collections import OrderedDict
 
 class NoDupOrderedDict(OrderedDict):
@@ -1464,7 +1464,7 @@ class OrderedMeta(type):
 
 下面我们测试重复的定义会出现什么情况：
 
-```
+```python
 >>> class A(metaclass=OrderedMeta):
 ... def spam(self):
 ... pass
@@ -1484,7 +1484,7 @@ TypeError: spam already defined in A
 
 对于很多应用程序而已，能够捕获类定义的顺序是一个看似不起眼却又非常重要的特性。 例如，在对象关系映射中，我们通常会看到下面这种方式定义的类：
 
-```
+```python
 class Stock(Model):
     name = String()
     shares = Integer()
@@ -1500,7 +1500,7 @@ class Stock(Model):
 ## 解决方案
 在定义类的时候，Python 允许我们使用 ``metaclass``关键字参数来指定特定的元类。 例如使用抽象基类：
 
-```
+```python
 from abc import ABCMeta, abstractmethod
 class IStream(metaclass=ABCMeta):
     @abstractmethod
@@ -1514,14 +1514,14 @@ class IStream(metaclass=ABCMeta):
 
 然而，在自定义元类中我们还可以提供其他的关键字参数，如下所示：
 
-```
+```python
 class Spam(metaclass=MyMeta, debug=True, synchronize=True):
     pass
 ```
 
 为了使元类支持这些关键字参数，你必须确保在 `__prepare__() `, `__new__()` 和 `__init__()` 方法中 都使用强制关键字参数。就像下面这样：
 
-```
+```python
 class MyMeta(type):
     # Optional
     @classmethod
@@ -1552,7 +1552,7 @@ class MyMeta(type):
 
 使用关键字参数配置一个元类还可以视作对类变量的一种替代方式。例如：
 
-```
+```python
 class Spam(metaclass=MyMeta):
     debug = True
     synchronize = True
@@ -1568,7 +1568,7 @@ class Spam(metaclass=MyMeta):
 ## 解决方案
 对任何涉及到操作函数调用签名的问题，你都应该使用 `inspect` 模块中的签名特性。 我们最主要关注两个类：`Signature` 和 `Parameter` 。下面是一个创建函数前面的交互例子：
 
-```
+```python
 >>> from inspect import Signature, Parameter
 >>> # Make a signature for a func(x, y=42, *, z=None)
 >>> parms = [ Parameter('x', Parameter.POSITIONAL_OR_KEYWORD),
@@ -1582,7 +1582,7 @@ class Spam(metaclass=MyMeta):
 
 一旦你有了一个签名对象，你就可以使用它的 `bind()` 方法很容易的将它绑定到 `*args `和 `**kwargs `上去。 下面是一个简单的演示：
 
-```
+```python
 >>> def func(*args, **kwargs):
 ...     bound_values = sig.bind(*args, **kwargs)
 ...     for name, value in bound_values.arguments.items():
@@ -1626,7 +1626,7 @@ TypeError: multiple values for argument 'x'
 
 下面是一个强制函数签名更具体的例子。在代码中，我们在基类中先定义了一个非常通用的` __init__() `方法， 然后我们强制所有的子类必须提供一个特定的参数签名。
 
-```
+```python
 from inspect import Signature, Parameter
 
 def make_sig(*names):
@@ -1651,7 +1651,7 @@ class Point(Structure):
 
 下面是使用这个 `Stock `类的示例：
 
-```
+```python
 >>> import inspect
 >>> print(inspect.signature(Stock))
 (name, shares, price)
@@ -1672,7 +1672,7 @@ TypeError: multiple values for argument 'shares'
 
 在最后的一个方案实例中，我们还可以通过使用自定义元类来创建签名对象。下面演示怎样来实现：
 
-```
+```python
 from inspect import Signature, Parameter
 
 def make_sig(*names):
@@ -1702,7 +1702,7 @@ class Point(Structure):
 
 当我们自定义签名的时候，将签名存储在特定的属性 `__signature__ `中通常是很有用的。 这样的话，在使用 `inspect `模块执行内省的代码就能发现签名并将它作为调用约定。
 
-```
+```python
 >>> import inspect
 >>> print(inspect.signature(Stock))
 (name, shares, price)
@@ -1718,7 +1718,7 @@ class Point(Structure):
 ## 解决方案
 如果你想监控类的定义，通常可以通过定义一个元类。一个基本元类通常是继承自` type` 并重定义它的` __new__()` 方法 或者是 `__init__() `方法。比如：
 
-```
+```python
 class MyMeta(type):
     def __new__(self, clsname, bases, clsdict):
         # clsname is name of class being defined
@@ -1729,7 +1729,7 @@ class MyMeta(type):
 
 另一种是，定义 `__init__()` 方法：
 
-```
+```python
 class MyMeta(type):
     def __init__(self, clsname, bases, clsdict):
         super().__init__(clsname, bases, clsdict)
@@ -1740,7 +1740,7 @@ class MyMeta(type):
 
 为了使用这个元类，你通常要将它放到到一个顶级父类定义中，然后其他的类继承这个顶级父类。例如：
 
-```
+```python
 class Root(metaclass=MyMeta):
     pass
 
@@ -1755,7 +1755,7 @@ class B(Root):
 
 作为一个具体的应用例子，下面定义了一个元类，它会拒绝任何有混合大小写名字作为方法的类定义（可能是想气死Java程序员^_^）：
 
-```
+```python
 class NoMixedCaseMeta(type):
     def __new__(cls, clsname, bases, clsdict):
         for name in clsdict:
@@ -1777,7 +1777,7 @@ class B(Root):
 
 作为更高级和实用的例子，下面有一个元类，它用来检测重载方法，确保它的调用参数跟父类中原始方法有着相同的参数签名。
 
-```
+```python
 from inspect import signature
 import logging
 
@@ -1820,7 +1820,7 @@ class B(A):
 
 如果你运行这段代码，就会得到下面这样的输出结果：
 
-```
+```python
 WARNING:root:Signature mismatch in B.spam. (self, x, *, z) != (self, x, z)
 WARNING:root:Signature mismatch in B.foo. (self, x, y) != (self, a, b)
 ```
@@ -1845,7 +1845,7 @@ WARNING:root:Signature mismatch in B.foo. (self, x, y) != (self, a, b)
 ## 解决方案
 你可以使用函数 `types.new_class()` 来初始化新的类对象。 你需要做的只是提供类的名字、父类元组、关键字参数，以及一个用成员变量填充类字典的回调函数。例如：
 
-```
+```python
 # stock.py
 # Example of making a class manually from parts
 
@@ -1871,7 +1871,7 @@ Stock.__module__ = __name__
 
 这种方式会构建一个普通的类对象，并且按照你的期望工作：
 
-```
+```python
 >>> s = Stock('ACME', 50, 91.1)
 >>> s
 <stock.Stock object at 0x1006a9b10>
@@ -1884,7 +1884,7 @@ Stock.__module__ = __name__
 
 如果你想创建的类需要一个不同的元类，可以通过 `types.new_class()` 第三个参数传递给它。例如：
 
-```
+```python
 >>> import abc
 >>> Stock = types.new_class('Stock', (), {'metaclass': abc.ABCMeta},
 ...                         lambda ns: ns.update(cls_dict))
@@ -1899,14 +1899,14 @@ Stock.__module__ = __name__
 
 第三个参数还可以包含其他的关键字参数。比如，一个类的定义如下：
 
-```
+```python
 class Spam(Base, debug=True, typecheck=False):
     pass
 ```
 
 那么可以将其翻译成如下的 `new_class()` 调用形式：
 
-```
+```python
 Spam = types.new_class('Spam', (Base,),
                         {'debug': True, 'typecheck': False},
                         lambda ns: ns.update(cls_dict))
@@ -1917,7 +1917,7 @@ Spam = types.new_class('Spam', (Base,),
 ## 讨论
 很多时候如果能构造新的类对象是很有用的。 有个很熟悉的例子是调用 `collections.namedtuple()` 函数，例如：
 
-```
+```python
 >>> Stock = collections.namedtuple('Stock', ['name', 'shares', 'price'])
 >>> Stock
 <class '__main__.Stock'>
@@ -1926,7 +1926,7 @@ Spam = types.new_class('Spam', (Base,),
 
 `namedtuple()` 使用 `exec()` 而不是上面介绍的技术。但是，下面通过一个简单的变化， 我们直接创建一个类：
 
-```
+```python
 import operator
 import types
 import sys
@@ -1957,7 +1957,7 @@ def named_tuple(classname, fieldnames):
 
 下面的例子演示了前面的代码是如何工作的：
 
-```
+```python
 >>> Point = named_tuple('Point', ['x', 'y'])
 >>> Point
 <class '__main__.Point'>
@@ -1979,7 +1979,7 @@ AttributeError: can't set attribute
 
 这项技术一个很重要的方面是它对于元类的正确使用。 你可能像通过直接实例化一个元类来直接创建一个类：
 
-```
+```python
 Stock = type('Stock', (), cls_dict)
 ```
 
@@ -1987,7 +1987,7 @@ Stock = type('Stock', (), cls_dict)
 
 如果你仅仅只是想执行准备步骤，可以使用 `types.prepare_class()` 。例如：
 
-```
+```python
 import types
 metaclass, kwargs, ns = types.prepare_class('Stock', (), {'metaclass': type})
 ```
@@ -2005,7 +2005,7 @@ metaclass, kwargs, ns = types.prepare_class('Stock', (), {'metaclass': type})
 
 下面是一个例子，利用这个思路来创建类似于 `collections` 模块中的命名元组的类：
 
-```
+```python
 import operator
 
 class StructTupleMeta(type):
@@ -2024,7 +2024,7 @@ class StructTuple(tuple, metaclass=StructTupleMeta):
 
 这段代码可以用来定义简单的基于元组的数据结构，如下所示：
 
-```
+```python
 class Stock(StructTuple):
     _fields = ['name', 'shares', 'price']
 
@@ -2034,7 +2034,7 @@ class Point(StructTuple):
 
 下面演示它如何工作：
 
-```
+```python
 >>> s = Stock('ACME', 50, 91.1)
 >>> s
 ('ACME', 50, 91.1)
@@ -2058,7 +2058,7 @@ AttributeError: can't set attribute
 
 `StructTuple `类作为一个普通的基类，供其他使用者来继承。 这个类中的 `__new__()` 方法用来构造新的实例。 这里使用` __new__()` 并不是很常见，主要是因为我们要修改元组的调用签名， 使得我们可以像普通的实例调用那样创建实例。就像下面这样：
 
-```
+```python
 s = Stock('ACME', 50, 91.1) # OK
 s = Stock(('ACME', 50, 91.1)) # Error
 ```
@@ -2076,7 +2076,7 @@ s = Stock(('ACME', 50, 91.1)) # Error
 ## 解决方案
 本小节的技术是基于一个简单的技术，那就是 Python 允许参数注解，代码可以像下面这样写：
 
-```
+```python
 class Spam:
     def bar(self, x:int, y:int):
         print('Bar 1:', x, y)
@@ -2091,7 +2091,7 @@ s.bar('hello') # Prints Bar 2: hello 0
 
 下面是我们第一步的尝试，使用到了一个元类和描述器：
 
-```
+```python
 # multiple.py
 import inspect
 import types
@@ -2181,7 +2181,7 @@ class MultipleMeta(type):
 
 为了使用这个类，你可以像下面这样写：
 
-```
+```python
 class Spam(metaclass=MultipleMeta):
     def bar(self, x:int, y:int):
         print('Bar 1:', x, y)
@@ -2205,7 +2205,7 @@ class Date(metaclass=MultipleMeta):
 
 下面是一个交互示例来验证它能正确的工作：
 
-```
+```python
 >>> s = Spam()
 >>> s.bar(2, 3)
 Bar 1: 2 3
@@ -2241,7 +2241,7 @@ TypeError: No matching method for types (<class 'int'>, <class 'str'>)
 
 为了让` MultiMethod` 实例模拟一个调用，它的 `__call__()` 方法被实现了。 这个方法从所有排除 `slef` 的参数中构建一个类型元组，在内部 map 中查找这个方法， 然后调用相应的方法。为了能让 `MultiMethod `实例在类定义时正确操作，`__get__() `是必须得实现的。 它被用来构建正确的绑定方法。比如：
 
-```
+```python
 >>> b = s.bar
 >>> b
 <bound method Spam.bar of <__main__.Spam object at 0x1006a46d0>>
@@ -2258,7 +2258,7 @@ Bar 2: hello 0
 
 不过本节的实现还有一些限制，其中一个是它不能使用关键字参数。例如：
 
-```
+```python
 >>> s.bar(x=2, y=3)
 Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
@@ -2275,7 +2275,7 @@ TypeError: __call__() got an unexpected keyword argument 's'
 
 同样对于继承也是有限制的，例如，类似下面这种代码就不能正常工作：
 
-```
+```python
 class A:
     pass
 
@@ -2295,7 +2295,7 @@ class Spam(metaclass=MultipleMeta):
 
 原因是因为 `x:A `注解不能成功匹配子类实例（比如 B 的实例），如下：
 
-```
+```python
 >>> s = Spam()
 >>> a = A()
 >>> s.foo(a)
@@ -2315,7 +2315,7 @@ TypeError: No matching method for types (<class '__main__.B'>,)
 
 作为使用元类和注解的一种替代方案，可以通过描述器来实现类似的效果。例如：
 
-```
+```python
 import types
 
 class multimethod:
@@ -2349,7 +2349,7 @@ class multimethod:
 
 为了使用描述器版本，你需要像下面这样写：
 
-```
+```python
 class Spam:
     @multimethod
     def bar(self, *args):
@@ -2378,7 +2378,7 @@ class Spam:
 ## 解决方案
 考虑下一个简单的类，它的属性由属性方法包装：
 
-```
+```python
 class Person:
     def __init__(self, name ,age):
         self.name = name
@@ -2407,7 +2407,7 @@ class Person:
 
 可以看到，为了实现属性值的类型检查我们写了很多的重复代码。 只要你以后看到类似这样的代码，你都应该想办法去简化它。 一个可行的方法是创建一个函数用来定义属性并返回它。例如：
 
-```
+```python
 def typed_property(name, expected_type):
     storage_name = '_' + name
 
@@ -2438,7 +2438,7 @@ class Person:
 
 我们还可以使用 `functools.partial()` 来稍稍改变下这个例子，很有趣。例如，你可以像下面这样：
 
-```
+```python
 from functools import partial
 
 String = partial(typed_property, expected_type=str)
@@ -2463,7 +2463,7 @@ class Person:
 ## 解决方案
 实现一个新的上下文管理器的最简单的方法就是使用 `contexlib` 模块中的 `@contextmanager `装饰器。 下面是一个实现了代码块计时功能的上下文管理器例子：
 
-```
+```python
 import time
 from contextlib import contextmanager
 
@@ -2487,7 +2487,7 @@ with timethis('counting'):
 
 下面是一个更加高级一点的上下文管理器，实现了列表对象上的某种事务：
 
-```
+```python
 @contextmanager
 def list_transaction(orig_list):
     working = list(orig_list)
@@ -2497,7 +2497,7 @@ def list_transaction(orig_list):
 
 这段代码的作用是任何对列表的修改只有当所有代码运行完成并且不出现异常的情况下才会生效。 下面我们来演示一下：
 
-```
+```python
 >>> items = [1, 2, 3]
 >>> with list_transaction(items) as working:
 ...     working.append(4)
@@ -2521,7 +2521,7 @@ RuntimeError: oops
 ## 讨论
 通常情况下，如果要写一个上下文管理器，你需要定义一个类，里面包含一个 `__enter__()` 和一个 `__exit__()` 方法，如下所示：
 
-```
+```python
 import time
 
 class timethis:
@@ -2547,7 +2547,7 @@ class timethis:
 ## 解决方案
 为了理解这个问题，先试试一个简单场景。首先，在全局命名空间内执行一个代码片段：
 
-```
+```python
 >>> a = 13
 >>> exec('b = a + 1')
 >>> print(b)
@@ -2557,7 +2557,7 @@ class timethis:
 
 然后，再在一个函数中执行同样的代码：
 
-```
+```python
 >>> def test():
 ...     a = 13
 ...     exec('b = a + 1')
@@ -2575,7 +2575,7 @@ NameError: global name 'b' is not defined
 
 为了修正这样的错误，你需要在调用 `exec() `之前使用 `locals()` 函数来得到一个局部变量字典。 之后你就能从局部字典中获取修改过后的变量值了。例如：
 
-```
+```python
 >>> def test():
 ...     a = 13
 ...     loc = locals()
@@ -2593,7 +2593,7 @@ NameError: global name 'b' is not defined
 
 然而，如果你仍然要使用 `exec() `，本节列出了一些如何正确使用它的方法。 默认情况下，`exec() `会在调用者局部和全局范围内执行代码。然而，在函数里面， 传递给 `exec() `的局部范围是拷贝实际局部变量组成的一个字典。 因此，如果` exec() `如果执行了修改操作，这种修改后的结果对实际局部变量值是没有影响的。 下面是另外一个演示它的例子：
 
-```
+```python
 >>> def test1():
 ...     x = 0
 ...     exec('x += 1')
@@ -2606,7 +2606,7 @@ NameError: global name 'b' is not defined
 
 上面代码里，当你调用 `locals()` 获取局部变量时，你获得的是传递给 `exec()` 的局部变量的一个拷贝。 通过在代码执行后审查这个字典的值，那就能获取修改后的值了。下面是一个演示例子：
 
-```
+```python
 >>> def test2():
 ...     x = 0
 ...     loc = locals()
@@ -2626,7 +2626,7 @@ x = 0
 
 在使用 `locals() `的时候，你需要注意操作顺序。每次它被调用的时候， `locals()` 会获取局部变量值中的值并覆盖字典中相应的变量。 请注意观察下下面这个试验的输出结果：
 
-```
+```python
 >>> def test3():
 ...     x = 0
 ...     loc = locals()
@@ -2647,7 +2647,7 @@ x = 0
 
 作为 `locals()` 的一个替代方案，你可以使用你自己的字典，并将它传递给` exec()` 。例如：
 
-```
+```python
 >>> def test4():
 ...     a = 13
 ...     loc = { 'a' : a }
@@ -2672,7 +2672,7 @@ x = 0
 ## 解决方案
 大部分程序员知道 Python 能够计算或执行字符串形式的源代码。例如：
 
-```
+```python
 >>> x = 42
 >>> eval('2 + 3*4 + x')
 56
@@ -2692,7 +2692,7 @@ x = 0
 
 尽管如此，`ast` 模块能被用来将 Python 源码编译成一个可被分析的抽象语法树（AST）。例如：
 
-```
+```python
 >>> import ast
 >>> ex = ast.parse('2 + 3*4 + x', mode='eval')
 >>> ex
@@ -2717,7 +2717,7 @@ kwargs=None))], orelse=[])])"
 
 分析源码树需要你自己更多的学习，它是由一系列 AST 节点组成的。 分析这些节点最简单的方法就是定义一个访问者类，实现很多 `visit_NodeName() `方法， `NodeName() `匹配那些你感兴趣的节点。下面是这样一个类，记录了哪些名字被加载、存储和删除的信息。
 
-```
+```python
 import ast
 
 class CodeAnalyzer(ast.NodeVisitor):
@@ -2756,7 +2756,7 @@ if __name__ == '__main__':
 
 如果你运行这个程序，你会得到下面这样的输出：
 
-```
+```python
 Loaded: {'i', 'range', 'print'}
 Stored: {'i'}
 Deleted: {'i'}
@@ -2764,7 +2764,7 @@ Deleted: {'i'}
 
 最后，AST 可以通过 `compile()` 函数来编译并执行。例如：
 
-```
+```python
 >>> exec(compile(top,'<stdin>', 'exec'))
 0
 1
@@ -2784,7 +2784,7 @@ Deleted: {'i'}
 
 需要注意的是，如果你知道自己在干啥，你还能够重写 AST 来表示新的代码。 下面是一个装饰器例子，可以通过重新解析函数体源码、 重写 AST 并重新创建函数代码对象来将全局访问变量降为函数体作用范围，
 
-```
+```python
 # namelower.py
 import ast
 import inspect
@@ -2839,7 +2839,7 @@ def lower_names(*namelist):
 
 为了使用这个代码，你可以像下面这样写：
 
-```
+```python
 INCR = 1
 @lower_names('INCR')
 def countdown(n):
@@ -2849,7 +2849,7 @@ def countdown(n):
 
 装饰器会将 `countdown() `函数重写为类似下面这样子：
 
-```
+```python
 def countdown(n):
     __globals = globals()
     INCR = __globals['INCR']
@@ -2870,7 +2870,7 @@ def countdown(n):
 ## 解决方案
 `dis `模块可以被用来输出任何 Python 函数的反编译结果。例如：
 
-```
+```python
 >>> def countdown(n):
 ... while n > 0:
 ...     print('T-minus', n)
@@ -2886,7 +2886,7 @@ def countdown(n):
 ## 讨论
 当你想要知道你的程序底层的运行机制的时候，`dis` 模块是很有用的。比如如果你想试着理解性能特征。 被 `dis()` 函数解析的原始字节码如下所示：
 
-```
+```python
 >>> countdown.__code__.co_code
 b"x'\x00|\x00\x00d\x01\x00k\x04\x00r)\x00t\x00\x00d\x02\x00|\x00\x00\x83
 \x02\x00\x01|\x00\x00d\x03\x008}\x00\x00q\x03\x00Wt\x00\x00d\x04\x00\x83
@@ -2896,7 +2896,7 @@ b"x'\x00|\x00\x00d\x01\x00k\x04\x00r)\x00t\x00\x00d\x02\x00|\x00\x00\x83
 
 如果你想自己解释这段代码，你需要使用一些在 `opcode `模块中定义的常量。例如：
 
-```
+```python
 >>> c = countdown.__code__.co_code
 >>> import opcode
 >>> opcode.opname[c[0]]
@@ -2909,7 +2909,7 @@ b"x'\x00|\x00\x00d\x01\x00k\x04\x00r)\x00t\x00\x00d\x02\x00|\x00\x00\x83
 
 奇怪的是，在 `dis` 模块中并没有函数让你以编程方式很容易的来处理字节码。 不过，下面的生成器函数可以将原始字节码序列转换成` opcodes` 和参数。
 
-```
+```python
 import opcode
 
 def generate_opcodes(codebytes):
@@ -2933,14 +2933,14 @@ def generate_opcodes(codebytes):
 
 使用方法如下：
 
-```
+```python
 >>> for op, oparg in generate_opcodes(countdown.__code__.co_code):
 ...     print(op, opcode.opname[op], oparg)
 ```
 
 这种方式很少有人知道，你可以利用它替换任何你想要替换的函数的原始字节码。 下面我们用一个示例来演示整个过程：
 
-```
+```python
 >>> def add(x, y):
 ...     return x + y
 ...

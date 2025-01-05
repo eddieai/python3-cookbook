@@ -10,7 +10,7 @@
 ## 解决方案
 `threading `库可以在单独的线程中执行任何的在 Python 中可以调用的对象。你可以创建一个 `Thread` 对象并将你要执行的对象以 target 参数的形式提供给该对象。 下面是一个简单的例子：
 
-```
+```python
 # Code to execute in an independent thread
 import time
 def countdown(n):
@@ -27,7 +27,7 @@ t.start()
 
 当你创建好一个线程对象后，该对象并不会立即执行，除非你调用它的 `start()` 方法（当你调用 `start()` 方法时，它会调用你传递进来的函数，并把你传递进来的参数传递给该函数）。Python 中的线程会在一个单独的系统级线程中执行（比如说一个 POSIX 线程或者一个 Windows 线程），这些线程将由操作系统来全权管理。线程一旦启动，将独立执行直到目标函数返回。你可以查询一个线程对象的状态，看它是否还在执行：
 
-```
+```python
 if t.is_alive():
     print('Still running')
 else:
@@ -36,20 +36,20 @@ else:
 
 你也可以将一个线程加入到当前线程，并等待它终止：
 
-```
+```python
 t.join()
 ```
 
 Python 解释器在所有线程都终止后才继续执行代码剩余的部分。对于需要长时间运行的线程或者需要一直运行的后台任务，你应当考虑使用后台线程。 例如：
 
-```
+```python
 t = Thread(target=countdown, args=(10,), daemon=True)
 t.start()
 ```
 
 后台线程无法等待，不过，这些线程会在主线程终止时自动销毁。 除了如上所示的两个操作，并没有太多可以对线程做的事情。你无法结束一个线程，无法给它发送信号，无法调整它的调度，也无法执行其他高级操作。如果需要这些特性，你需要自己添加。比如说，如果你需要终止线程，那么这个线程必须通过编程在某个特定点轮询来退出。你可以像下边这样把线程放入一个类中：
 
-```
+```python
 class CountdownTask:
     def __init__(self):
         self._running = True
@@ -72,7 +72,7 @@ class CountdownTask:
 
 如果线程执行一些像 I/O 这样的阻塞操作，那么通过轮询来终止线程将使得线程之间的协调变得非常棘手。比如，如果一个线程一直阻塞在一个 I/O 操作上，它就永远无法返回，也就无法检查自己是否已经被结束了。要正确处理这些问题，你需要利用超时循环来小心操作线程。 例子如下：
 
-```
+```python
 class IOTask:
     def terminate(self):
         self._running = False
@@ -98,7 +98,7 @@ class IOTask:
 
 有时你会看到下边这种通过继承 `Thread` 类来实现的线程：
 
-```
+```python
 from threading import Thread
 
 class CountdownThread(Thread):
@@ -118,7 +118,7 @@ c.start()
 
 尽管这样也可以工作，但这使得你的代码依赖于 `threading` 库，所以你的这些代码只能在线程上下文中使用。上文所写的那些代码、函数都是与 `threading` 库无关的，这样就使得这些代码可以被用在其他的上下文中，可能与线程有关，也可能与线程无关。比如，你可以通过 `multiprocessing` 模块在一个单独的进程中执行你的代码：
 
-```
+```python
 import multiprocessing
 c = CountdownTask(5)
 p = multiprocessing.Process(target=c.run)
@@ -134,7 +134,7 @@ p.start()
 ## 解决方案
 线程的一个关键特性是每个线程都是独立运行且状态不可预测。如果程序中的其他线程需要通过判断某个线程的状态来确定自己下一步的操作，这时线程同步问题就会变得非常棘手。为了解决这些问题，我们需要使用 `threading` 库中的 `Event` 对象。 `Event` 对象包含一个可由线程设置的信号标志，它允许线程等待某些事件的发生。在初始情况下，event 对象中的信号标志被设置为假。如果有线程等待一个 event 对象，而这个 event 对象的标志为假，那么这个线程将会被一直阻塞直至该标志为真。一个线程如果将一个 event 对象的信号标志设置为真，它将唤醒所有等待这个 event 对象的线程。如果一个线程等待一个已经被设置为真的 event 对象，那么它将忽略这个事件，继续执行。 下边的代码展示了如何使用 `Event` 来协调线程的启动：
 
-```
+```python
 from threading import Thread, Event
 import time
 
@@ -165,7 +165,7 @@ print('countdown is running')
 ## 讨论
 event 对象最好单次使用，就是说，你创建一个 event 对象，让某个线程等待这个对象，一旦这个对象被设置为真，你就应该丢弃它。尽管可以通过 `clear()` 方法来重置 event 对象，但是很难确保安全地清理 event 对象并对它重新赋值。很可能会发生错过事件、死锁或者其他问题（特别是，你无法保证重置 event 对象的代码会在线程再次等待这个 event 对象之前执行）。如果一个线程需要不停地重复使用 event 对象，你最好使用 `Condition` 对象来代替。下面的代码使用 `Condition` 对象实现了一个周期定时器，每当定时器超时的时候，其他线程都可以监测到：
 
-```
+```python
 import threading
 import time
 
@@ -224,7 +224,7 @@ threading.Thread(target=countup, args=(5,)).start()
 
 event 对象的一个重要特点是当它被设置为真时会唤醒所有等待它的线程。如果你只想唤醒单个线程，最好是使用信号量或者 `Condition` 对象来替代。考虑一下这段使用信号量实现的代码：
 
-```
+```python
 # Worker thread
 def worker(n, sema):
     # Wait to be signaled
@@ -243,7 +243,7 @@ for n in range(nworkers):
 
 运行上边的代码将会启动一个线程池，但是并没有什么事情发生。这是因为所有的线程都在等待获取信号量。每次信号量被释放，只有一个线程会被唤醒并执行，示例如下：
 
-```
+```python
 >>> sema.release()
 Working 0
 >>> sema.release()
@@ -262,7 +262,7 @@ Working 1
 
 `Queue `对象已经包含了必要的锁，所以你可以通过它在多个线程间多安全地共享数据。 当使用队列时，协调生产者和消费者的关闭问题可能会有一些麻烦。一个通用的解决方法是在队列中放置一个特殊的只，当消费者读到这个值的时候，终止执行。例如：
 
-```
+```python
 from queue import Queue
 from threading import Thread
 
@@ -296,7 +296,7 @@ def consumer(in_q):
 
 本例中有一个特殊的地方：消费者在读到这个特殊值之后立即又把它放回到队列中，将之传递下去。这样，所有监听这个队列的消费者线程就可以全部关闭了。 尽管队列是最常见的线程间通信机制，但是仍然可以自己通过创建自己的数据结构并添加所需的锁和同步机制来实现线程间通信。最常见的方法是使用` Condition `变量来包装你的数据结构。下边这个例子演示了如何创建一个线程安全的优先级队列，如同1.5节中介绍的那样。
 
-```
+```python
 import heapq
 import threading
 
@@ -320,7 +320,7 @@ class PriorityQueue:
 
 使用队列来进行线程间通信是一个单向、不确定的过程。通常情况下，你没有办法知道接收数据的线程是什么时候接收到的数据并开始工作的。不过队列对象提供一些基本完成的特性，比如下边这个例子中的` task_done()` 和` join() `：
 
-```
+```python
 from queue import Queue
 from threading import Thread
 
@@ -355,7 +355,7 @@ q.join()
 
 如果一个线程需要在一个“消费者”线程处理完特定的数据项时立即得到通知，你可以把要发送的数据和一个 `Event` 放到一起使用，这样“生产者”就可以通过这个 Event 对象来监测处理的过程了。示例如下：
 
-```
+```python
 from queue import Queue
 from threading import Thread, Event
 
@@ -385,7 +385,7 @@ def consumer(in_q):
 ## 讨论
 基于简单队列编写多线程程序在多数情况下是一个比较明智的选择。从线程安全队列的底层实现来看，你无需在你的代码中使用锁和其他底层的同步机制，这些只会把你的程序弄得乱七八糟。此外，使用队列这种基于消息的通信机制可以被扩展到更大的应用范畴，比如，你可以把你的程序放入多个进程甚至是分布式系统而无需改变底层的队列结构。 使用线程队列有一个要注意的问题是，向队列中添加数据项时并不会复制此数据项，线程间通信实际上是在线程间传递对象引用。如果你担心对象的共享状态，那你最好只传递不可修改的数据结构（如：整型、字符串或者元组）或者一个对象的深拷贝。例如：
 
-```
+```python
 from queue import Queue
 from threading import Thread
 import copy
@@ -408,7 +408,7 @@ def consumer(in_q):
 
 `Queue` 对象提供一些在当前上下文很有用的附加特性。比如在创建 Queue 对象时提供可选的` size` 参数来限制可以添加到队列中的元素数量。对于“生产者”与“消费者”速度有差异的情况，为队列中的元素数量添加上限是有意义的。比如，一个“生产者”产生项目的速度比“消费者” “消费”的速度快，那么使用固定大小的队列就可以在队列已满的时候阻塞队列，以免未预期的连锁效应扩散整个程序造成死锁或者程序运行失常。在通信的线程之间进行“流量控制”是一个看起来容易实现起来困难的问题。如果你发现自己曾经试图通过摆弄队列大小来解决一个问题，这也许就标志着你的程序可能存在脆弱设计或者固有的可伸缩问题。 `get() `和` put() `方法都支持非阻塞方式和设定超时，例如：
 
-```
+```python
 import queue
 q = queue.Queue()
 
@@ -430,7 +430,7 @@ except queue.Empty:
 
 这些操作都可以用来避免当执行某些特定队列操作时发生无限阻塞的情况，比如，一个非阻塞的` put()` 方法和一个固定大小的队列一起使用，这样当队列已满时就可以执行不同的代码。比如输出一条日志信息并丢弃。
 
-```
+```python
 def producer(q):
     ...
     try:
@@ -441,7 +441,7 @@ def producer(q):
 
 如果你试图让消费者线程在执行像 `q.get() `这样的操作时，超时自动终止以便检查终止标志，你应该使用` q.get() `的可选参数 `timeout `，如下：
 
-```
+```python
 _running = True
 
 def consumer(q):
@@ -463,7 +463,7 @@ def consumer(q):
 ## 解决方案
 要在多线程程序中安全使用可变对象，你需要使用 threading 库中的 `Lock` 对象，就像下边这个例子这样：
 
-```
+```python
 import threading
 
 class SharedCounter:
@@ -494,7 +494,7 @@ class SharedCounter:
 ## 讨论
 线程调度本质上是不确定的，因此，在多线程程序中错误地使用锁机制可能会导致随机数据损坏或者其他的异常行为，我们称之为竞争条件。为了避免竞争条件，最好只在临界区（对临界资源进行操作的那部分代码）使用锁。 在一些“老的” Python 代码中，显式获取和释放锁是很常见的。下边是一个上一个例子的变种：
 
-```
+```python
 import threading
 
 class SharedCounter:
@@ -524,7 +524,7 @@ class SharedCounter:
 
 相比于这种显式调用的方法，with 语句更加优雅，也更不容易出错，特别是程序员可能会忘记调用 release() 方法或者程序在获得锁之后产生异常这两种情况（使用 with 语句可以保证在这两种情况下仍能正确释放锁）。 为了避免出现死锁的情况，使用锁机制的程序应该设定为每个线程一次只允许获取一个锁。如果不能这样做的话，你就需要更高级的死锁避免机制，我们将在12.5节介绍。 在 `threading `库中还提供了其他的同步原语，比如 `RLoct` 和 `Semaphore` 对象。但是根据以往经验，这些原语是用于一些特殊的情况，如果你只是需要简单地对可变对象进行锁定，那就不应该使用它们。一个 `RLock `（可重入锁）可以被同一个线程多次获取，主要用来实现基于监测对象模式的锁定和同步。在使用这种锁的情况下，当锁被持有时，只有一个线程可以使用完整的函数或者类中的方法。比如，你可以实现一个这样的 SharedCounter 类：
 
-```
+```python
 import threading
 
 class SharedCounter:
@@ -552,7 +552,7 @@ class SharedCounter:
 
 在上边这个例子中，没有对每一个实例中的可变对象加锁，取而代之的是一个被所有实例共享的类级锁。这个锁用来同步类方法，具体来说就是，这个锁可以保证一次只有一个线程可以调用这个类方法。不过，与一个标准的锁不同的是，已经持有这个锁的方法在调用同样使用这个锁的方法时，无需再次获取锁。比如 decr 方法。 这种实现方式的一个特点是，无论这个类有多少个实例都只用一个锁。因此在需要大量使用计数器的情况下内存效率更高。不过这样做也有缺点，就是在程序中使用大量线程并频繁更新计数器时会有争用锁的问题。 信号量对象是一个建立在共享计数器基础上的同步原语。如果计数器不为0，with 语句将计数器减1，线程被允许执行。with 语句执行结束后，计数器加１。如果计数器为0，线程将被阻塞，直到其他线程结束将计数器加1。尽管你可以在程序中像标准锁一样使用信号量来做线程同步，但是这种方式并不被推荐，因为使用信号量为程序增加的复杂性会影响程序性能。相对于简单地作为锁使用，信号量更适用于那些需要在线程之间引入信号或者限制的程序。比如，你需要限制一段代码的并发访问量，你就可以像下面这样使用信号量完成：
 
-```
+```python
 from threading import Semaphore
 import urllib.request
 
@@ -601,7 +601,7 @@ def fetch_url(url):
 
 作为使用本地存储的一个有趣的实际例子， 考虑在8.3小节定义过的 `LazyConnection` 上下文管理器类。 下面我们对它进行一些小的修改使得它可以适用于多线程：
 
-```
+```python
 from socket import socket, AF_INET, SOCK_STREAM
 import threading
 
@@ -626,7 +626,7 @@ class LazyConnection:
 
 代码中，自己观察对于` self.local `属性的使用。 它被初始化尾一个 `threading.local() `实例。 其他方法操作被存储为 `self.local.sock `的套接字对象。 有了这些就可以在多线程中安全的使用 `LazyConnection `实例了。例如：
 
-```
+```python
 from functools import partial
 def test(conn):
     with conn as s:
@@ -665,7 +665,7 @@ if __name__ == '__main__':
 ## 解决方案
 `concurrent.futures` 函数库有一个` ThreadPoolExecutor` 类可以被用来完成这个任务。 下面是一个简单的 TCP 服务器，使用了一个线程池来响应客户端：
 
-```
+```python
 from socket import AF_INET, SOCK_STREAM, socket
 from concurrent.futures import ThreadPoolExecutor
 
@@ -696,7 +696,7 @@ echo_server(('',15000))
 
 如果你想手动创建你自己的线程池， 通常可以使用一个 Queue 来轻松实现。下面是一个稍微不同但是手动实现的例子：
 
-```
+```python
 from socket import socket, AF_INET, SOCK_STREAM
 from threading import Thread
 from queue import Queue
@@ -737,7 +737,7 @@ echo_server(('',15000), 128)
 
 使用 `ThreadPoolExecutor` 相对于手动实现的一个好处在于它使得 任务提交者更方便的从被调用函数中获取返回值。例如，你可能会像下面这样写：
 
-```
+```python
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
 
@@ -761,7 +761,7 @@ y = b.result()
 ## 讨论
 通常来讲，你应该避免编写线程数量可以无限制增长的程序。例如，看看下面这个服务器：
 
-```
+```python
 from threading import Thread
 from socket import socket, AF_INET, SOCK_STREAM
 
@@ -798,7 +798,7 @@ echo_server(('',15000))
 
 创建大的线程池的一个可能需要关注的问题是内存的使用。 例如，如果你在 OS X 系统上面创建2000个线程，系统显示 Python 进程使用了超过 9 GB 的虚拟内存。 不过，这个计算通常是有误差的。当创建一个线程时，操作系统会预留一个虚拟内存区域来 放置线程的执行栈（通常是 8 MB 大小）。但是这个内存只有一小片段被实际映射到真实内存中。 因此，Python 进程使用到的真实内存其实很小 （比如，对于2000个线程来讲，只使用到了 70 MB 的真实内存，而不是 9 GB）。 如果你担心虚拟内存大小，可以使用 `threading.stack_size()` 函数来降低它。例如：
 
-```
+```python
 import threading
 threading.stack_size(65536)
 ```
@@ -812,7 +812,7 @@ threading.stack_size(65536)
 ## 解决方案
 `concurrent.futures `库提供了一个 `ProcessPoolExecutor` 类， 可被用来在一个单独的 Python 解释器中执行计算密集型函数。 不过，要使用它，你首先要有一些计算密集型的任务。 我们通过一个简单而实际的例子来演示它。假定你有个 Apache web 服务器日志目录的 gzip 压缩包：
 
-```
+```python
 logs/
    20120701.log.gz
    20120702.log.gz
@@ -825,7 +825,7 @@ logs/
 
 进一步假设每个日志文件内容类似下面这样：
 
-```
+```python
 124.115.6.12 - - [10/Jul/2012:00:18:50 -0500] "GET /robots.txt ..." 200 71
 210.212.209.67 - - [10/Jul/2012:00:18:51 -0500] "GET /ply/ ..." 200 11875
 210.212.209.67 - - [10/Jul/2012:00:18:51 -0500] "GET /favicon.ico ..." 404 369
@@ -835,7 +835,7 @@ logs/
 
 下面是一个脚本，在这些日志文件中查找出所有访问过 robots.txt 文件的主机：
 
-```
+```python
 # findrobots.py
 
 import gzip
@@ -872,7 +872,7 @@ if __name__ == '__main__':
 
 前面的程序使用了通常的 map-reduce 风格来编写。 函数 `find_robots() `在一个文件名集合上做 map 操作，并将结果汇总为一个单独的结果， 也就是 `find_all_robots()` 函数中的 `all_robots` 集合。 现在，假设你想要修改这个程序让它使用多核 CPU。 很简单——只需要将 map()操作替换为一个 `concurrent.futures` 库中生成的类似操作即可。 下面是一个简单修改版本：
 
-```
+```python
 # findrobots.py
 
 import gzip
@@ -915,7 +915,7 @@ if __name__ == '__main__':
 ## 讨论
 `ProcessPoolExecutor` 的典型用法如下：
 
-```
+```python
 from concurrent.futures import ProcessPoolExecutor
 
 with ProcessPoolExecutor() as pool:
@@ -928,7 +928,7 @@ with ProcessPoolExecutor() as pool:
 
 被提交到池中的工作必须被定义为一个函数。有两种方法去提交。 如果你想让一个列表推导或一个 `map()` 操作并行执行的话，可使用` pool.map()` :
 
-```
+```python
 # A function that performs a lot of work
 def work(x):
     ...
@@ -944,7 +944,7 @@ with ProcessPoolExecutor() as pool:
 
 另外，你可以使用` pool.submit()` 来手动的提交单个任务：
 
-```
+```python
 # Some function
 def work(x):
     ...
@@ -964,7 +964,7 @@ with ProcessPoolExecutor() as pool:
 
 如果不想阻塞，你还可以使用一个回调函数，例如：
 
-```
+```python
 def when_done(r):
     print('Got:', r.result())
 
@@ -1002,7 +1002,7 @@ with ProcessPoolExecutor() as pool:
 
 说了这么多，现在想说的是我们有两种策略来解决 GIL 的缺点。 首先，如果你完全工作于 Python 环境中，你可以使用 `multiprocessing `模块来创建一个进程池， 并像协同处理器一样的使用它。例如，加入你有如下的线程代码：
 
-```
+```python
 # Performs a large calculation (CPU bound)
 def some_work(args):
     ...
@@ -1018,7 +1018,7 @@ def some_thread():
 
 修改代码，使用进程池：
 
-```
+```python
 # Processing pool (see below for initiazation)
 pool = None
 
@@ -1044,7 +1044,7 @@ if __name__ == '__main__':
 
 另外一个解决 GIL 的策略是使用 C 扩展编程技术。 主要思想是将计算密集型任务转移给 C，跟 Python 独立，在工作的时候在 C 代码中释放 GIL。 这可以通过在 C 代码中插入下面这样的特殊宏来完成：
 
-```
+```python
 #include "Python.h"
 ...
 
@@ -1082,7 +1082,7 @@ actore 模式是一种最古老的也是最简单的并行和分布式计算解�
 
 结合使用一个线程和一个队列可以很容易的定义 actor，例如：
 
-```
+```python
 from queue import Queue
 from threading import Thread, Event
 
@@ -1163,7 +1163,7 @@ p.join()
 
 如果你放宽对于同步和异步消息发送的要求， 类 actor 对象还可以通过生成器来简化定义。例如：
 
-```
+```python
 def print_actor():
     while True:
 
@@ -1184,7 +1184,7 @@ p.close()
 ## 讨论
 actor 模式的魅力就在于它的简单性。 实际上，这里仅仅只有一个核心操作 `send()` . 甚至，对于在基于 actor 系统中的“消息”的泛化概念可以已多种方式被扩展。 例如，你可以以元组形式传递标签消息，让 actor 执行不同的操作，如下：
 
-```
+```python
 class TaggedActor(Actor):
     def run(self):
         while True:
@@ -1207,7 +1207,7 @@ a.send(('B', 2, 3))   # Invokes do_B(2,3)
 
 作为另外一个例子，下面的 actor 允许在一个工作者中运行任意的函数， 并且通过一个特殊的 Result 对象返回结果：
 
-```
+```python
 from threading import Event
 class Result:
     def __init__(self):
@@ -1250,7 +1250,7 @@ print(r.result())
 ## 解决方案
 要实现发布/订阅的消息通信模式， 你通常要引入一个单独的“交换机”或“网关”对象作为所有消息的中介。 也就是说，不直接将消息从一个任务发送到另一个，而是将其发送给交换机， 然后由交换机将它发送给一个或多个被关联任务。下面是一个非常简单的交换机实现例子：
 
-```
+```python
 from collections import defaultdict
 
 class Exchange:
@@ -1279,7 +1279,7 @@ def get_exchange(name):
 
 下面是一个简单例子，演示了如何使用一个交换机：
 
-```
+```python
 # Example of a task.  Any object with a send() method
 
 class Task:
@@ -1315,7 +1315,7 @@ exc.detach(task_b)
 
 其次，交换机广播消息给多个订阅者的能力带来了一个全新的通信模式。 例如，你可以使用多任务系统、广播或扇出。 你还可以通过以普通订阅者身份绑定来构建调试和诊断工具。 例如，下面是一个简单的诊断类，可以显示被发送的消息：
 
-```
+```python
 class DisplayMessages:
     def __init__(self):
         self.count = 0
@@ -1332,7 +1332,7 @@ exc.attach(d)
 
 关于交换机的一个可能问题是对于订阅者的正确绑定和解绑。 为了正确的管理资源，每一个绑定的订阅者必须最终要解绑。 在代码中通常会是像下面这样的模式：
 
-```
+```python
 exc = get_exchange('name')
 exc.attach(some_task)
 try:
@@ -1343,7 +1343,7 @@ finally:
 
 某种意义上，这个和使用文件、锁和类似对象很像。 通常很容易会忘记最后的` detach()` 步骤。 为了简化这个，你可以考虑使用上下文管理器协议。 例如，在交换机对象上增加一个 `subscribe() `方法，如下：
 
-```
+```python
 from contextlib import contextmanager
 from collections import defaultdict
 
@@ -1398,7 +1398,7 @@ with exc.subscribe(task_a, task_b):
 ## 解决方案
 要使用生成器实现自己的并发，你首先要对生成器函数和` yield` 语句有深刻理解。 `yield` 语句会让一个生成器挂起它的执行，这样就可以编写一个调度器， 将生成器当做某种“任务”并使用任务协作切换来替换它们的执行。 要演示这种思想，考虑下面两个使用简单的` yield` 语句的生成器函数：
 
-```
+```python
 # Two simple generator functions
 def countdown(n):
     while n > 0:
@@ -1417,7 +1417,7 @@ def countup(n):
 
 这些函数在内部使用 yield 语句，下面是一个实现了简单任务调度器的代码：
 
-```
+```python
 from collections import deque
 
 class TaskScheduler:
@@ -1455,7 +1455,7 @@ sched.run()
 
 `TaskScheduler` 类在一个循环中运行生成器集合——每个都运行到碰到 yield 语句为止。 运行这个例子，输出如下：
 
-```
+```python
 T-minus 10
 T-minus 5
 Counting up 0
@@ -1476,7 +1476,7 @@ T-minus 2
 
 下面的代码演示了使用生成器来实现一个不依赖线程的 actor：
 
-```
+```python
 from collections import deque
 
 class ActorScheduler:
@@ -1543,7 +1543,7 @@ if __name__ == '__main__':
 
 下面是一个更加高级的例子，演示了使用生成器来实现一个并发网络应用程序：
 
-```
+```python
 from collections import deque
 from select import select
 
@@ -1713,7 +1713,7 @@ if __name__ == '__main__':
 ## 讨论
 在构建基于生成器的并发框架时，通常会使用更常见的 yield 形式：
 
-```
+```python
 def some_generator():
     ...
     result = yield data
@@ -1722,7 +1722,7 @@ def some_generator():
 
 使用这种形式的 yield 语句的函数通常被称为“协程”。 通过调度器，yield 语句在一个循环中被处理，如下：
 
-```
+```python
 f = some_generator()
 
 # Initial result. Is None to start since nothing has been computed
@@ -1752,7 +1752,7 @@ PEP 3156 同样有一个关于使用协程的异步 I/O 模型。 特别的，�
 ## 解决方案
 对于轮询问题的一个常见解决方案中有个很少有人知道的技巧，包含了一个隐藏的回路网络连接。 本质上讲其思想就是：对于每个你想要轮询的队列，你创建一对连接的套接字。 然后你在其中一个套接字上面编写代码来标识存在的数据， 另外一个套接字被传给 `select()` 或类似的一个轮询数据到达的函数。下面的例子演示了这个思想：
 
-```
+```python
 import queue
 import socket
 import os
@@ -1791,7 +1791,7 @@ class PollableQueue(queue.Queue):
 
 下面是一个例子，定义了一个为到来的元素监控多个队列的消费者：
 
-```
+```python
 import select
 import threading
 
@@ -1825,7 +1825,7 @@ q2.put(15)
 ## 讨论
 对于轮询非类文件对象，比如队列通常都是比较棘手的问题。 例如，如果你不使用上面的套接字技术， 你唯一的选择就是编写代码来循环遍历这些队列并使用一个定时器。像下面这样：
 
-```
+```python
 import time
 def consumer(queues):
     while True:
@@ -1840,7 +1840,7 @@ def consumer(queues):
 
 这样做其实不合理，还会引入其他的性能问题。 例如，如果新的数据被加入到一个队列中，至少要花10毫秒才能被发现。 如果你之前的轮询还要去轮询其他对象，比如网络套接字那还会有更多问题。 例如，如果你想同时轮询套接字和队列，你可能要像下面这样使用：
 
-```
+```python
 import select
 
 def event_loop(sockets, queues):
@@ -1864,7 +1864,7 @@ def event_loop(sockets, queues):
 ## 解决方案
 创建一个正确的守护进程需要一个精确的系统调用序列以及对于细节的控制。 下面的代码展示了怎样定义一个守护进程，可以启动后很容易的停止它。
 
-```
+```python
 #!/usr/bin/env python3
 # daemon.py
 
@@ -1963,7 +1963,7 @@ if __name__ == '__main__':
 
 要启动这个守护进程，用户需要使用如下的命令：
 
-```
+```python
 bash % daemon.py start
 bash % cat /tmp/daemon.pid
 2882
@@ -1976,7 +1976,7 @@ Daemon Alive! Fri Oct 12 13:45:47 2012
 
 守护进程可以完全在后台运行，因此这个命令会立即返回。 不过，你可以像上面那样查看与它相关的 pid 文件和日志。要停止这个守护进程，使用：
 
-```
+```python
 bash % daemon.py stop
 bash %
 ```
@@ -1984,7 +1984,7 @@ bash %
 ## 讨论
 本节定义了一个函数 `daemonize()` ，在程序启动时被调用使得程序以一个守护进程来运行。 `daemonize() `函数只接受关键字参数，这样的话可选参数在被使用时就更清晰了。 它会强制用户像下面这样使用它：
 
-```
+```python
 daemonize('daemon.pid',
           stdin='/dev/null,
           stdout='/tmp/daemon.log',
@@ -1993,7 +1993,7 @@ daemonize('daemon.pid',
 
 而不是像下面这样含糊不清的调用：
 
-```
+```python
 # Illegal. Must use keyword arguments
 daemonize('daemon.pid',
           '/dev/null', '/tmp/daemon.log','/tmp/daemon.log')

@@ -349,28 +349,30 @@
 <h2 id="解决方案">解决方案</h2>
 <p>使用 <code>unittest.mock</code> 模块中的 <code>patch()</code> 函数， 使用起来非常简单，可以为单个测试模拟 <code>sys.stdout</code> 然后回滚， 并且不产生大量的临时变量或在测试用例直接暴露状态变量。</p>
 <p>作为一个例子，我们在 <code>mymodule</code> 模块中定义如下一个函数：</p>
-<pre><code># mymodule.py
+<pre><code class="lang-python"><span class="hljs-comment"># mymodule.py</span>
 
-def urlprint(protocol, host, domain):
-    url = '{}://{}.{}'.format(protocol, host, domain)
-    print(url)
-</code></pre><p>默认情况下内置的 <code>print</code> 函数会将输出发送到 <code>sys.stdout</code> 。 为了测试输出真的在那里，你可以使用一个替身对象来模拟它，然后使用断言来确认结果。 使用 <code>unittest.mock</code> 模块的<code>patch()</code> 方法可以很方便的在测试运行的上下文中替换对象， 并且当测试完成时候自动返回它们的原有状态。下面是对 <code>mymodule</code>模块的测试代码：</p>
-<pre><code>from io import StringIO
-from unittest import TestCase
-from unittest.mock import patch
-import mymodule
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">urlprint</span>(<span class="hljs-params">protocol, host, domain</span>):
+    url = <span class="hljs-string">'{}://{}.{}'</span>.<span class="hljs-built_in">format</span>(protocol, host, domain)
+    <span class="hljs-built_in">print</span>(url)
+</code></pre>
+<p>默认情况下内置的 <code>print</code> 函数会将输出发送到 <code>sys.stdout</code> 。 为了测试输出真的在那里，你可以使用一个替身对象来模拟它，然后使用断言来确认结果。 使用 <code>unittest.mock</code> 模块的<code>patch()</code> 方法可以很方便的在测试运行的上下文中替换对象， 并且当测试完成时候自动返回它们的原有状态。下面是对 <code>mymodule</code>模块的测试代码：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> io <span class="hljs-keyword">import</span> StringIO
+<span class="hljs-keyword">from</span> unittest <span class="hljs-keyword">import</span> TestCase
+<span class="hljs-keyword">from</span> unittest.mock <span class="hljs-keyword">import</span> patch
+<span class="hljs-keyword">import</span> mymodule
 
-class TestURLPrint(TestCase):
-    def test_url_gets_to_stdout(self):
-        protocol = 'http'
-        host = 'www'
-        domain = 'example.com'
-        expected_url = '{}://{}.{}\n'.format(protocol, host, domain)
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TestURLPrint</span>(<span class="hljs-title class_ inherited__">TestCase</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_url_gets_to_stdout</span>(<span class="hljs-params">self</span>):
+        protocol = <span class="hljs-string">'http'</span>
+        host = <span class="hljs-string">'www'</span>
+        domain = <span class="hljs-string">'example.com'</span>
+        expected_url = <span class="hljs-string">'{}://{}.{}\n'</span>.<span class="hljs-built_in">format</span>(protocol, host, domain)
 
-        with patch('sys.stdout', new=StringIO()) as fake_out:
+        <span class="hljs-keyword">with</span> patch(<span class="hljs-string">'sys.stdout'</span>, new=StringIO()) <span class="hljs-keyword">as</span> fake_out:
             mymodule.urlprint(protocol, host, domain)
-            self.assertEqual(fake_out.getvalue(), expected_url)
-</code></pre><h2 id="讨论">讨论</h2>
+            <span class="hljs-variable language_">self</span>.assertEqual(fake_out.getvalue(), expected_url)
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>urlprint()</code>函数接受三个参数，测试方法开始会先设置每一个参数的值。 <code>expected_url</code> 变量被设置成包含期望的输出的字符串。</p>
 <p><code>unittest.mock.patch()</code>函数被用作一个上下文管理器，使用<code>StringIO</code> 对象来代替 <code>sys.stdout</code> . <code>fake_out</code> 变量是在该进程中被创建的模拟对象。 在 with 语句中使用它可以执行各种检查。当 with 语句结束时，<code>patch</code> 会将所有东西恢复到测试开始前的状态。 有一点需要注意的是某些对 Python 的 C 扩展可能会忽略掉 <code>sys.stdout</code> 的配置二直接写入到标准输出中。 限于篇幅，本节不会涉及到这方面的讲解，它适用于纯 Python 代码。 如果你真的需要在 C 扩展中捕获 I/O，你可以先打开一个临时文件，然后将标准输出重定向到该文件中。 更多关于捕获以字符串形式捕获 I/O 和 <code>StringIO</code> 对象请参阅5.6小节。</p>
 <h1 id="142-在单元测试中给对象打补丁">14.2 在单元测试中给对象打补丁</h1>
@@ -378,124 +380,133 @@ class TestURLPrint(TestCase):
 <p>你写的单元测试中需要给指定的对象打补丁， 用来断言它们在测试中的期望行为（比如，断言被调用时的参数个数，访问指定的属性等）。</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>unittest.mock.patch()</code> 函数可被用来解决这个问题。<code>patch()</code> 还可被用作一个装饰器、上下文管理器或单独使用，尽管并不常见。 例如，下面是一个将它当做装饰器使用的例子：</p>
-<pre><code>from unittest.mock import patch
-import example
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> unittest.mock <span class="hljs-keyword">import</span> patch
+<span class="hljs-keyword">import</span> example
 
-@patch('example.func')
-def test1(x, mock_func):
-    example.func(x)       # Uses patched example.func
+<span class="hljs-meta">@patch(<span class="hljs-params"><span class="hljs-string">'example.func'</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test1</span>(<span class="hljs-params">x, mock_func</span>):
+    example.func(x)       <span class="hljs-comment"># Uses patched example.func</span>
     mock_func.assert_called_with(x)
-</code></pre><p>它还可以被当做一个上下文管理器：</p>
-<pre><code>with patch('example.func') as mock_func:
-    example.func(x)      # Uses patched example.func
+</code></pre>
+<p>它还可以被当做一个上下文管理器：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">with</span> patch(<span class="hljs-string">'example.func'</span>) <span class="hljs-keyword">as</span> mock_func:
+    example.func(x)      <span class="hljs-comment"># Uses patched example.func</span>
     mock_func.assert_called_with(x)
-</code></pre><p>最后，你还可以手动的使用它打补丁：</p>
-<pre><code>p = patch('example.func')
+</code></pre>
+<p>最后，你还可以手动的使用它打补丁：</p>
+<pre><code class="lang-python">p = patch(<span class="hljs-string">'example.func'</span>)
 mock_func = p.start()
 example.func(x)
 mock_func.assert_called_with(x)
 p.stop()
-</code></pre><p>如果可能的话，你能够叠加装饰器和上下文管理器来给多个对象打补丁。例如：</p>
-<pre><code>@patch('example.func1')
-@patch('example.func2')
-@patch('example.func3')
-def test1(mock1, mock2, mock3):
+</code></pre>
+<p>如果可能的话，你能够叠加装饰器和上下文管理器来给多个对象打补丁。例如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">@patch(<span class="hljs-params"><span class="hljs-string">'example.func1'</span></span>)</span>
+<span class="hljs-meta">@patch(<span class="hljs-params"><span class="hljs-string">'example.func2'</span></span>)</span>
+<span class="hljs-meta">@patch(<span class="hljs-params"><span class="hljs-string">'example.func3'</span></span>)</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test1</span>(<span class="hljs-params">mock1, mock2, mock3</span>):
     ...
 
-def test2():
-    with patch('example.patch1') as mock1, \
-         patch('example.patch2') as mock2, \
-         patch('example.patch3') as mock3:
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">test2</span>():
+    <span class="hljs-keyword">with</span> patch(<span class="hljs-string">'example.patch1'</span>) <span class="hljs-keyword">as</span> mock1, \
+         patch(<span class="hljs-string">'example.patch2'</span>) <span class="hljs-keyword">as</span> mock2, \
+         patch(<span class="hljs-string">'example.patch3'</span>) <span class="hljs-keyword">as</span> mock3:
     ...
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>patch()</code> 接受一个已存在对象的全路径名，将其替换为一个新的值。 原来的值会在装饰器函数或上下文管理器完成后自动恢复回来。 默认情况下，所有值会被 <code>MagicMock</code> 实例替代。例如：</p>
-<pre><code>&gt;&gt;&gt; x = 42
-&gt;&gt;&gt; with patch('__main__.x'):
-...     print(x)
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>x = <span class="hljs-number">42</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> patch(<span class="hljs-string">'__main__.x'</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x)
 ...
-&lt;MagicMock name='x' id='4314230032'&gt;
-&gt;&gt;&gt; x
-42
+&lt;MagicMock name=<span class="hljs-string">'x'</span> <span class="hljs-built_in">id</span>=<span class="hljs-string">'4314230032'</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>x
+<span class="hljs-number">42</span>
 &gt;&gt;&gt;
-</code></pre><p>不过，你可以通过给 <code>patch()</code> 提供第二个参数来将值替换成任何你想要的：</p>
-<pre><code>&gt;&gt;&gt; x
-42
-&gt;&gt;&gt; with patch('__main__.x', 'patched_value'):
-...     print(x)
+</code></pre>
+<p>不过，你可以通过给 <code>patch()</code> 提供第二个参数来将值替换成任何你想要的：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>x
+<span class="hljs-number">42</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> patch(<span class="hljs-string">'__main__.x'</span>, <span class="hljs-string">'patched_value'</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(x)
 ...
 patched_value
-&gt;&gt;&gt; x
-42
+<span class="hljs-meta">&gt;&gt;&gt; </span>x
+<span class="hljs-number">42</span>
 &gt;&gt;&gt;
-</code></pre><p>被用来作为替换值的 <code>MagicMock</code> 实例能够模拟可调用对象和实例。 他们记录对象的使用信息并允许你执行断言检查，例如：</p>
-<pre><code>&gt;&gt;&gt; from unittest.mock import MagicMock
-&gt;&gt;&gt; m = MagicMock(return_value = 10)
-&gt;&gt;&gt; m(1, 2, debug=True)
-10
-&gt;&gt;&gt; m.assert_called_with(1, 2, debug=True)
-&gt;&gt;&gt; m.assert_called_with(1, 2)
+</code></pre>
+<p>被用来作为替换值的 <code>MagicMock</code> 实例能够模拟可调用对象和实例。 他们记录对象的使用信息并允许你执行断言检查，例如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> unittest.mock <span class="hljs-keyword">import</span> MagicMock
+<span class="hljs-meta">&gt;&gt;&gt; </span>m = MagicMock(return_value = <span class="hljs-number">10</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>m(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, debug=<span class="hljs-literal">True</span>)
+<span class="hljs-number">10</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.assert_called_with(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, debug=<span class="hljs-literal">True</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.assert_called_with(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
 Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-  File ".../unittest/mock.py", line 726, in assert_called_with
-    raise AssertionError(msg)
-AssertionError: Expected call: mock(1, 2)
-Actual call: mock(1, 2, debug=True)
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+  File <span class="hljs-string">".../unittest/mock.py"</span>, line <span class="hljs-number">726</span>, <span class="hljs-keyword">in</span> assert_called_with
+    <span class="hljs-keyword">raise</span> AssertionError(msg)
+AssertionError: Expected call: mock(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)
+Actual call: mock(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, debug=<span class="hljs-literal">True</span>)
 &gt;&gt;&gt;
 
-&gt;&gt;&gt; m.upper.return_value = 'HELLO'
-&gt;&gt;&gt; m.upper('hello')
-'HELLO'
-&gt;&gt;&gt; assert m.upper.called
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.upper.return_value = <span class="hljs-string">'HELLO'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.upper(<span class="hljs-string">'hello'</span>)
+<span class="hljs-string">'HELLO'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">assert</span> m.upper.called
 
-&gt;&gt;&gt; m.split.return_value = ['hello', 'world']
-&gt;&gt;&gt; m.split('hello world')
-['hello', 'world']
-&gt;&gt;&gt; m.split.assert_called_with('hello world')
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.split.return_value = [<span class="hljs-string">'hello'</span>, <span class="hljs-string">'world'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.split(<span class="hljs-string">'hello world'</span>)
+[<span class="hljs-string">'hello'</span>, <span class="hljs-string">'world'</span>]
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.split.assert_called_with(<span class="hljs-string">'hello world'</span>)
 &gt;&gt;&gt;
 
-&gt;&gt;&gt; m['blah']
-&lt;MagicMock name='mock.__getitem__()' id='4314412048'&gt;
-&gt;&gt;&gt; m.__getitem__.called
-True
-&gt;&gt;&gt; m.__getitem__.assert_called_with('blah')
+<span class="hljs-meta">&gt;&gt;&gt; </span>m[<span class="hljs-string">'blah'</span>]
+&lt;MagicMock name=<span class="hljs-string">'mock.__getitem__()'</span> <span class="hljs-built_in">id</span>=<span class="hljs-string">'4314412048'</span>&gt;
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.__getitem__.called
+<span class="hljs-literal">True</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>m.__getitem__.assert_called_with(<span class="hljs-string">'blah'</span>)
 &gt;&gt;&gt;
-</code></pre><p>一般来讲，这些操作会在一个单元测试中完成。例如，假设你已经有了像下面这样的函数：</p>
-<pre><code># example.py
-from urllib.request import urlopen
-import csv
+</code></pre>
+<p>一般来讲，这些操作会在一个单元测试中完成。例如，假设你已经有了像下面这样的函数：</p>
+<pre><code class="lang-python"><span class="hljs-comment"># example.py</span>
+<span class="hljs-keyword">from</span> urllib.request <span class="hljs-keyword">import</span> urlopen
+<span class="hljs-keyword">import</span> csv
 
-def dowprices():
-    u = urlopen('http://finance.yahoo.com/d/quotes.csv?s=@^DJI&amp;f=sl1')
-    lines = (line.decode('utf-8') for line in u)
-    rows = (row for row in csv.reader(lines) if len(row) == 2)
-    prices = { name:float(price) for name, price in rows }
-    return prices
-</code></pre><p>正常来讲，这个函数会使用 <code>urlopen()</code> 从 Web 上面获取数据并解析它。 在单元测试中，你可以给它一个预先定义好的数据集。下面是使用补丁操作的例子:</p>
-<pre><code>import unittest
-from unittest.mock import patch
-import io
-import example
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">dowprices</span>():
+    u = urlopen(<span class="hljs-string">'http://finance.yahoo.com/d/quotes.csv?s=@^DJI&amp;f=sl1'</span>)
+    lines = (line.decode(<span class="hljs-string">'utf-8'</span>) <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> u)
+    rows = (row <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> csv.reader(lines) <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(row) == <span class="hljs-number">2</span>)
+    prices = { name:<span class="hljs-built_in">float</span>(price) <span class="hljs-keyword">for</span> name, price <span class="hljs-keyword">in</span> rows }
+    <span class="hljs-keyword">return</span> prices
+</code></pre>
+<p>正常来讲，这个函数会使用 <code>urlopen()</code> 从 Web 上面获取数据并解析它。 在单元测试中，你可以给它一个预先定义好的数据集。下面是使用补丁操作的例子:</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> unittest
+<span class="hljs-keyword">from</span> unittest.mock <span class="hljs-keyword">import</span> patch
+<span class="hljs-keyword">import</span> io
+<span class="hljs-keyword">import</span> example
 
-sample_data = io.BytesIO(b'''\
+sample_data = io.BytesIO(<span class="hljs-string">b'''\
 "IBM",91.1\r
 "AA",13.25\r
 "MSFT",27.72\r
 \r
-''')
+'''</span>)
 
-class Tests(unittest.TestCase):
-    @patch('example.urlopen', return_value=sample_data)
-    def test_dowprices(self, mock_urlopen):
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Tests</span>(unittest.TestCase):
+<span class="hljs-meta">    @patch(<span class="hljs-params"><span class="hljs-string">'example.urlopen'</span>, return_value=sample_data</span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_dowprices</span>(<span class="hljs-params">self, mock_urlopen</span>):
         p = example.dowprices()
-        self.assertTrue(mock_urlopen.called)
-        self.assertEqual(p,
-                         {'IBM': 91.1,
-                          'AA': 13.25,
-                          'MSFT' : 27.72})
+        <span class="hljs-variable language_">self</span>.assertTrue(mock_urlopen.called)
+        <span class="hljs-variable language_">self</span>.assertEqual(p,
+                         {<span class="hljs-string">'IBM'</span>: <span class="hljs-number">91.1</span>,
+                          <span class="hljs-string">'AA'</span>: <span class="hljs-number">13.25</span>,
+                          <span class="hljs-string">'MSFT'</span> : <span class="hljs-number">27.72</span>})
 
-if __name__ == '__main__':
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
     unittest.main()
-</code></pre><p>本例中，位于 <code>example</code> 模块中的 <code>urlopen()</code> 函数被一个模拟对象替代， 该对象会返回一个包含测试数据的 <code>ByteIO()</code>.</p>
+</code></pre>
+<p>本例中，位于 <code>example</code> 模块中的 <code>urlopen()</code> 函数被一个模拟对象替代， 该对象会返回一个包含测试数据的 <code>ByteIO()</code>.</p>
 <p>还有一点，在打补丁时我们使用了 <code>example.urlopen</code> 来代替 <code>urllib.request.urlopen</code> 。 当你创建补丁的时候，你必须使用它们在测试代码中的名称。 由于测试代码使用了 <code>from urllib.request import urlopen</code> ,那么 <code>dowprices()</code> 函数 中使用的 <code>urlopen()</code>函数实际上就位于 <code>example</code>模块了。</p>
 <p>本节实际上只是对 <code>unittest.mock</code>模块的一次浅尝辄止。 更多更高级的特性，请参考<a href="http://docs.python.org/3/library/unittest.mock" target="_blank">官方文档</a></p>
 <h1 id="143-在单元测试中测试异常情况">14.3 在单元测试中测试异常情况</h1>
@@ -503,80 +514,88 @@ if __name__ == '__main__':
 <p>你想写个测试用例来准确的判断某个异常是否被抛出。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>对于异常的测试可使用 <code>assertRaises()</code> 方法。 例如，如果你想测试某个函数抛出了 <code>ValueError</code> 异常，像下面这样写：</p>
-<pre><code>import unittest
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> unittest
 
-# A simple function to illustrate
-def parse_int(s):
-    return int(s)
+<span class="hljs-comment"># A simple function to illustrate</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">parse_int</span>(<span class="hljs-params">s</span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(s)
 
-class TestConversion(unittest.TestCase):
-    def test_bad_int(self):
-        self.assertRaises(ValueError, parse_int, 'N/A')
-</code></pre><p>如果你想测试异常的具体值，需要用到另外一种方法：</p>
-<pre><code>import errno
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TestConversion</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_bad_int</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.assertRaises(ValueError, parse_int, <span class="hljs-string">'N/A'</span>)
+</code></pre>
+<p>如果你想测试异常的具体值，需要用到另外一种方法：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> errno
 
-class TestIO(unittest.TestCase):
-    def test_file_not_found(self):
-        try:
-            f = open('/file/not/found')
-        except IOError as e:
-            self.assertEqual(e.errno, errno.ENOENT)
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TestIO</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_file_not_found</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">try</span>:
+            f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'/file/not/found'</span>)
+        <span class="hljs-keyword">except</span> IOError <span class="hljs-keyword">as</span> e:
+            <span class="hljs-variable language_">self</span>.assertEqual(e.errno, errno.ENOENT)
 
-        else:
-            self.fail('IOError not raised')
-</code></pre><h2 id="讨论">讨论</h2>
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.fail(<span class="hljs-string">'IOError not raised'</span>)
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p><code>assertRaises()</code> 方法为测试异常存在性提供了一个简便方法。 一个常见的陷阱是手动去进行异常检测。比如：</p>
-<pre><code>class TestConversion(unittest.TestCase):
-    def test_bad_int(self):
-        try:
-            r = parse_int('N/A')
-        except ValueError as e:
-            self.assertEqual(type(e), ValueError)
-</code></pre><p>这种方法的问题在于它很容易遗漏其他情况，比如没有任何异常抛出的时候。 那么你还得需要增加另外的检测过程，如下面这样：</p>
-<pre><code>class TestConversion(unittest.TestCase):
-    def test_bad_int(self):
-        try:
-            r = parse_int('N/A')
-        except ValueError as e:
-            self.assertEqual(type(e), ValueError)
-        else:
-            self.fail('ValueError not raised')
-</code></pre><p><code>assertRaises()</code> 方法会处理所有细节，因此你应该使用它。</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TestConversion</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_bad_int</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">try</span>:
+            r = parse_int(<span class="hljs-string">'N/A'</span>)
+        <span class="hljs-keyword">except</span> ValueError <span class="hljs-keyword">as</span> e:
+            <span class="hljs-variable language_">self</span>.assertEqual(<span class="hljs-built_in">type</span>(e), ValueError)
+</code></pre>
+<p>这种方法的问题在于它很容易遗漏其他情况，比如没有任何异常抛出的时候。 那么你还得需要增加另外的检测过程，如下面这样：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TestConversion</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_bad_int</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">try</span>:
+            r = parse_int(<span class="hljs-string">'N/A'</span>)
+        <span class="hljs-keyword">except</span> ValueError <span class="hljs-keyword">as</span> e:
+            <span class="hljs-variable language_">self</span>.assertEqual(<span class="hljs-built_in">type</span>(e), ValueError)
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-variable language_">self</span>.fail(<span class="hljs-string">'ValueError not raised'</span>)
+</code></pre>
+<p><code>assertRaises()</code> 方法会处理所有细节，因此你应该使用它。</p>
 <p><code>assertRaises()</code> 的一个缺点是它测不了异常具体的值是多少。 为了测试异常值，可以使用 <code>assertRaisesRegex()</code>方法， 它可同时测试异常的存在以及通过正则式匹配异常的字符串表示。例如：</p>
-<pre><code>class TestConversion(unittest.TestCase):
-    def test_bad_int(self):
-        self.assertRaisesRegex(ValueError, 'invalid literal .*',
-                                       parse_int, 'N/A')
-</code></pre><p><code>assertRaises()</code> 和 <code>assertRaisesRegex()</code> 还有一个容易忽略的地方就是它们还能被当做上下文管理器使用：</p>
-<pre><code>class TestConversion(unittest.TestCase):
-    def test_bad_int(self):
-        with self.assertRaisesRegex(ValueError, 'invalid literal .*'):
-            r = parse_int('N/A')
-</code></pre><p>但你的测试涉及到多个执行步骤的时候这种方法就很有用了。</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TestConversion</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_bad_int</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.assertRaisesRegex(ValueError, <span class="hljs-string">'invalid literal .*'</span>,
+                                       parse_int, <span class="hljs-string">'N/A'</span>)
+</code></pre>
+<p><code>assertRaises()</code> 和 <code>assertRaisesRegex()</code> 还有一个容易忽略的地方就是它们还能被当做上下文管理器使用：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">TestConversion</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_bad_int</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">with</span> <span class="hljs-variable language_">self</span>.assertRaisesRegex(ValueError, <span class="hljs-string">'invalid literal .*'</span>):
+            r = parse_int(<span class="hljs-string">'N/A'</span>)
+</code></pre>
+<p>但你的测试涉及到多个执行步骤的时候这种方法就很有用了。</p>
 <h1 id="144-将测试输出用日志记录到文件中">14.4 将测试输出用日志记录到文件中</h1>
 <h2 id="问题">问题</h2>
 <p>你希望将单元测试的输出写到到某个文件中去，而不是打印到标准输出。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>运行单元测试一个常见技术就是在测试文件底部加入下面这段代码片段：</p>
-<pre><code>import unittest
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> unittest
 
-class MyTest(unittest.TestCase):
-    pass
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MyTest</span>(unittest.TestCase):
+    <span class="hljs-keyword">pass</span>
 
-if __name__ == '__main__':
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
     unittest.main()
-</code></pre><p>这样的话测试文件就是可执行的，并且会将运行测试的结果打印到标准输出上。 如果你想重定向输出，就需要像下面这样修改 <code>main()</code> 函数：</p>
-<pre><code>import sys
+</code></pre>
+<p>这样的话测试文件就是可执行的，并且会将运行测试的结果打印到标准输出上。 如果你想重定向输出，就需要像下面这样修改 <code>main()</code> 函数：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> sys
 
-def main(out=sys.stderr, verbosity=2):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>(<span class="hljs-params">out=sys.stderr, verbosity=<span class="hljs-number">2</span></span>):
     loader = unittest.TestLoader()
     suite = loader.loadTestsFromModule(sys.modules[__name__])
     unittest.TextTestRunner(out,verbosity=verbosity).run(suite)
 
-if __name__ == '__main__':
-    with open('testing.out', 'w') as f:
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">'testing.out'</span>, <span class="hljs-string">'w'</span>) <span class="hljs-keyword">as</span> f:
         main(f)
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>本节感兴趣的部分并不是将测试结果重定向到一个文件中， 而是通过这样做向你展示了 <code>unittest</code> 模块中一些值得关注的内部工作原理。</p>
 <p><code>unittest</code> 模块首先会组装一个测试套件。 这个测试套件包含了你定义的各种方法。一旦套件组装完成，它所包含的测试就可以被执行了。</p>
 <p>这两步是分开的，<code>unittest.TestLoader</code> 实例被用来组装测试套件。 <code>loadTestsFromModule()</code> 是它定义的方法之一，用来收集测试用例。 它会为 <code>TestCase</code> 类扫描某个模块并将其中的测试方法提取出来。 如果你想进行细粒度的控制， 可以使用 <code>loadTestsFromTestCase()</code> 方法来从某个继承 TestCase 的类中提取测试方法。 <code>TextTestRunner</code>类是一个测试运行类的例子， 这个类的主要用途是执行某个测试套件中包含的测试方法。 这个类跟执行 <code>unittest.main()</code> 函数所使用的测试运行器是一样的。 不过，我们在这里对它进行了一些列底层配置，包括输出文件和提升级别。 尽管本节例子代码很少，但是能指导你如何对 <code>unittest</code> 框架进行更进一步的自定义。 要想自定义测试套件的装配方式，你可以对 <code>TestLoader</code> 类执行更多的操作。 为了自定义测试运行，你可以构造一个自己的测试运行类来模拟 <code>TextTestRunner</code> 的功能。 而这些已经超出了本节的范围。<code>unittest</code> 模块的文档对底层实现原理有更深入的讲解，可以去看看。</p>
@@ -585,415 +604,456 @@ if __name__ == '__main__':
 <p>你想在单元测试中忽略或标记某些测试会按照预期运行失败。</p>
 <h2 id="解决方案">解决方案</h2>
 <p><code>unittest</code> 模块有装饰器可用来控制对指定测试方法的处理，例如：</p>
-<pre><code>import unittest
-import os
-import platform
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> unittest
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> platform
 
-class Tests(unittest.TestCase):
-    def test_0(self):
-        self.assertTrue(True)
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Tests</span>(unittest.TestCase):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_0</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.assertTrue(<span class="hljs-literal">True</span>)
 
-    @unittest.skip('skipped test')
-    def test_1(self):
-        self.fail('should have failed!')
+<span class="hljs-meta">    @unittest.skip(<span class="hljs-params"><span class="hljs-string">'skipped test'</span></span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_1</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.fail(<span class="hljs-string">'should have failed!'</span>)
 
-    @unittest.skipIf(os.name=='posix', 'Not supported on Unix')
-    def test_2(self):
-        import winreg
+<span class="hljs-meta">    @unittest.skipIf(<span class="hljs-params">os.name==<span class="hljs-string">'posix'</span>, <span class="hljs-string">'Not supported on Unix'</span></span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_2</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">import</span> winreg
 
-    @unittest.skipUnless(platform.system() == 'Darwin', 'Mac specific test')
-    def test_3(self):
-        self.assertTrue(True)
+<span class="hljs-meta">    @unittest.skipUnless(<span class="hljs-params">platform.system(<span class="hljs-params"></span>) == <span class="hljs-string">'Darwin'</span>, <span class="hljs-string">'Mac specific test'</span></span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_3</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.assertTrue(<span class="hljs-literal">True</span>)
 
-    @unittest.expectedFailure
-    def test_4(self):
-        self.assertEqual(2+2, 5)
+<span class="hljs-meta">    @unittest.expectedFailure</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">test_4</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-variable language_">self</span>.assertEqual(<span class="hljs-number">2</span>+<span class="hljs-number">2</span>, <span class="hljs-number">5</span>)
 
-if __name__ == '__main__':
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">'__main__'</span>:
     unittest.main()
-</code></pre><p>如果你在 Mac 上运行这段代码，你会得到如下输出：</p>
-<pre><code>bash % python3 testsample.py -v
+</code></pre>
+<p>如果你在 Mac 上运行这段代码，你会得到如下输出：</p>
+<pre><code class="lang-python">bash % python3 testsample.py -v
 test_0 (__main__.Tests) ... ok
-test_1 (__main__.Tests) ... skipped 'skipped test'
-test_2 (__main__.Tests) ... skipped 'Not supported on Unix'
+test_1 (__main__.Tests) ... skipped <span class="hljs-string">'skipped test'</span>
+test_2 (__main__.Tests) ... skipped <span class="hljs-string">'Not supported on Unix'</span>
 test_3 (__main__.Tests) ... ok
 test_4 (__main__.Tests) ... expected failure
 
 ----------------------------------------------------------------------
-Ran 5 tests in 0.002s
+Ran <span class="hljs-number">5</span> tests <span class="hljs-keyword">in</span> <span class="hljs-number">0.002</span>s
 
-OK (skipped=2, expected failures=1)
-</code></pre><p>讨论
+OK (skipped=<span class="hljs-number">2</span>, expected failures=<span class="hljs-number">1</span>)
+</code></pre>
+<p>讨论
 <code>skip()</code>装饰器能被用来忽略某个你不想运行的测试。 <code>skipIf()</code>和<code>skipUnless()</code> 对于你只想在某个特定平台或 Python 版本或其他依赖成立时才运行测试的时候非常有用。 使用 <code>@expected</code> 的失败装饰器来标记那些确定会失败的测试，并且对这些测试你不想让测试框架打印更多信息。</p>
 <p>忽略方法的装饰器还可以被用来装饰整个测试类，比如：</p>
-<pre><code>@unittest.skipUnless(platform.system() == 'Darwin', 'Mac specific tests')
-class DarwinTests(unittest.TestCase):
-    pass
-</code></pre><h1 id="146-处理多个异常">14.6 处理多个异常</h1>
+<pre><code class="lang-python"><span class="hljs-meta">@unittest.skipUnless(<span class="hljs-params">platform.system(<span class="hljs-params"></span>) == <span class="hljs-string">'Darwin'</span>, <span class="hljs-string">'Mac specific tests'</span></span>)</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DarwinTests</span>(unittest.TestCase):
+    <span class="hljs-keyword">pass</span>
+</code></pre>
+<h1 id="146-处理多个异常">14.6 处理多个异常</h1>
 <h2 id="问题">问题</h2>
 <p>你有一个代码片段可能会抛出多个不同的异常，怎样才能不创建大量重复代码就能处理所有的可能异常呢？</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你可以用单个代码块处理不同的异常，可以将它们放入一个元组中，如下所示：</p>
-<pre><code>try:
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
     client_obj.get_url(url)
-except (URLError, ValueError, SocketTimeout):
+<span class="hljs-keyword">except</span> (URLError, ValueError, SocketTimeout):
     client_obj.remove_url(url)
-</code></pre><p>在这个例子中，元祖中任何一个异常发生时都会执行 <code>remove_url()</code> 方法。 如果你想对其中某个异常进行不同的处理，可以将其放入另外一个 <code>except</code>语句中：</p>
-<pre><code>try:
+</code></pre>
+<p>在这个例子中，元祖中任何一个异常发生时都会执行 <code>remove_url()</code> 方法。 如果你想对其中某个异常进行不同的处理，可以将其放入另外一个 <code>except</code>语句中：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
     client_obj.get_url(url)
-except (URLError, ValueError):
+<span class="hljs-keyword">except</span> (URLError, ValueError):
     client_obj.remove_url(url)
-except SocketTimeout:
+<span class="hljs-keyword">except</span> SocketTimeout:
     client_obj.handle_url_timeout(url)
-</code></pre><p>很多的异常会有层级关系，对于这种情况，你可能使用它们的一个基类来捕获所有的异常。例如，下面的代码：</p>
-<pre><code>try:
-    f = open(filename)
-except (FileNotFoundError, PermissionError):
-    pass
-</code></pre><p>可以被重写为：</p>
-<pre><code>try:
-    f = open(filename)
-except OSError:
-    pass
-</code></pre><p><code>OSError</code> 是 <code>FileNotFoundError</code> 和 <code>PermissionError</code>异常的基类。</p>
+</code></pre>
+<p>很多的异常会有层级关系，对于这种情况，你可能使用它们的一个基类来捕获所有的异常。例如，下面的代码：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
+    f = <span class="hljs-built_in">open</span>(filename)
+<span class="hljs-keyword">except</span> (FileNotFoundError, PermissionError):
+    <span class="hljs-keyword">pass</span>
+</code></pre>
+<p>可以被重写为：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
+    f = <span class="hljs-built_in">open</span>(filename)
+<span class="hljs-keyword">except</span> OSError:
+    <span class="hljs-keyword">pass</span>
+</code></pre>
+<p><code>OSError</code> 是 <code>FileNotFoundError</code> 和 <code>PermissionError</code>异常的基类。</p>
 <h2 id="讨论">讨论</h2>
 <p>尽管处理多个异常本身并没什么特殊的，不过你可以使用 <code>as</code> 关键字来获得被抛出异常的引用：</p>
-<pre><code>try:
-    f = open(filename)
-except OSError as e:
-    if e.errno == errno.ENOENT:
-        logger.error('File not found')
-    elif e.errno == errno.EACCES:
-        logger.error('Permission denied')
-    else:
-        logger.error('Unexpected error: %d', e.errno)
-</code></pre><p>这个例子中， <code>e</code>变量指向一个被抛出的 <code>OSError</code>异常实例。 这个在你想更进一步分析这个异常的时候会很有用，比如基于某个状态码来处理它。</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
+    f = <span class="hljs-built_in">open</span>(filename)
+<span class="hljs-keyword">except</span> OSError <span class="hljs-keyword">as</span> e:
+    <span class="hljs-keyword">if</span> e.errno == errno.ENOENT:
+        logger.error(<span class="hljs-string">'File not found'</span>)
+    <span class="hljs-keyword">elif</span> e.errno == errno.EACCES:
+        logger.error(<span class="hljs-string">'Permission denied'</span>)
+    <span class="hljs-keyword">else</span>:
+        logger.error(<span class="hljs-string">'Unexpected error: %d'</span>, e.errno)
+</code></pre>
+<p>这个例子中， <code>e</code>变量指向一个被抛出的 <code>OSError</code>异常实例。 这个在你想更进一步分析这个异常的时候会很有用，比如基于某个状态码来处理它。</p>
 <p>同时还要注意的时候 <code>except</code>语句是顺序检查的，第一个匹配的会执行。 你可以很容易的构造多个 <code>except</code> 同时匹配的情形，比如：</p>
-<pre><code>&gt;&gt;&gt; f = open('missing')
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'missing'</span>)
 Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-FileNotFoundError: [Errno 2] No such file or directory: 'missing'
-&gt;&gt;&gt; try:
-...     f = open('missing')
-... except OSError:
-...     print('It failed')
-... except FileNotFoundError:
-...     print('File not found')
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+FileNotFoundError: [Errno <span class="hljs-number">2</span>] No such file <span class="hljs-keyword">or</span> directory: <span class="hljs-string">'missing'</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>    f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'missing'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">except</span> OSError:
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(<span class="hljs-string">'It failed'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">except</span> FileNotFoundError:
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(<span class="hljs-string">'File not found'</span>)
 ...
 It failed
 &gt;&gt;&gt;
-</code></pre><p>这里的 <code>FileNotFoundError</code> 语句并没有执行的原因是 <code>OSError</code>更一般，它可匹配 <code>FileNotFoundError</code>异常， 于是就是第一个匹配的。 在调试的时候，如果你对某个特定异常的类成层级关系不是很确定， 你可以通过查看该异常的 <code>__mro__</code> 属性来快速浏览。比如：</p>
-<pre><code>&gt;&gt;&gt; FileNotFoundError.__mro__
-(&lt;class 'FileNotFoundError'&gt;, &lt;class 'OSError'&gt;, &lt;class 'Exception'&gt;,
- &lt;class 'BaseException'&gt;, &lt;class 'object'&gt;)
+</code></pre>
+<p>这里的 <code>FileNotFoundError</code> 语句并没有执行的原因是 <code>OSError</code>更一般，它可匹配 <code>FileNotFoundError</code>异常， 于是就是第一个匹配的。 在调试的时候，如果你对某个特定异常的类成层级关系不是很确定， 你可以通过查看该异常的 <code>__mro__</code> 属性来快速浏览。比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>FileNotFoundError.__mro__
+(&lt;<span class="hljs-keyword">class</span> <span class="hljs-string">'FileNotFoundError'</span>&gt;, &lt;<span class="hljs-keyword">class</span> <span class="hljs-string">'OSError'</span>&gt;, &lt;<span class="hljs-keyword">class</span> <span class="hljs-string">'Exception'</span>&gt;,
+ &lt;<span class="hljs-keyword">class</span> <span class="hljs-string">'BaseException'</span>&gt;, &lt;<span class="hljs-keyword">class</span> <span class="hljs-string">'object'</span>&gt;)
 &gt;&gt;&gt;
-</code></pre><p>上面列表中任何一个直到 <code>BaseException</code> 的类都能被用于 <code>except</code> 语句。</p>
+</code></pre>
+<p>上面列表中任何一个直到 <code>BaseException</code> 的类都能被用于 <code>except</code> 语句。</p>
 <h1 id="147-捕获所有异常">14.7 捕获所有异常</h1>
 <h2 id="问题">问题</h2>
 <p>怎样捕获代码中的所有异常？</p>
 <h2 id="解决方案">解决方案</h2>
 <p>想要捕获所有的异常，可以直接捕获 <code>Exception</code> 即可：</p>
-<pre><code>try:
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
    ...
-except Exception as e:
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
    ...
-   log('Reason:', e)       # Important!
-</code></pre><p>这个将会捕获除了 <code>SystemExit</code> 、<code>KeyboardInterrupt</code> 和 <code>GeneratorExit</code> 之外的所有异常。 如果你还想捕获这三个异常，将 <code>Exception</code> 改成 <code>BaseException</code> 即可。</p>
+   log(<span class="hljs-string">'Reason:'</span>, e)       <span class="hljs-comment"># Important!</span>
+</code></pre>
+<p>这个将会捕获除了 <code>SystemExit</code> 、<code>KeyboardInterrupt</code> 和 <code>GeneratorExit</code> 之外的所有异常。 如果你还想捕获这三个异常，将 <code>Exception</code> 改成 <code>BaseException</code> 即可。</p>
 <h2 id="讨论">讨论</h2>
 <p>捕获所有异常通常是由于程序员在某些复杂操作中并不能记住所有可能的异常。 如果你不是很细心的人，这也是编写不易调试代码的一个简单方法。</p>
 <p>正因如此，如果你选择捕获所有异常，那么在某个地方（比如日志文件、打印异常到屏幕）打印确切原因就比较重要了。 如果你没有这样做，有时候你看到异常打印时可能摸不着头脑，就像下面这样：</p>
-<pre><code>def parse_int(s):
-    try:
-        n = int(v)
-    except Exception:
-        print("Couldn't parse")
-</code></pre><p>试着运行这个函数，结果如下：</p>
-<pre><code>&gt;&gt;&gt; parse_int('n/a')
-Couldn't parse
-&gt;&gt;&gt; parse_int('42')
-Couldn't parse
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">parse_int</span>(<span class="hljs-params">s</span>):
+    <span class="hljs-keyword">try</span>:
+        n = <span class="hljs-built_in">int</span>(v)
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">"Couldn't parse"</span>)
+</code></pre>
+<p>试着运行这个函数，结果如下：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>parse_int(<span class="hljs-string">'n/a'</span>)
+Couldn<span class="hljs-string">'t parse
+&gt;&gt;&gt; parse_int('</span><span class="hljs-number">42</span><span class="hljs-string">')
+Couldn'</span>t parse
 &gt;&gt;&gt;
-</code></pre><p>这时候你就会挠头想：“这咋回事啊？” 假如你像下面这样重写这个函数：</p>
-<pre><code>def parse_int(s):
-    try:
-        n = int(v)
-    except Exception as e:
-        print("Couldn't parse")
-        print('Reason:', e)
-</code></pre><p>这时候你能获取如下输出，指明了有个编程错误：</p>
-<pre><code>&gt;&gt;&gt; parse_int('42')
-Couldn't parse
-Reason: global name 'v' is not defined
+</code></pre>
+<p>这时候你就会挠头想：“这咋回事啊？” 假如你像下面这样重写这个函数：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">parse_int</span>(<span class="hljs-params">s</span>):
+    <span class="hljs-keyword">try</span>:
+        n = <span class="hljs-built_in">int</span>(v)
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">"Couldn't parse"</span>)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'Reason:'</span>, e)
+</code></pre>
+<p>这时候你能获取如下输出，指明了有个编程错误：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>parse_int(<span class="hljs-string">'42'</span>)
+Couldn<span class="hljs-string">'t parse
+Reason: global name '</span>v<span class="hljs-string">' is not defined
 &gt;&gt;&gt;
-</code></pre><p>很明显，你应该尽可能将异常处理器定义的精准一些。 不过，要是你必须捕获所有异常，确保打印正确的诊断信息或将异常传播出去，这样不会丢失掉异常。</p>
+</span></code></pre>
+<p>很明显，你应该尽可能将异常处理器定义的精准一些。 不过，要是你必须捕获所有异常，确保打印正确的诊断信息或将异常传播出去，这样不会丢失掉异常。</p>
 <h1 id="148-创建自定义异常">14.8 创建自定义异常</h1>
 <h2 id="问题">问题</h2>
 <p>在你构建的应用程序中，你想将底层异常包装成自定义的异常。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>创建新的异常很简单——定义新的类，让它继承自 <code>Exception</code> （或者是任何一个已存在的异常类型）。 例如，如果你编写网络相关的程序，你可能会定义一些类似如下的异常：</p>
-<pre><code>class NetworkError(Exception):
-    pass
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">NetworkError</span>(<span class="hljs-title class_ inherited__">Exception</span>):
+    <span class="hljs-keyword">pass</span>
 
-class HostnameError(NetworkError):
-    pass
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">HostnameError</span>(<span class="hljs-title class_ inherited__">NetworkError</span>):
+    <span class="hljs-keyword">pass</span>
 
-class TimeoutError(NetworkError):
-    pass
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TimeoutError</span>(<span class="hljs-title class_ inherited__">NetworkError</span>):
+    <span class="hljs-keyword">pass</span>
 
-class ProtocolError(NetworkError):
-    pass
-</code></pre><p>然后用户就可以像通常那样使用这些异常了，例如：</p>
-<pre><code>try:
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ProtocolError</span>(<span class="hljs-title class_ inherited__">NetworkError</span>):
+    <span class="hljs-keyword">pass</span>
+</code></pre>
+<p>然后用户就可以像通常那样使用这些异常了，例如：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
     msg = s.recv()
-except TimeoutError as e:
+<span class="hljs-keyword">except</span> TimeoutError <span class="hljs-keyword">as</span> e:
     ...
-except ProtocolError as e:
+<span class="hljs-keyword">except</span> ProtocolError <span class="hljs-keyword">as</span> e:
     ...
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>自定义异常类应该总是继承自内置的 <code>Exception</code> 类， 或者是继承自那些本身就是从 <code>Exception</code>继承而来的类。 尽管所有类同时也继承自 <code>BaseException</code> ，但你不应该使用这个基类来定义新的异常。 <code>BaseException</code>是为系统退出异常而保留的，比如 <code>KeyboardInterrupt</code> 或 <code>SystemExit</code> 以及其他那些会给应用发送信号而退出的异常。 因此，捕获这些异常本身没什么意义。 这样的话，假如你继承<code>BaseException</code> 可能会导致你的自定义异常不会被捕获而直接发送信号退出程序运行。</p>
 <p>在程序中引入自定义异常可以使得你的代码更具可读性，能清晰显示谁应该阅读这个代码。 还有一种设计是将自定义异常通过继承组合起来。在复杂应用程序中， 使用基类来分组各种异常类也是很有用的。它可以让用户捕获一个范围很窄的特定异常，比如下面这样的：</p>
-<pre><code>try:
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
     s.send(msg)
-except ProtocolError:
+<span class="hljs-keyword">except</span> ProtocolError:
     ...
-</code></pre><p>你还能捕获更大范围的异常，就像下面这样：</p>
-<pre><code>try:
+</code></pre>
+<p>你还能捕获更大范围的异常，就像下面这样：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
     s.send(msg)
-except NetworkError:
+<span class="hljs-keyword">except</span> NetworkError:
     ...
-</code></pre><p>如果你想定义的新异常重写了 <code>__init__()</code> 方法， 确保你使用所有参数调用 <code>Exception.__init__()</code> ，例如：</p>
-<pre><code>class CustomError(Exception):
-    def __init__(self, message, status):
-        super().__init__(message, status)
-        self.message = message
-        self.status = status
-</code></pre><p>看上去有点奇怪，不过 Exception 的默认行为是接受所有传递的参数并将它们以元组形式存储在 <code>.args</code> 属性中. 很多其他函数库和部分 Python 库默认所有异常都必须有 <code>.args</code> 属性， 因此如果你忽略了这一步，你会发现有些时候你定义的新异常不会按照期望运行。 为了演示 <code>.args</code> 的使用，考虑下下面这个使用内置的 <code>RuntimeError</code> 异常的交互会话， 注意看 raise 语句中使用的参数个数是怎样的：</p>
-<pre><code>&gt;&gt;&gt; try:
-...     raise RuntimeError('It failed')
-... except RuntimeError as e:
-...     print(e.args)
+</code></pre>
+<p>如果你想定义的新异常重写了 <code>__init__()</code> 方法， 确保你使用所有参数调用 <code>Exception.__init__()</code> ，例如：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">CustomError</span>(<span class="hljs-title class_ inherited__">Exception</span>):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, message, status</span>):
+        <span class="hljs-built_in">super</span>().__init__(message, status)
+        <span class="hljs-variable language_">self</span>.message = message
+        <span class="hljs-variable language_">self</span>.status = status
+</code></pre>
+<p>看上去有点奇怪，不过 Exception 的默认行为是接受所有传递的参数并将它们以元组形式存储在 <code>.args</code> 属性中. 很多其他函数库和部分 Python 库默认所有异常都必须有 <code>.args</code> 属性， 因此如果你忽略了这一步，你会发现有些时候你定义的新异常不会按照期望运行。 为了演示 <code>.args</code> 的使用，考虑下下面这个使用内置的 <code>RuntimeError</code> 异常的交互会话， 注意看 raise 语句中使用的参数个数是怎样的：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">raise</span> RuntimeError(<span class="hljs-string">'It failed'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">except</span> RuntimeError <span class="hljs-keyword">as</span> e:
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(e.args)
 ...
-('It failed',)
-&gt;&gt;&gt; try:
-...     raise RuntimeError('It failed', 42, 'spam')
-... except RuntimeError as e:
+(<span class="hljs-string">'It failed'</span>,)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">raise</span> RuntimeError(<span class="hljs-string">'It failed'</span>, <span class="hljs-number">42</span>, <span class="hljs-string">'spam'</span>)
+<span class="hljs-meta">... </span><span class="hljs-keyword">except</span> RuntimeError <span class="hljs-keyword">as</span> e:
 
-...     print(e.args)
+<span class="hljs-meta">... </span>    <span class="hljs-built_in">print</span>(e.args)
 ...
-('It failed', 42, 'spam')
+(<span class="hljs-string">'It failed'</span>, <span class="hljs-number">42</span>, <span class="hljs-string">'spam'</span>)
 &gt;&gt;&gt;
-</code></pre><p>关于创建自定义异常的更多信息，请参考<a href="https://docs.python.org/3/tutorial/errors.html" target="_blank"> Python 官方文档</a></p>
+</code></pre>
+<p>关于创建自定义异常的更多信息，请参考<a href="https://docs.python.org/3/tutorial/errors.html" target="_blank"> Python 官方文档</a></p>
 <h1 id="149-捕获异常后抛出另外的异常">14.9 捕获异常后抛出另外的异常</h1>
 <h2 id="问题">问题</h2>
 <p>你想捕获一个异常后抛出另外一个不同的异常，同时还得在异常回溯中保留两个异常的信息。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>为了链接异常，使用 <code>raise from</code>语句来代替简单的 <code>raise</code>语句。 它会让你同时保留两个异常的信息。例如：</p>
-<pre><code>&gt;&gt;&gt; def example():
-...     try:
-...             int('N/A')
-...     except ValueError as e:
-...             raise RuntimeError('A parsing error occurred') from e
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">example</span>():
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>            <span class="hljs-built_in">int</span>(<span class="hljs-string">'N/A'</span>)
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">except</span> ValueError <span class="hljs-keyword">as</span> e:
+<span class="hljs-meta">... </span>            <span class="hljs-keyword">raise</span> RuntimeError(<span class="hljs-string">'A parsing error occurred'</span>) <span class="hljs-keyword">from</span> e
 &gt;&gt;&gt;
 example()
 Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 3, in example
-ValueError: invalid literal for int() with base 10: 'N/A'
-</code></pre><p>上面的异常是下面的异常产生的直接原因：</p>
-<pre><code>Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-  File "&lt;stdin&gt;", line 5, in example
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> example
+ValueError: invalid literal <span class="hljs-keyword">for</span> <span class="hljs-built_in">int</span>() <span class="hljs-keyword">with</span> base <span class="hljs-number">10</span>: <span class="hljs-string">'N/A'</span>
+</code></pre>
+<p>上面的异常是下面的异常产生的直接原因：</p>
+<pre><code class="lang-python">Traceback (most recent call last):
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">5</span>, <span class="hljs-keyword">in</span> example
 RuntimeError: A parsing error occurred
 &gt;&gt;&gt;
-</code></pre><p>在回溯中科院看到，两个异常都被捕获。 要想捕获这样的异常，你可以使用一个简单的 <code>except</code> 语句。 不过，你还可以通过查看异常对象的 <code>__cause__</code> 属性来跟踪异常链。例如：</p>
-<pre><code>try:
+</code></pre>
+<p>在回溯中科院看到，两个异常都被捕获。 要想捕获这样的异常，你可以使用一个简单的 <code>except</code> 语句。 不过，你还可以通过查看异常对象的 <code>__cause__</code> 属性来跟踪异常链。例如：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
     example()
-except RuntimeError as e:
-    print("It didn't work:", e)
+<span class="hljs-keyword">except</span> RuntimeError <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">"It didn't work:"</span>, e)
 
-    if e.__cause__:
-        print('Cause:', e.__cause__)
-</code></pre><p>当在 <code>except</code> 块中又有另外的异常被抛出时会导致一个隐藏的异常链的出现。例如：</p>
-<pre><code>&gt;&gt;&gt; def example2():
-...     try:
-...             int('N/A')
-...     except ValueError as e:
-...             print("Couldn't parse:", err)
+    <span class="hljs-keyword">if</span> e.__cause__:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'Cause:'</span>, e.__cause__)
+</code></pre>
+<p>当在 <code>except</code> 块中又有另外的异常被抛出时会导致一个隐藏的异常链的出现。例如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">example2</span>():
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>            <span class="hljs-built_in">int</span>(<span class="hljs-string">'N/A'</span>)
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">except</span> ValueError <span class="hljs-keyword">as</span> e:
+<span class="hljs-meta">... </span>            <span class="hljs-built_in">print</span>(<span class="hljs-string">"Couldn't parse:"</span>, err)
 ...
 &gt;&gt;&gt;
-&gt;&gt;&gt; example2()
+<span class="hljs-meta">&gt;&gt;&gt; </span>example2()
 Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 3, in example2
-ValueError: invalid literal for int() with base 10: 'N/A'
-</code></pre><p>在处理上述异常的时候，另外一个异常发生了：</p>
-<pre><code>Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-  File "&lt;stdin&gt;", line 5, in example2
-NameError: global name 'err' is not defined
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> example2
+ValueError: invalid literal <span class="hljs-keyword">for</span> <span class="hljs-built_in">int</span>() <span class="hljs-keyword">with</span> base <span class="hljs-number">10</span>: <span class="hljs-string">'N/A'</span>
+</code></pre>
+<p>在处理上述异常的时候，另外一个异常发生了：</p>
+<pre><code class="lang-python">Traceback (most recent call last):
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">5</span>, <span class="hljs-keyword">in</span> example2
+NameError: <span class="hljs-keyword">global</span> name <span class="hljs-string">'err'</span> <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> defined
 &gt;&gt;&gt;
-</code></pre><p>这个例子中，你同时获得了两个异常的信息，但是对异常的解释不同。 这时候，<code>NameError</code> 异常被作为程序最终异常被抛出，而不是位于解析异常的直接回应中。</p>
+</code></pre>
+<p>这个例子中，你同时获得了两个异常的信息，但是对异常的解释不同。 这时候，<code>NameError</code> 异常被作为程序最终异常被抛出，而不是位于解析异常的直接回应中。</p>
 <p>如果，你想忽略掉异常链，可使用 <code>raise from None</code> :</p>
-<pre><code>&gt;&gt;&gt; def example3():
-...     try:
-...             int('N/A')
-...     except ValueError:
-...             raise RuntimeError('A parsing error occurred') from None...
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">example3</span>():
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>            <span class="hljs-built_in">int</span>(<span class="hljs-string">'N/A'</span>)
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">except</span> ValueError:
+<span class="hljs-meta">... </span>            <span class="hljs-keyword">raise</span> RuntimeError(<span class="hljs-string">'A parsing error occurred'</span>) <span class="hljs-keyword">from</span> <span class="hljs-literal">None</span>...
 &gt;&gt;&gt;
 example3()
 Traceback (most recent call last):
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-  File "&lt;stdin&gt;", line 5, in example3
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">5</span>, <span class="hljs-keyword">in</span> example3
 RuntimeError: A parsing error occurred
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>在设计代码时，在另外一个 <code>except</code>代码块中使用 <code>raise</code>语句的时候你要特别小心了。 大多数情况下，这种 <code>raise</code> 语句都应该被改成<code>raise from</code>语句。也就是说你应该使用下面这种形式：</p>
-<pre><code>try:
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
    ...
-except SomeException as e:
-   raise DifferentException() from e
-</code></pre><p>这样做的原因是你应该显示的将原因链接起来。 也就是说，<code>DifferentException</code> 是直接从 <code>SomeException</code> 衍生而来。 这种关系可以从回溯结果中看出来。</p>
+<span class="hljs-keyword">except</span> SomeException <span class="hljs-keyword">as</span> e:
+   <span class="hljs-keyword">raise</span> DifferentException() <span class="hljs-keyword">from</span> e
+</code></pre>
+<p>这样做的原因是你应该显示的将原因链接起来。 也就是说，<code>DifferentException</code> 是直接从 <code>SomeException</code> 衍生而来。 这种关系可以从回溯结果中看出来。</p>
 <p>如果你像下面这样写代码，你仍然会得到一个链接异常， 不过这个并没有很清晰的说明这个异常链到底是内部异常还是某个未知的编程错误。</p>
-<pre><code>try:
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
    ...
-except SomeException:
-   raise DifferentException()
-</code></pre><p>当你使用 <code>raise from</code> 语句的话，就很清楚的表明抛出的是第二个异常。</p>
+<span class="hljs-keyword">except</span> SomeException:
+   <span class="hljs-keyword">raise</span> DifferentException()
+</code></pre>
+<p>当你使用 <code>raise from</code> 语句的话，就很清楚的表明抛出的是第二个异常。</p>
 <p>最后一个例子中隐藏异常链信息。 尽管隐藏异常链信息不利于回溯，同时它也丢失了很多有用的调试信息。 不过万事皆平等，有时候只保留适当的信息也是很有用的。</p>
 <h1 id="1410-重新抛出被捕获的异常">14.10 重新抛出被捕获的异常</h1>
 <h2 id="问题">问题</h2>
 <p>你在一个 <code>except</code> 块中捕获了一个异常，现在想重新抛出它。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>简单的使用一个单独的 <code>rasie</code>语句即可，例如：</p>
-<pre><code>&gt;&gt;&gt; def example():
-...     try:
-...             int('N/A')
-...     except ValueError:
-...             print("Didn't work")
-...             raise
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">example</span>():
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">try</span>:
+<span class="hljs-meta">... </span>            <span class="hljs-built_in">int</span>(<span class="hljs-string">'N/A'</span>)
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">except</span> ValueError:
+<span class="hljs-meta">... </span>            <span class="hljs-built_in">print</span>(<span class="hljs-string">"Didn't work"</span>)
+<span class="hljs-meta">... </span>            <span class="hljs-keyword">raise</span>
 ...
 
-&gt;&gt;&gt; example()
-Didn't work
+<span class="hljs-meta">&gt;&gt;&gt; </span>example()
+Didn<span class="hljs-string">'t work
 Traceback (most recent call last):
   File "&lt;stdin&gt;", line 1, in &lt;module&gt;
   File "&lt;stdin&gt;", line 3, in example
-ValueError: invalid literal for int() with base 10: 'N/A'
+ValueError: invalid literal for int() with base 10: '</span>N/A<span class="hljs-string">'
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</span></code></pre>
+<h2 id="讨论">讨论</h2>
 <p>这个问题通常是当你需要在捕获异常后执行某个操作（比如记录日志、清理等），但是之后想将异常传播下去。 一个很常见的用法是在捕获所有异常的处理器中：</p>
-<pre><code>try:
+<pre><code class="lang-python"><span class="hljs-keyword">try</span>:
    ...
-except Exception as e:
-   # Process exception information in some way
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+   <span class="hljs-comment"># Process exception information in some way</span>
    ...
 
-   # Propagate the exception
-   raise
-</code></pre><h1 id="1411-输出警告信息">14.11 输出警告信息</h1>
+   <span class="hljs-comment"># Propagate the exception</span>
+   <span class="hljs-keyword">raise</span>
+</code></pre>
+<h1 id="1411-输出警告信息">14.11 输出警告信息</h1>
 <h2 id="问题">问题</h2>
 <p>你希望自己的程序能生成警告信息（比如废弃特性或使用问题）。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>要输出一个警告消息，可使用 <code>warning.warn()</code> 函数。例如：</p>
-<pre><code>import warnings
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> warnings
 
-def func(x, y, logfile=None, debug=False):
-    if logfile is not None:
-         warnings.warn('logfile argument deprecated', DeprecationWarning)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">func</span>(<span class="hljs-params">x, y, logfile=<span class="hljs-literal">None</span>, debug=<span class="hljs-literal">False</span></span>):
+    <span class="hljs-keyword">if</span> logfile <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:
+         warnings.warn(<span class="hljs-string">'logfile argument deprecated'</span>, DeprecationWarning)
     ...
-</code></pre><p><code>warn()</code>的参数是一个警告消息和一个警告类，警告类有如下几种：UserWarning, DeprecationWarning, SyntaxWarning, RuntimeWarning, ResourceWarning, 或 FutureWarning.</p>
+</code></pre>
+<p><code>warn()</code>的参数是一个警告消息和一个警告类，警告类有如下几种：UserWarning, DeprecationWarning, SyntaxWarning, RuntimeWarning, ResourceWarning, 或 FutureWarning.</p>
 <p>对警告的处理取决于你如何运行解释器以及一些其他配置。 例如，如果你使用 <code>-W all</code> 选项去运行 Python，你会得到如下的输出：</p>
-<pre><code>bash % python3 -W all example.py
-example.py:5: DeprecationWarning: logfile argument is deprecated
-  warnings.warn('logfile argument is deprecated', DeprecationWarning)
-</code></pre><p>通常来讲，警告会输出到标准错误上。如果你想讲警告转换为异常，可以使用 <code>-W error</code> 选项：</p>
-<pre><code>bash % python3 -W error example.py
+<pre><code class="lang-python">bash % python3 -W <span class="hljs-built_in">all</span> example.py
+example.py:<span class="hljs-number">5</span>: DeprecationWarning: logfile argument <span class="hljs-keyword">is</span> deprecated
+  warnings.warn(<span class="hljs-string">'logfile argument is deprecated'</span>, DeprecationWarning)
+</code></pre>
+<p>通常来讲，警告会输出到标准错误上。如果你想讲警告转换为异常，可以使用 <code>-W error</code> 选项：</p>
+<pre><code class="lang-python">bash % python3 -W error example.py
 Traceback (most recent call last):
-  File "example.py", line 10, in &lt;module&gt;
-    func(2, 3, logfile='log.txt')
-  File "example.py", line 5, in func
-    warnings.warn('logfile argument is deprecated', DeprecationWarning)
-DeprecationWarning: logfile argument is deprecated
+  File <span class="hljs-string">"example.py"</span>, line <span class="hljs-number">10</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+    func(<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, logfile=<span class="hljs-string">'log.txt'</span>)
+  File <span class="hljs-string">"example.py"</span>, line <span class="hljs-number">5</span>, <span class="hljs-keyword">in</span> func
+    warnings.warn(<span class="hljs-string">'logfile argument is deprecated'</span>, DeprecationWarning)
+DeprecationWarning: logfile argument <span class="hljs-keyword">is</span> deprecated
 bash %
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>在你维护软件，提示用户某些信息，但是又不需要将其上升为异常级别，那么输出警告信息就会很有用了。 例如，假设你准备修改某个函数库或框架的功能，你可以先为你要更改的部分输出警告信息，同时向后兼容一段时间。 你还可以警告用户一些对代码有问题的使用方式。</p>
 <p>作为另外一个内置函数库的警告使用例子，下面演示了一个没有关闭文件就销毁它时产生的警告消息：</p>
-<pre><code>&gt;&gt;&gt; import warnings
-&gt;&gt;&gt; warnings.simplefilter('always')
-&gt;&gt;&gt; f = open('/etc/passwd')
-&gt;&gt;&gt; del f
-__main__:1: ResourceWarning: unclosed file &lt;_io.TextIOWrapper name='/etc/passwd'
- mode='r' encoding='UTF-8'&gt;
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> warnings
+<span class="hljs-meta">&gt;&gt;&gt; </span>warnings.simplefilter(<span class="hljs-string">'always'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>f = <span class="hljs-built_in">open</span>(<span class="hljs-string">'/etc/passwd'</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">del</span> f
+__main__:<span class="hljs-number">1</span>: ResourceWarning: unclosed file &lt;_io.TextIOWrapper name=<span class="hljs-string">'/etc/passwd'</span>
+ mode=<span class="hljs-string">'r'</span> encoding=<span class="hljs-string">'UTF-8'</span>&gt;
 &gt;&gt;&gt;
-</code></pre><p>默认情况下，并不是所有警告消息都会出现。<code>-W</code>选项能控制警告消息的输出。 <code>-W all</code> 会输出所有警告消息，<code>-W ignore</code>忽略掉所有警告，<code>-W error</code> 将警告转换成异常。 另外一种选择，你还可以使用 <code>warnings.simplefilter()</code> 函数控制输出。 <code>always</code> 参数会让所有警告消息出现，<code>`ignore</code>忽略调所有的警告，<code>error</code> 将警告转换成异常。</p>
+</code></pre>
+<p>默认情况下，并不是所有警告消息都会出现。<code>-W</code>选项能控制警告消息的输出。 <code>-W all</code> 会输出所有警告消息，<code>-W ignore</code>忽略掉所有警告，<code>-W error</code> 将警告转换成异常。 另外一种选择，你还可以使用 <code>warnings.simplefilter()</code> 函数控制输出。 <code>always</code> 参数会让所有警告消息出现，<code>`ignore</code>忽略调所有的警告，<code>error</code> 将警告转换成异常。</p>
 <p>对于简单的生成警告消息的情况这些已经足够了。 <code>warnings</code> 模块对过滤和警告消息处理提供了大量的更高级的配置选项。 更多信息请参考 <a href="https://docs.python.org/3/library/warnings.html" target="_blank">Python 文档</a></p>
 <h1 id="1412-调试基本的程序崩溃错误">14.12 调试基本的程序崩溃错误</h1>
 <h2 id="问题">问题</h2>
 <p>你的程序奔溃后该怎样去调试它？</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你的程序因为某个异常而奔溃，运行 <code>python3 -i someprogram.py</code> 可执行简单的调试。 <code>-i</code> 选项可让程序结束后打开一个交互式 shell。 然后你就能查看环境，例如，假设你有下面的代码：</p>
-<pre><code># sample.py
+<pre><code class="lang-python"><span class="hljs-comment"># sample.py</span>
 
-def func(n):
-    return n + 10
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">func</span>(<span class="hljs-params">n</span>):
+    <span class="hljs-keyword">return</span> n + <span class="hljs-number">10</span>
 
-func('Hello')
-</code></pre><p>运行 <code>python3 -i sample.py</code> 会有类似如下的输出：</p>
-<pre><code>bash % python3 -i sample.py
+func(<span class="hljs-string">'Hello'</span>)
+</code></pre>
+<p>运行 <code>python3 -i sample.py</code> 会有类似如下的输出：</p>
+<pre><code class="lang-python">bash % python3 -i sample.py
 Traceback (most recent call last):
-  File "sample.py", line 6, in &lt;module&gt;
-    func('Hello')
-  File "sample.py", line 4, in func
-    return n + 10
-TypeError: Can't convert 'int' object to str implicitly
+  File <span class="hljs-string">"sample.py"</span>, line <span class="hljs-number">6</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+    func(<span class="hljs-string">'Hello'</span>)
+  File <span class="hljs-string">"sample.py"</span>, line <span class="hljs-number">4</span>, <span class="hljs-keyword">in</span> func
+    <span class="hljs-keyword">return</span> n + <span class="hljs-number">10</span>
+TypeError: Can<span class="hljs-string">'t convert '</span><span class="hljs-built_in">int</span><span class="hljs-string">' object to str implicitly
 &gt;&gt;&gt; func(10)
 20
 &gt;&gt;&gt;
-</code></pre><p>如果你看不到上面这样的，可以在程序奔溃后打开 Python 的调试器。例如：</p>
-<pre><code>&gt;&gt;&gt; import pdb
-&gt;&gt;&gt; pdb.pm()
-&gt; sample.py(4)func()
--&gt; return n + 10
+</span></code></pre>
+<p>如果你看不到上面这样的，可以在程序奔溃后打开 Python 的调试器。例如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">import</span> pdb
+<span class="hljs-meta">&gt;&gt;&gt; </span>pdb.pm()
+&gt; sample.py(<span class="hljs-number">4</span>)func()
+-&gt; <span class="hljs-keyword">return</span> n + <span class="hljs-number">10</span>
 (Pdb) w
-  sample.py(6)&lt;module&gt;()
--&gt; func('Hello')
-&gt; sample.py(4)func()
--&gt; return n + 10
-(Pdb) print n
-'Hello'
+  sample.py(<span class="hljs-number">6</span>)&lt;module&gt;()
+-&gt; func(<span class="hljs-string">'Hello'</span>)
+&gt; sample.py(<span class="hljs-number">4</span>)func()
+-&gt; <span class="hljs-keyword">return</span> n + <span class="hljs-number">10</span>
+(Pdb) <span class="hljs-built_in">print</span> n
+<span class="hljs-string">'Hello'</span>
 (Pdb) q
 &gt;&gt;&gt;
-</code></pre><p>如果你的代码所在的环境很难获取交互 shell（比如在某个服务器上面）， 通常可以捕获异常后自己打印跟踪信息。例如：</p>
-<pre><code>import traceback
-import sys
+</code></pre>
+<p>如果你的代码所在的环境很难获取交互 shell（比如在某个服务器上面）， 通常可以捕获异常后自己打印跟踪信息。例如：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> traceback
+<span class="hljs-keyword">import</span> sys
 
-try:
+<span class="hljs-keyword">try</span>:
     func(arg)
-except:
-    print('**** AN ERROR OCCURRED ****')
+<span class="hljs-keyword">except</span>:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">'**** AN ERROR OCCURRED ****'</span>)
     traceback.print_exc(file=sys.stderr)
-</code></pre><p>要是你的程序没有奔溃，而只是产生了一些你看不懂的结果， 你在感兴趣的地方插入一下 <code>print()</code>语句也是个不错的选择。 不过，要是你打算这样做，有一些小技巧可以帮助你。 首先，<code>traceback.print_stack()</code>函数会你程序运行到那个点的时候创建一个跟踪栈。例如：</p>
-<pre><code>&gt;&gt;&gt; def sample(n):
-...     if n &gt; 0:
-...             sample(n-1)
-...     else:
-...             traceback.print_stack(file=sys.stderr)
+</code></pre>
+<p>要是你的程序没有奔溃，而只是产生了一些你看不懂的结果， 你在感兴趣的地方插入一下 <code>print()</code>语句也是个不错的选择。 不过，要是你打算这样做，有一些小技巧可以帮助你。 首先，<code>traceback.print_stack()</code>函数会你程序运行到那个点的时候创建一个跟踪栈。例如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>(<span class="hljs-params">n</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">if</span> n &gt; <span class="hljs-number">0</span>:
+<span class="hljs-meta">... </span>            sample(n-<span class="hljs-number">1</span>)
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">else</span>:
+<span class="hljs-meta">... </span>            traceback.print_stack(file=sys.stderr)
 ...
-&gt;&gt;&gt; sample(5)
-  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
-  File "&lt;stdin&gt;", line 3, in sample
-  File "&lt;stdin&gt;", line 3, in sample
-  File "&lt;stdin&gt;", line 3, in sample
-  File "&lt;stdin&gt;", line 3, in sample
-  File "&lt;stdin&gt;", line 3, in sample
-  File "&lt;stdin&gt;", line 5, in sample
+<span class="hljs-meta">&gt;&gt;&gt; </span>sample(<span class="hljs-number">5</span>)
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">1</span>, <span class="hljs-keyword">in</span> &lt;module&gt;
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> sample
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> sample
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> sample
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> sample
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">3</span>, <span class="hljs-keyword">in</span> sample
+  File <span class="hljs-string">"&lt;stdin&gt;"</span>, line <span class="hljs-number">5</span>, <span class="hljs-keyword">in</span> sample
 &gt;&gt;&gt;
-</code></pre><p>另外，你还可以像下面这样使用 <code>pdb.set_trace()</code> 在任何地方手动的启动调试器：</p>
-<pre><code>import pdb
+</code></pre>
+<p>另外，你还可以像下面这样使用 <code>pdb.set_trace()</code> 在任何地方手动的启动调试器：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> pdb
 
-def func(arg):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">func</span>(<span class="hljs-params">arg</span>):
     ...
     pdb.set_trace()
     ...
-</code></pre><p>当程序比较大二你想调试控制流程以及函数参数的时候这个就比较有用了。 例如，一旦调试器开始运行，你就能够使用 <code>print</code> 来观测变量值或敲击某个命令比如 <code>w</code> 来获取追踪信息。</p>
+</code></pre>
+<p>当程序比较大二你想调试控制流程以及函数参数的时候这个就比较有用了。 例如，一旦调试器开始运行，你就能够使用 <code>print</code> 来观测变量值或敲击某个命令比如 <code>w</code> 来获取追踪信息。</p>
 <h2 id="讨论">讨论</h2>
 <p>不要将调试弄的过于复杂化。一些简单的错误只需要观察程序堆栈信息就能知道了， 实际的错误一般是堆栈的最后一行。 你在开发的时候，也可以在你需要调试的地方插入一下 <code>print()</code> 函数来诊断信息（只需要最后发布的时候删除这些打印语句即可）。</p>
 <p>调试器的一个常见用法是观测某个已经奔溃的函数中的变量。 知道怎样在函数奔溃后进入调试器是一个很有用的技能。</p>
@@ -1005,99 +1065,108 @@ def func(arg):
 <p>你想测试你的程序运行所花费的时间并做性能测试。</p>
 <h2 id="解决方案">解决方案</h2>
 <p>如果你只是简单的想测试下你的程序整体花费的时间， 通常使用 Unix 时间函数就行了，比如：</p>
-<pre><code>bash % time python3 someprogram.py
-real 0m13.937s
-user 0m12.162s
-sys  0m0.098s
+<pre><code class="lang-python">bash % time python3 someprogram.py
+real 0m13<span class="hljs-number">.937</span>s
+user 0m12<span class="hljs-number">.162</span>s
+sys  0m0<span class="hljs-number">.098</span>s
 bash %
-</code></pre><p>如果你还需要一个程序各个细节的详细报告，可以使用 <code>cProfile</code> 模块：</p>
-<pre><code>bash % python3 -m cProfile someprogram.py
-         859647 function calls in 16.016 CPU seconds
+</code></pre>
+<p>如果你还需要一个程序各个细节的详细报告，可以使用 <code>cProfile</code> 模块：</p>
+<pre><code class="lang-python">bash % python3 -m cProfile someprogram.py
+         <span class="hljs-number">859647</span> function calls <span class="hljs-keyword">in</span> <span class="hljs-number">16.016</span> CPU seconds
 
    Ordered by: standard name
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-   263169    0.080    0.000    0.080    0.000 someprogram.py:16(frange)
-      513    0.001    0.000    0.002    0.000 someprogram.py:30(generate_mandel)
-   262656    0.194    0.000   15.295    0.000 someprogram.py:32(&lt;genexpr&gt;)
-        1    0.036    0.036   16.077   16.077 someprogram.py:4(&lt;module&gt;)
-   262144   15.021    0.000   15.021    0.000 someprogram.py:4(in_mandelbrot)
-        1    0.000    0.000    0.000    0.000 os.py:746(urandom)
-        1    0.000    0.000    0.000    0.000 png.py:1056(_readable)
-        1    0.000    0.000    0.000    0.000 png.py:1073(Reader)
-        1    0.227    0.227    0.438    0.438 png.py:163(&lt;module&gt;)
-      512    0.010    0.000    0.010    0.000 png.py:200(group)
+   <span class="hljs-number">263169</span>    <span class="hljs-number">0.080</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.080</span>    <span class="hljs-number">0.000</span> someprogram.py:<span class="hljs-number">16</span>(frange)
+      <span class="hljs-number">513</span>    <span class="hljs-number">0.001</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.002</span>    <span class="hljs-number">0.000</span> someprogram.py:<span class="hljs-number">30</span>(generate_mandel)
+   <span class="hljs-number">262656</span>    <span class="hljs-number">0.194</span>    <span class="hljs-number">0.000</span>   <span class="hljs-number">15.295</span>    <span class="hljs-number">0.000</span> someprogram.py:<span class="hljs-number">32</span>(&lt;genexpr&gt;)
+        <span class="hljs-number">1</span>    <span class="hljs-number">0.036</span>    <span class="hljs-number">0.036</span>   <span class="hljs-number">16.077</span>   <span class="hljs-number">16.077</span> someprogram.py:<span class="hljs-number">4</span>(&lt;module&gt;)
+   <span class="hljs-number">262144</span>   <span class="hljs-number">15.021</span>    <span class="hljs-number">0.000</span>   <span class="hljs-number">15.021</span>    <span class="hljs-number">0.000</span> someprogram.py:<span class="hljs-number">4</span>(in_mandelbrot)
+        <span class="hljs-number">1</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span> os.py:<span class="hljs-number">746</span>(urandom)
+        <span class="hljs-number">1</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span> png.py:<span class="hljs-number">1056</span>(_readable)
+        <span class="hljs-number">1</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.000</span> png.py:<span class="hljs-number">1073</span>(Reader)
+        <span class="hljs-number">1</span>    <span class="hljs-number">0.227</span>    <span class="hljs-number">0.227</span>    <span class="hljs-number">0.438</span>    <span class="hljs-number">0.438</span> png.py:<span class="hljs-number">163</span>(&lt;module&gt;)
+      <span class="hljs-number">512</span>    <span class="hljs-number">0.010</span>    <span class="hljs-number">0.000</span>    <span class="hljs-number">0.010</span>    <span class="hljs-number">0.000</span> png.py:<span class="hljs-number">200</span>(group)
     ...
 bash %
-</code></pre><p>不过通常情况是介于这两个极端之间。比如你已经知道代码运行时在少数几个函数中花费了绝大部分时间。 对于这些函数的性能测试，可以使用一个简单的装饰器：</p>
-<pre><code># timethis.py
+</code></pre>
+<p>不过通常情况是介于这两个极端之间。比如你已经知道代码运行时在少数几个函数中花费了绝大部分时间。 对于这些函数的性能测试，可以使用一个简单的装饰器：</p>
+<pre><code class="lang-python"><span class="hljs-comment"># timethis.py</span>
 
-import time
-from functools import wraps
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">from</span> functools <span class="hljs-keyword">import</span> wraps
 
-def timethis(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">timethis</span>(<span class="hljs-params">func</span>):
+<span class="hljs-meta">    @wraps(<span class="hljs-params">func</span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">wrapper</span>(<span class="hljs-params">*args, **kwargs</span>):
         start = time.perf_counter()
         r = func(*args, **kwargs)
         end = time.perf_counter()
-        print('{}.{} : {}'.format(func.__module__, func.__name__, end - start))
-        return r
-    return wrapper
-</code></pre><p>要使用这个装饰器，只需要将其放置在你要进行性能测试的函数定义前即可，比如：</p>
-<pre><code>&gt;&gt;&gt; @timethis
-... def countdown(n):
-...     while n &gt; 0:
-...             n -= 1
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'{}.{} : {}'</span>.<span class="hljs-built_in">format</span>(func.__module__, func.__name__, end - start))
+        <span class="hljs-keyword">return</span> r
+    <span class="hljs-keyword">return</span> wrapper
+</code></pre>
+<p>要使用这个装饰器，只需要将其放置在你要进行性能测试的函数定义前即可，比如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>@timethis
+<span class="hljs-meta">... </span><span class="hljs-keyword">def</span> <span class="hljs-title function_">countdown</span>(<span class="hljs-params">n</span>):
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">while</span> n &gt; <span class="hljs-number">0</span>:
+<span class="hljs-meta">... </span>            n -= <span class="hljs-number">1</span>
 ...
-&gt;&gt;&gt; countdown(10000000)
-__main__.countdown : 0.803001880645752
+<span class="hljs-meta">&gt;&gt;&gt; </span>countdown(<span class="hljs-number">10000000</span>)
+__main__.countdown : <span class="hljs-number">0.803001880645752</span>
 &gt;&gt;&gt;
-</code></pre><p>要测试某个代码块运行时间，你可以定义一个上下文管理器，例如：</p>
-<pre><code>from contextlib import contextmanager
+</code></pre>
+<p>要测试某个代码块运行时间，你可以定义一个上下文管理器，例如：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> contextlib <span class="hljs-keyword">import</span> contextmanager
 
-@contextmanager
-def timeblock(label):
+<span class="hljs-meta">@contextmanager</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">timeblock</span>(<span class="hljs-params">label</span>):
     start = time.perf_counter()
-    try:
-        yield
-    finally:
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">yield</span>
+    <span class="hljs-keyword">finally</span>:
         end = time.perf_counter()
-        print('{} : {}'.format(label, end - start))
-</code></pre><p>下面是使用这个上下文管理器的例子：</p>
-<pre><code>&gt;&gt;&gt; with timeblock('counting'):
-...     n = 10000000
-...     while n &gt; 0:
-...             n -= 1
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'{} : {}'</span>.<span class="hljs-built_in">format</span>(label, end - start))
+</code></pre>
+<p>下面是使用这个上下文管理器的例子：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">with</span> timeblock(<span class="hljs-string">'counting'</span>):
+<span class="hljs-meta">... </span>    n = <span class="hljs-number">10000000</span>
+<span class="hljs-meta">... </span>    <span class="hljs-keyword">while</span> n &gt; <span class="hljs-number">0</span>:
+<span class="hljs-meta">... </span>            n -= <span class="hljs-number">1</span>
 ...
-counting : 1.5551159381866455
+counting : <span class="hljs-number">1.5551159381866455</span>
 &gt;&gt;&gt;
-</code></pre><p>对于测试很小的代码片段运行性能，使用 <code>timeit</code> 模块会很方便，例如：</p>
-<pre><code>&gt;&gt;&gt; from timeit import timeit
-&gt;&gt;&gt; timeit('math.sqrt(2)', 'import math')
-0.1432319980012835
-&gt;&gt;&gt; timeit('sqrt(2)', 'from math import sqrt')
-0.10836604500218527
+</code></pre>
+<p>对于测试很小的代码片段运行性能，使用 <code>timeit</code> 模块会很方便，例如：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> timeit <span class="hljs-keyword">import</span> timeit
+<span class="hljs-meta">&gt;&gt;&gt; </span>timeit(<span class="hljs-string">'math.sqrt(2)'</span>, <span class="hljs-string">'import math'</span>)
+<span class="hljs-number">0.1432319980012835</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>timeit(<span class="hljs-string">'sqrt(2)'</span>, <span class="hljs-string">'from math import sqrt'</span>)
+<span class="hljs-number">0.10836604500218527</span>
 &gt;&gt;&gt;
-</code></pre><p><code>timeit</code> 会执行第一个参数中语句100万次并计算运行时间。 第二个参数是运行测试之前配置环境。如果你想改变循环执行次数， 可以像下面这样设置 <code>number</code>参数的值：</p>
-<pre><code>&gt;&gt;&gt; timeit('math.sqrt(2)', 'import math', number=10000000)
-1.434852126003534
-&gt;&gt;&gt; timeit('sqrt(2)', 'from math import sqrt', number=10000000)
-1.0270336690009572
+</code></pre>
+<p><code>timeit</code> 会执行第一个参数中语句100万次并计算运行时间。 第二个参数是运行测试之前配置环境。如果你想改变循环执行次数， 可以像下面这样设置 <code>number</code>参数的值：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span>timeit(<span class="hljs-string">'math.sqrt(2)'</span>, <span class="hljs-string">'import math'</span>, number=<span class="hljs-number">10000000</span>)
+<span class="hljs-number">1.434852126003534</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>timeit(<span class="hljs-string">'sqrt(2)'</span>, <span class="hljs-string">'from math import sqrt'</span>, number=<span class="hljs-number">10000000</span>)
+<span class="hljs-number">1.0270336690009572</span>
 &gt;&gt;&gt;
-</code></pre><h2 id="讨论">讨论</h2>
+</code></pre>
+<h2 id="讨论">讨论</h2>
 <p>当执行性能测试的时候，需要注意的是你获取的结果都是近似值。 <code>time.perf_counter()</code>函数会在给定平台上获取最高精度的计时值。 不过，它仍然还是基于时钟时间，很多因素会影响到它的精确度，比如机器负载。 如果你对于执行时间更感兴趣，使用 <code>time.process_time()</code> 来代替它。例如：</p>
-<pre><code>from functools import wraps
-def timethis(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> functools <span class="hljs-keyword">import</span> wraps
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">timethis</span>(<span class="hljs-params">func</span>):
+<span class="hljs-meta">    @wraps(<span class="hljs-params">func</span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">wrapper</span>(<span class="hljs-params">*args, **kwargs</span>):
         start = time.process_time()
         r = func(*args, **kwargs)
         end = time.process_time()
-        print('{}.{} : {}'.format(func.__module__, func.__name__, end - start))
-        return r
-    return wrapper
-</code></pre><p>最后，如果你想进行更深入的性能分析，那么你需要详细阅读 <code>time</code> 、<code>timeit</code>和其他相关模块的文档。 这样你可以理解和平台相关的差异以及一些其他陷阱。 还可以参考13.13小节中相关的一个创建计时器类的例子。</p>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">'{}.{} : {}'</span>.<span class="hljs-built_in">format</span>(func.__module__, func.__name__, end - start))
+        <span class="hljs-keyword">return</span> r
+    <span class="hljs-keyword">return</span> wrapper
+</code></pre>
+<p>最后，如果你想进行更深入的性能分析，那么你需要详细阅读 <code>time</code> 、<code>timeit</code>和其他相关模块的文档。 这样你可以理解和平台相关的差异以及一些其他陷阱。 还可以参考13.13小节中相关的一个创建计时器类的例子。</p>
 <h1 id="1414-加速程序运行">14.14 加速程序运行</h1>
 <h2 id="问题">问题</h2>
 <p>你的程序运行太慢，你想在不使用复杂技术比如 C 扩展或 JIT 编译器的情况下加快程序运行速度。</p>
@@ -1106,126 +1175,137 @@ def timethis(func):
 <p>通常来讲你会发现你得程序在少数几个热点地方花费了大量时间， 不然内存的数据处理循环。一旦你定位到这些点，你就可以使用下面这些实用技术来加速程序运行。</p>
 <h3 id="使用函数">使用函数</h3>
 <p>很多程序员刚开始会使用 Python 语言写一些简单脚本。 当编写脚本的时候，通常习惯了写毫无结构的代码，比如：</p>
-<pre><code># somescript.py
+<pre><code class="lang-python"><span class="hljs-comment"># somescript.py</span>
 
-import sys
-import csv
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> csv
 
-with open(sys.argv[1]) as f:
-     for row in csv.reader(f):
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(sys.argv[<span class="hljs-number">1</span>]) <span class="hljs-keyword">as</span> f:
+     <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> csv.reader(f):
 
-         # Some kind of processing
-         pass
-</code></pre><p>很少有人知道，像这样定义在全局范围的代码运行起来要比定义在函数中运行慢的多。 这种速度差异是由于局部变量和全局变量的实现方式（使用局部变量要更快些）。 因此，如果你想让程序运行更快些，只需要将脚本语句放入函数中即可：</p>
-<pre><code># somescript.py
-import sys
-import csv
+         <span class="hljs-comment"># Some kind of processing</span>
+         <span class="hljs-keyword">pass</span>
+</code></pre>
+<p>很少有人知道，像这样定义在全局范围的代码运行起来要比定义在函数中运行慢的多。 这种速度差异是由于局部变量和全局变量的实现方式（使用局部变量要更快些）。 因此，如果你想让程序运行更快些，只需要将脚本语句放入函数中即可：</p>
+<pre><code class="lang-python"><span class="hljs-comment"># somescript.py</span>
+<span class="hljs-keyword">import</span> sys
+<span class="hljs-keyword">import</span> csv
 
-def main(filename):
-    with open(filename) as f:
-         for row in csv.reader(f):
-             # Some kind of processing
-             pass
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>(<span class="hljs-params">filename</span>):
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(filename) <span class="hljs-keyword">as</span> f:
+         <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> csv.reader(f):
+             <span class="hljs-comment"># Some kind of processing</span>
+             <span class="hljs-keyword">pass</span>
 
-main(sys.argv[1])
-</code></pre><p>速度的差异取决于实际运行的程序，不过根据经验，使用函数带来15-30%的性能提升是很常见的。</p>
+main(sys.argv[<span class="hljs-number">1</span>])
+</code></pre>
+<p>速度的差异取决于实际运行的程序，不过根据经验，使用函数带来15-30%的性能提升是很常见的。</p>
 <h3 id="尽可能去掉属性访问">尽可能去掉属性访问</h3>
 <p>每一次使用点(.)操作符来访问属性的时候会带来额外的开销。 它会触发特定的方法，比如 <code>__getattribute__()</code> 和 <code>__getattr__()</code> ，这些方法会进行字典操作操作。</p>
 <p>通常你可以使用<code>from module import name</code>  这样的导入形式，以及使用绑定的方法。 假设你有如下的代码片段：</p>
-<pre><code>import math
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> math
 
-def compute_roots(nums):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_roots</span>(<span class="hljs-params">nums</span>):
     result = []
-    for n in nums:
+    <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> nums:
         result.append(math.sqrt(n))
-    return result
+    <span class="hljs-keyword">return</span> result
 
-# Test
-nums = range(1000000)
-for n in range(100):
+<span class="hljs-comment"># Test</span>
+nums = <span class="hljs-built_in">range</span>(<span class="hljs-number">1000000</span>)
+<span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">100</span>):
     r = compute_roots(nums)
-</code></pre><p>在我们机器上面测试的时候，这个程序花费了大概40秒。现在我们修改<code>compute_roots()</code>函数如下：</p>
-<pre><code>from math import sqrt
+</code></pre>
+<p>在我们机器上面测试的时候，这个程序花费了大概40秒。现在我们修改<code>compute_roots()</code>函数如下：</p>
+<pre><code class="lang-python"><span class="hljs-keyword">from</span> math <span class="hljs-keyword">import</span> sqrt
 
-def compute_roots(nums):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_roots</span>(<span class="hljs-params">nums</span>):
 
     result = []
     result_append = result.append
-    for n in nums:
+    <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> nums:
         result_append(sqrt(n))
-    return result
-</code></pre><p>修改后的版本运行时间大概是29秒。唯一不同之处就是消除了属性访问。 用<code>sqrt()</code> 代替了 <code>math.sqrt()</code> 。 <code>The result.append()</code> 方法被赋给一个局部变量 <code>result_append</code>，然后在内部循环中使用它。</p>
+    <span class="hljs-keyword">return</span> result
+</code></pre>
+<p>修改后的版本运行时间大概是29秒。唯一不同之处就是消除了属性访问。 用<code>sqrt()</code> 代替了 <code>math.sqrt()</code> 。 <code>The result.append()</code> 方法被赋给一个局部变量 <code>result_append</code>，然后在内部循环中使用它。</p>
 <p>不过，这些改变只有在大量重复代码中才有意义，比如循环。 因此，这些优化也只是在某些特定地方才应该被使用。</p>
 <h3 id="理解局部变量">理解局部变量</h3>
 <p>之前提过，局部变量会比全局变量运行速度快。 对于频繁访问的名称，通过将这些名称变成局部变量可以加速程序运行。 例如，看下之前对于 <code>compute_roots()</code>函数进行修改后的版本：</p>
-<pre><code>import math
+<pre><code class="lang-python"><span class="hljs-keyword">import</span> math
 
-def compute_roots(nums):
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">compute_roots</span>(<span class="hljs-params">nums</span>):
     sqrt = math.sqrt
     result = []
     result_append = result.append
-    for n in nums:
+    <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> nums:
         result_append(sqrt(n))
-    return result
-</code></pre><p>在这个版本中，<code>sqrt</code> 从 <code>match</code>模块被拿出并放入了一个局部变量中。 如果你运行这个代码，大概花费25秒（对于之前29秒又是一个改进）。 这个额外的加速原因是因为对于局部变量 <code>sqrt</code> 的查找要快于全局变量<code>sqrt</code></p>
+    <span class="hljs-keyword">return</span> result
+</code></pre>
+<p>在这个版本中，<code>sqrt</code> 从 <code>match</code>模块被拿出并放入了一个局部变量中。 如果你运行这个代码，大概花费25秒（对于之前29秒又是一个改进）。 这个额外的加速原因是因为对于局部变量 <code>sqrt</code> 的查找要快于全局变量<code>sqrt</code></p>
 <p>对于类中的属性访问也同样适用于这个原理。 通常来讲，查找某个值比如 <code>self.name</code> 会比访问一个局部变量要慢一些。 在内部循环中，可以将某个需要频繁访问的属性放入到一个局部变量中。例如：</p>
-<pre><code># Slower
-class SomeClass:
+<pre><code class="lang-python"><span class="hljs-comment"># Slower</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeClass</span>:
     ...
-    def method(self):
-         for x in s:
-             op(self.value)
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">method</span>(<span class="hljs-params">self</span>):
+         <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> s:
+             op(<span class="hljs-variable language_">self</span>.value)
 
-# Faster
-class SomeClass:
+<span class="hljs-comment"># Faster</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeClass</span>:
 
     ...
-    def method(self):
-         value = self.value
-         for x in s:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">method</span>(<span class="hljs-params">self</span>):
+         value = <span class="hljs-variable language_">self</span>.value
+         <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> s:
              op(value)
-</code></pre><h3 id="避免不必要的抽象">避免不必要的抽象</h3>
+</code></pre>
+<h3 id="避免不必要的抽象">避免不必要的抽象</h3>
 <p>任何时候当你使用额外的处理层（比如装饰器、属性访问、描述器）去包装你的代码时，都会让程序运行变慢。 比如看下如下的这个类：</p>
-<pre><code>class A:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-    @property
-    def y(self):
-        return self._y
-    @y.setter
-    def y(self, value):
-        self._y = value
-</code></pre><p>现在进行一个简单测试：</p>
-<pre><code>&gt;&gt;&gt; from timeit import timeit
-&gt;&gt;&gt; a = A(1,2)
-&gt;&gt;&gt; timeit('a.x', 'from __main__ import a')
-0.07817923510447145
-&gt;&gt;&gt; timeit('a.y', 'from __main__ import a')
-0.35766440676525235
+<pre><code class="lang-python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, x, y</span>):
+        <span class="hljs-variable language_">self</span>.x = x
+        <span class="hljs-variable language_">self</span>.y = y
+<span class="hljs-meta">    @property</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">y</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>._y
+<span class="hljs-meta">    @y.setter</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">y</span>(<span class="hljs-params">self, value</span>):
+        <span class="hljs-variable language_">self</span>._y = value
+</code></pre>
+<p>现在进行一个简单测试：</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> timeit <span class="hljs-keyword">import</span> timeit
+<span class="hljs-meta">&gt;&gt;&gt; </span>a = A(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>timeit(<span class="hljs-string">'a.x'</span>, <span class="hljs-string">'from __main__ import a'</span>)
+<span class="hljs-number">0.07817923510447145</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>timeit(<span class="hljs-string">'a.y'</span>, <span class="hljs-string">'from __main__ import a'</span>)
+<span class="hljs-number">0.35766440676525235</span>
 &gt;&gt;&gt;
-</code></pre><p>可以看到，访问属性 y 相比属性 x 而言慢的不止一点点，大概慢了4.5倍。 如果你在意性能的话，那么就需要重新审视下对于y的属性访问器的定义是否真的有必要了。 如果没有必要，就使用简单属性吧。 如果仅仅是因为其他编程语言需要使用 getter/setter 函数就去修改代码风格，这个真的没有必要。</p>
+</code></pre>
+<p>可以看到，访问属性 y 相比属性 x 而言慢的不止一点点，大概慢了4.5倍。 如果你在意性能的话，那么就需要重新审视下对于y的属性访问器的定义是否真的有必要了。 如果没有必要，就使用简单属性吧。 如果仅仅是因为其他编程语言需要使用 getter/setter 函数就去修改代码风格，这个真的没有必要。</p>
 <h3 id="使用内置的容器">使用内置的容器</h3>
 <p>内置的数据类型比如字符串、元组、列表、集合和字典都是使用 C 来实现的，运行起来非常快。 如果你想自己实现新的数据结构（比如链接列表、平衡树等）， 那么要想在性能上达到内置的速度几乎不可能，因此，还是乖乖的使用内置的吧。</p>
 <h3 id="避免创建不必要的数据结构或复制">避免创建不必要的数据结构或复制</h3>
 <p>有时候程序员想显摆下，构造一些并没有必要的数据结构。例如，有人可能会像下面这样写：</p>
-<pre><code>values = [x for x in sequence]
-squares = [x*x for x in values]
-</code></pre><p>也许这里的想法是首先将一些值收集到一个列表中，然后使用列表推导来执行操作。 不过，第一个列表完全没有必要，可以简单的像下面这样写：</p>
-<pre><code>squares = [x*x for x in sequence]
-</code></pre><p>与此相关，还要注意下那些对 Python 的共享数据机制过于偏执的程序所写的代码。 有些人并没有很好的理解或信任 Python 的内存模型，滥用 <code>copy.deepcopy()</code> 之类的函数。 通常在这些代码中是可以去掉复制操作的。</p>
+<pre><code class="lang-python">values = [x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> sequence]
+squares = [x*x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> values]
+</code></pre>
+<p>也许这里的想法是首先将一些值收集到一个列表中，然后使用列表推导来执行操作。 不过，第一个列表完全没有必要，可以简单的像下面这样写：</p>
+<pre><code class="lang-python">squares = [x*x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> sequence]
+</code></pre>
+<p>与此相关，还要注意下那些对 Python 的共享数据机制过于偏执的程序所写的代码。 有些人并没有很好的理解或信任 Python 的内存模型，滥用 <code>copy.deepcopy()</code> 之类的函数。 通常在这些代码中是可以去掉复制操作的。</p>
 <h2 id="讨论">讨论</h2>
 <p>在优化之前，有必要先研究下使用的算法。 选择一个复杂度为 O(n log n) 的算法要比你去调整一个复杂度为 O(n**2) 的算法所带来的性能提升要大得多。</p>
 <p>如果你觉得你还是得进行优化，那么请从整体考虑。 作为一般准则，不要对程序的每一个部分都去优化,因为这些修改回导致代码难以阅读和理解。 你应该专注于优化产生性能瓶颈的地方，比如内部循环。</p>
 <p>你还要注意微小优化的结果。例如考虑下面创建一个字典的两种方式：</p>
-<pre><code>a = {
-    'name' : 'AAPL',
-    'shares' : 100,
-    'price' : 534.22
+<pre><code class="lang-python">a = {
+    <span class="hljs-string">'name'</span> : <span class="hljs-string">'AAPL'</span>,
+    <span class="hljs-string">'shares'</span> : <span class="hljs-number">100</span>,
+    <span class="hljs-string">'price'</span> : <span class="hljs-number">534.22</span>
 }
 
-b = dict(name='AAPL', shares=100, price=534.22)
-</code></pre><p>后面一种写法更简洁一些（你不需要在关键字上输入引号）。 不过，如果你将这两个代码片段进行性能测试对比时，会发现使用 <code>dict()</code> 的方式会慢了3倍。 看到这个，你是不是有冲动把所有使用 <code>dict()</code>的代码都替换成第一种。 不够，聪明的程序员只会关注他应该关注的地方，比如内部循环。在其他地方，这点性能损失没有什么影响。</p>
+b = <span class="hljs-built_in">dict</span>(name=<span class="hljs-string">'AAPL'</span>, shares=<span class="hljs-number">100</span>, price=<span class="hljs-number">534.22</span>)
+</code></pre>
+<p>后面一种写法更简洁一些（你不需要在关键字上输入引号）。 不过，如果你将这两个代码片段进行性能测试对比时，会发现使用 <code>dict()</code> 的方式会慢了3倍。 看到这个，你是不是有冲动把所有使用 <code>dict()</code>的代码都替换成第一种。 不够，聪明的程序员只会关注他应该关注的地方，比如内部循环。在其他地方，这点性能损失没有什么影响。</p>
 <p>如果你的优化要求比较高，本节的这些简单技术满足不了，那么你可以研究下基于即时编译（JIT）技术的一些工具。 例如，PyPy 工程是 Python 解释器的另外一种实现，它会分析你的程序运行并对那些频繁执行的部分生成本机机器码。 它有时候能极大的提升性能，通常可以接近 C 代码的速度。 不过可惜的是，到写这本书位置，PyPy 还不能完全支持 Python3. 因此，这个是你将来需要去研究的。你还可以考虑下 Numba 工程， Numba 是一个在你使用装饰器来选择 Python 函数进行优化时的动态编译器。 这些函数会使用 LLVM 被编译成本地机器码。它同样可以极大的提升性能。 但是，跟 PyPy 一样，它对于 Python 3 的支持现在还停留在实验阶段。</p>
 <p>最后我引用 John Ousterhout 说过的话作为结尾：“最好的性能优化时从不工作到工作状态的迁移”。 直到你真的需要优化的时候再去考虑它。确保你程序正确的运行通常比让它运行更快要更重要一些（至少开始是这样的）.</p>
 
@@ -1271,7 +1351,7 @@ b = dict(name='AAPL', shares=100, price=534.22)
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"第十四章：测试、调试和异常","level":"1.15","depth":1,"next":{"title":"第十五章：C 语言扩展","level":"1.16","depth":1,"path":"c-language-extensions.md","ref":"c-language-extensions.md","articles":[]},"previous":{"title":"第十三章：脚本编程与系统管理","level":"1.14","depth":1,"path":"scripting-and-systems-management.md","ref":"scripting-and-systems-management.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"testing-debugging-and-exception.md","mtime":"2025-01-05T10:56:44.746Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2025-01-05T12:14:20.822Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"第十四章：测试、调试和异常","level":"1.15","depth":1,"next":{"title":"第十五章：C 语言扩展","level":"1.16","depth":1,"path":"c-language-extensions.md","ref":"c-language-extensions.md","articles":[]},"previous":{"title":"第十三章：脚本编程与系统管理","level":"1.14","depth":1,"path":"scripting-and-systems-management.md","ref":"scripting-and-systems-management.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56},"embedFonts":false},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"testing-debugging-and-exception.md","mtime":"2025-01-05T18:01:57.042Z","type":"markdown"},"gitbook":{"version":"6.0.2","time":"2025-01-05T18:02:08.648Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

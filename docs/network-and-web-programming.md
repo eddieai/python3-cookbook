@@ -8,7 +8,7 @@
 ## 解决方案
 对于简单的事情来说，通常使用 `urllib.request` 模块就够了。例如，发送一个简单的 HTTP GET 请求到远程的服务上，可以这样做：
 
-```
+```python
 from urllib import request, parse
 
 # Base URL being accessed
@@ -30,7 +30,7 @@ resp = u.read()
 
 如果你需要使用 POST 方法在请求主体中发送查询参数，可以将参数编码后作为可选参数提供给 `urlopen()` 函数，就像这样：
 
-```
+```python
 from urllib import request, parse
 
 # Base URL being accessed
@@ -52,7 +52,7 @@ resp = u.read()
 
 如果你需要在发出的请求中提供一些自定义的 HTTP 头，例如修改 `user-agent` 字段,可以创建一个包含字段值的字典，并创建一个 Request 实例然后将其传给 `urlopen()` ，如下：
 
-```
+```python
 from urllib import request, parse
 ...
 
@@ -71,7 +71,7 @@ resp = u.read()
 
 如果需要交互的服务比上面的例子都要复杂，也许应该去看看 requests 库（https://pypi.python.org/pypi/requests）。例如，下面这个示例采用 requests 库重新实现了上面的操作：
 
-```
+```python
 import requests
 
 # Base URL being accessed
@@ -99,7 +99,7 @@ text = resp.text
 
 下面这个示例利用 `requests` 库发起一个 HEAD 请求，并从响应中提取出一些 HTTP 头数据的字段：
 
-```
+```python
 import requests
 
 resp = requests.head('http://www.python.org/index.html')
@@ -142,7 +142,7 @@ r = requests.post(url, files=files)
 
 例如，如果你决定坚持使用标准的程序库而不考虑像 `requests` 这样的第三方库，那么也许就不得不使用底层的 `http.client` 模块来实现自己的代码。比方说，下面的代码展示了如何执行一个 HEAD 请求：
 
-```
+```python
 from http.client import HTTPConnection
 from urllib import parse
 
@@ -157,7 +157,7 @@ for name, value in resp.getheaders():
 
 同样地，如果必须编写涉及代理、认证、cookies 以及其他一些细节方面的代码，那么使用 `urllib `就显得特别别扭和啰嗦。比方说，下面这个示例实现在 Python 包索引上的认证：
 
-```
+```python
 import urllib.request
 
 auth = urllib.request.HTTPBasicAuthHandler()
@@ -176,7 +176,7 @@ resp = u.read()
 
 在开发过程中测试 HTTP 客户端代码常常是很令人沮丧的，因为所有棘手的细节问题都需要考虑（例如 cookies、认证、HTTP 头、编码方式等）。要完成这些任务，考虑使用 httpbin 服务（http://httpbin.org）。这个站点会接收发出的请求，然后以 JSON 的形式将相应信息回传回来。下面是一个交互式的例子：
 
-```
+```python
 >>> import requests
 >>> r = requests.get('http://httpbin.org/get?name=Dave&n=37',
 ...     headers = { 'User-agent': 'goaway/1.0' })
@@ -201,7 +201,7 @@ resp = u.read()
 ## 解决方案
 创建一个 TCP 服务器的一个简单方法是使用 `socketserver` 库。例如，下面是一个简单的应答服务器：
 
-```
+```python
 from socketserver import BaseRequestHandler, TCPServer
 
 class EchoHandler(BaseRequestHandler):
@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
 在这段代码中，你定义了一个特殊的处理类，实现了一个 `handle()` 方法，用来为客户端连接服务。` request `属性是客户端 socket，`client_address` 有客户端地址。 为了测试这个服务器，运行它并打开另外一个 Python 进程连接这个服务器：
 
-```
+```python
 >>> from socket import socket, AF_INET, SOCK_STREAM
 >>> s = socket(AF_INET, SOCK_STREAM)
 >>> s.connect(('localhost', 20000))
@@ -234,7 +234,7 @@ b'Hello'
 
 很多时候，可以很容易的定义一个不同的处理器。下面是一个使用 `StreamRequestHandler `基类将一个类文件接口放置在底层 socket 上的例子：
 
-```
+```python
 from socketserver import StreamRequestHandler, TCPServer
 
 class EchoHandler(StreamRequestHandler):
@@ -253,7 +253,7 @@ if __name__ == '__main__':
 ## 讨论
 `socketserver` 可以让我们很容易的创建简单的 TCP 服务器。 但是，你需要注意的是，默认情况下这种服务器是单线程的，一次只能为一个客户端连接服务。 如果你想处理多个客户端，可以初始化一个 `ForkingTCPServer` 或者是 `ThreadingTCPServer` 对象。例如：
 
-```
+```python
 from socketserver import ThreadingTCPServer
 
 
@@ -266,7 +266,7 @@ if __name__ == '__main__':
 
 如果你担心这个问题，你可以创建一个预先分配大小的工作线程池或进程池。 你先创建一个普通的非线程服务器，然后在一个线程池中使用 `serve_forever()` 方法来启动它们。
 
-```
+```python
 if __name__ == '__main__':
     from threading import Thread
     NWORKERS = 16
@@ -280,7 +280,7 @@ if __name__ == '__main__':
 
 一般来讲，一个 `TCPServer` 在实例化的时候会绑定并激活相应的 `socket `。 不过，有时候你想通过设置某些选项去调整底下的 `socket` ，可以设置参数 `bind_and_activate=False `。如下：
 
-```
+```python
 if __name__ == '__main__':
     serv = TCPServer(('', 20000), EchoHandler, bind_and_activate=False)
     # Set up various socket options
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 
 上面的` socket `选项是一个非常普遍的配置项，它允许服务器重新绑定一个之前使用过的端口号。 由于要被经常使用到，它被放置到类变量中，可以直接在 `TCPServer` 上面设置。 在实例化服务器的时候去设置它的值，如下所示：
 
-```
+```python
 if __name__ == '__main__':
     TCPServer.allow_reuse_address = True
     serv = TCPServer(('', 20000), EchoHandler)
@@ -302,7 +302,7 @@ if __name__ == '__main__':
 
 在上面示例中，我们演示了两种不同的处理器基类（ `BaseRequestHandler `和 `StreamRequestHandler` ）。 `StreamRequestHandler `更加灵活点，能通过设置其他的类变量来支持一些新的特性。比如：
 
-```
+```python
 import socket
 
 class EchoHandler(StreamRequestHandler):
@@ -323,7 +323,7 @@ class EchoHandler(StreamRequestHandler):
 
 最后，还需要注意的是巨大部分 Python 的高层网络模块（比如 HTTP、XML-RPC 等）都是建立在 s`ocketserver` 功能之上。 也就是说，直接使用 `socket` 库来实现服务器也并不是很难。 下面是一个使用 `socket `直接编程实现的一个服务器简单例子：
 
-```
+```python
 from socket import socket, AF_INET, SOCK_STREAM
 
 def echo_handler(address, client_sock):
@@ -354,7 +354,7 @@ if __name__ == '__main__':
 ## 解决方案
 跟 TCP 一样，UDP 服务器也可以通过使用 `socketserver` 库很容易的被创建。 例如，下面是一个简单的时间服务器：
 
-```
+```python
 from socketserver import BaseRequestHandler, UDPServer
 import time
 
@@ -375,7 +375,7 @@ if __name__ == '__main__':
 
 我们来测试下这个服务器，首先运行它，然后打开另外一个 Python 进程向服务器发送消息：
 
-```
+```python
 >>> from socket import socket, AF_INET, SOCK_DGRAM
 >>> s = socket(AF_INET, SOCK_DGRAM)
 >>> s.sendto(b'', ('localhost', 20000))
@@ -392,7 +392,7 @@ if __name__ == '__main__':
 
 `UDPServer `类是单线程的，也就是说一次只能为一个客户端连接服务。 实际使用中，这个无论是对于 UDP 还是 TCP 都不是什么大问题。 如果你想要并发操作，可以实例化一个 `ForkingUDPServer` 或 `ThreadingUDPServer` 对象：
 
-```
+```python
 from socketserver import ThreadingUDPServer
 
    if __name__ == '__main__':
@@ -402,7 +402,7 @@ from socketserver import ThreadingUDPServer
 
 直接使用 `socket` 来是想一个 UDP 服务器也不难，下面是一个例子：
 
-```
+```python
 from socket import socket, AF_INET, SOCK_DGRAM
 import time
 
@@ -426,7 +426,7 @@ if __name__ == '__main__':
 ## 解决方案
 可以使用 `ipaddress` 模块很容易的实现这样的计算。例如：
 
-```
+```python
 >>> import ipaddress
 >>> net = ipaddress.ip_network('123.45.67.64/27')
 >>> net
@@ -462,7 +462,7 @@ IPv6Network('12:3456:78:90ab:cd:ef01:23:30/125')
 
 `Network `也允许像数组一样的索引取值，例如：
 
-```
+```python
 >>> net.num_addresses
 32
 >>> net[0]
@@ -479,7 +479,7 @@ IPv4Address('123.45.67.94')
 
 另外，你还可以执行网络成员检查之类的操作：
 
-```
+```python
 >>> a = ipaddress.ip_address('123.45.67.69')
 >>> a in net
 True
@@ -491,7 +491,7 @@ False
 
 一个 IP 地址和网络地址能通过一个 IP 接口来指定，例如：
 
-```
+```python
 >>> inet = ipaddress.ip_interface('123.45.67.73/27')
 >>> inet.network
 IPv4Network('123.45.67.64/27')
@@ -505,7 +505,7 @@ IPv4Address('123.45.67.73')
 
 要注意的是，`ipaddress `模块跟其他一些和网络相关的模块比如 `socket `库交集很少。 所以，你不能使用 `IPv4Address` 的实例来代替一个地址字符串，你首先得显式的使用` str() `转换它。例如：
 
-```
+```python
 >>> a = ipaddress.ip_address('127.0.0.1')
 >>> from socket import socket, AF_INET, SOCK_STREAM
 >>> s = socket(AF_INET, SOCK_STREAM)
@@ -526,7 +526,7 @@ TypeError: Can't convert 'IPv4Address' object to str implicitly
 ## 解决方案
 构建一个 REST 风格的接口最简单的方法是创建一个基于 WSGI 标准（PEP 3333）的很小的库，下面是一个例子：
 
-```
+```python
 # resty.py
 
 import cgi
@@ -555,7 +555,7 @@ class PathDispatcher:
 
 为了使用这个调度器，你只需要编写不同的处理器，就像下面这样：
 
-```
+```python
 import time
 
 _hello_resp = '''\
@@ -607,7 +607,7 @@ if __name__ == '__main__':
 
 要测试下这个服务器，你可以使用一个浏览器或 `urllib `和它交互。例如：
 
-```
+```python
 >>> u = urlopen('http://localhost:8080/hello?name=Guido')
 >>> print(u.read().decode('utf-8'))
 <html>
@@ -642,7 +642,7 @@ if __name__ == '__main__':
 
 在 WSGI 中，你可以像下面这样约定的方式以一个可调用对象形式来实现你的程序。
 
-```
+```python
 import cgi
 
 def wsgi_app(environ, start_response):
@@ -651,7 +651,7 @@ def wsgi_app(environ, start_response):
 
 `environ `属性是一个字典，包含了从 web 服务器如 Apache [参考 Internet RFC 3875]提供的 CGI 接口中获取的值。 要将这些不同的值提取出来，你可以像这么这样写：
 
-```
+```python
 def wsgi_app(environ, start_response):
     method = environ['REQUEST_METHOD']
     path = environ['PATH_INFO']
@@ -663,7 +663,7 @@ def wsgi_app(environ, start_response):
 
 `start_response `参数是一个为了初始化一个请求对象而必须被调用的函数。 第一个参数是返回的 HTTP 状态值，第二个参数是一个(名,值)元组列表，用来构建返回的 HTTP 头。例如：
 
-```
+```python
 def wsgi_app(environ, start_response):
     pass
     start_response('200 OK', [('Content-type', 'text/plain')])
@@ -671,7 +671,7 @@ def wsgi_app(environ, start_response):
 
 为了返回数据，一个 WSGI 程序必须返回一个字节字符串序列。可以像下面这样使用一个列表来完成：
 
-```
+```python
 def wsgi_app(environ, start_response):
     pass
     start_response('200 OK', [('Content-type', 'text/plain')])
@@ -683,7 +683,7 @@ def wsgi_app(environ, start_response):
 
 或者，你还可以使用` yield` ：
 
-```
+```python
 def wsgi_app(environ, start_response):
     pass
     start_response('200 OK', [('Content-type', 'text/plain')])
@@ -695,7 +695,7 @@ def wsgi_app(environ, start_response):
 
 尽管 WSGI 程序通常被定义成一个函数，不过你也可以使用类实例来实现，只要它实现了合适的 `__call__()` 方法。例如：
 
-```
+```python
 class WSGIApplication:
     def __init__(self):
         ...
@@ -709,7 +709,7 @@ class WSGIApplication:
 
 最后，使用 WSGI 还有一个很重要的部分就是没有什么地方是针对特定 web 服务器的。 因为标准对于服务器和框架是中立的，你可以将你的程序放入任何类型服务器中。 我们使用下面的代码测试测试本节代码：
 
-```
+```python
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
 
@@ -734,7 +734,7 @@ WSGI 本身是一个很小的标准。因此它并没有提供一些高级的特
 ## 解决方案
 实现一个远程方法调用的最简单方式是使用 XML-RPC。下面我们演示一下一个实现了键-值存储功能的简单服务器：
 
-```
+```python
 from xmlrpc.server import SimpleXMLRPCServer
 
 class KeyValueServer:
@@ -771,7 +771,7 @@ if __name__ == '__main__':
 
 下面我们从一个客户端机器上面来访问服务器：
 
-```
+```python
 >>> from xmlrpc.client import ServerProxy
 >>> s = ServerProxy('http://localhost:15000', allow_none=True)
 >>> s.set('foo', 'bar')
@@ -791,7 +791,7 @@ False
 ## 讨论
 XML-RPC 可以让我们很容易的构造一个简单的远程调用服务。你所需要做的仅仅是创建一个服务器实例， 通过它的方法 `register_function() `来注册函数，然后使用方法 `serve_forever() `启动它。 在上面我们将这些步骤放在一起写到一个类中，不够这并不是必须的。比如你还可以像下面这样创建一个服务器：
 
-```
+```python
 from xmlrpc.server import SimpleXMLRPCServer
 def add(x,y):
     return x+y
@@ -803,7 +803,7 @@ serv.serve_forever()
 
 XML-RPC 暴露出来的函数只能适用于部分数据类型，比如字符串、整形、列表和字典。 对于其他类型就得需要做些额外的功课了。 例如，如果你想通过 XML-RPC 传递一个对象实例，实际上只有他的实例字典被处理：
 
-```
+```python
 >>> class Point:
 ...     def __init__(self, x, y):
 ...             self.x = x
@@ -818,7 +818,7 @@ XML-RPC 暴露出来的函数只能适用于部分数据类型，比如字符串
 
 类似的，对于二进制数据的处理也跟你想象的不太一样：
 
-```
+```python
 >>> s.set('foo', b'Hello World')
 >>> s.get('foo')
 <xmlrpc.client.Binary object at 0x10131d410>
@@ -841,7 +841,7 @@ XML-RPC 的一个缺点是它的性能。`SimpleXMLRPCServer` 的实现是单线
 ## 解决方案
 通过使用 `multiprocessing.connection `模块可以很容易的实现解释器之间的通信。 下面是一个简单的应答服务器例子：
 
-```
+```python
 from multiprocessing.connection import Listener
 import traceback
 
@@ -868,7 +868,7 @@ echo_server(('', 25000), authkey=b'peekaboo')
 
 然后客户端连接服务器并发送消息的简单示例：
 
-```
+```python
 >>> from multiprocessing.connection import Client
 >>> c = Client(('localhost', 25000), authkey=b'peekaboo')
 >>> c.send('hello')
@@ -890,13 +890,13 @@ echo_server(('', 25000), authkey=b'peekaboo')
 
 如果你的解释器运行在同一台机器上面，那么你可以使用另外的通信机制，比如 Unix 域套接字或者是 Windows 命名管道。 要想使用 UNIX 域套接字来创建一个连接，只需简单的将地址改写一个文件名即可：
 
-```
+```python
 s = Listener('/tmp/myconn', authkey=b'peekaboo')
 ```
 
 要想使用 Windows 命名管道来创建连接，只需像下面这样使用一个文件名：
 
-```
+```python
 s = Listener(r'\\.\pipe\myconn', authkey=b'peekaboo')
 ```
 
@@ -911,7 +911,7 @@ s = Listener(r'\\.\pipe\myconn', authkey=b'peekaboo')
 ## 解决方案
 将函数请求、参数和返回值使用 pickle 编码后，在不同的解释器直接传送 pickle 字节字符串，可以很容易的实现 RPC。 下面是一个简单的 PRC 处理器，可以被整合到一个服务器中去：
 
-```
+```python
 # rpcserver.py
 
 import pickle
@@ -939,7 +939,7 @@ class RPCHandler:
 
 要使用这个处理器，你需要将它加入到一个消息服务器中。你有很多种选择， 但是使用 `multiprocessing` 库是最简单的。下面是一个 RPC 服务器例子：
 
-```
+```python
 from multiprocessing.connection import Listener
 from threading import Thread
 
@@ -969,7 +969,7 @@ rpc_server(handler, ('localhost', 17000), authkey=b'peekaboo')
 
 为了从一个远程客户端访问服务器，你需要创建一个对应的用来传送请求的 RPC 代理类。例如
 
-```
+```python
 import pickle
 
 class RPCProxy:
@@ -987,7 +987,7 @@ class RPCProxy:
 
 要使用这个代理类，你需要将其包装到一个服务器的连接上面，例如：
 
-```
+```python
 >>> from multiprocessing.connection import Client
 >>> c = Client(('localhost', 17000), authkey=b'peekaboo')
 >>> proxy = RPCProxy(c)
@@ -1014,7 +1014,7 @@ TypeError: unsupported operand type(s) for -: 'list' and 'int'
 
 作为 pickle 的替代，你也许可以考虑使用 JSON、XML 或一些其他的编码格式来序列化消息。 例如，本机实例可以很容易的改写成 JSON 编码方案。还需要将 `pickle.loads()` 和 `pickle.dumps() `替换成 `json.loads()` 和 `json.dumps()` 即可：
 
-```
+```python
 # jsonrpcserver.py
 import json
 
@@ -1064,7 +1064,7 @@ class RPCProxy:
 ## 解决方案
 可以利用 `hmac` 模块实现一个连接握手，从而实现一个简单而高效的认证过程。下面是代码示例：
 
-```
+```python
 import hmac
 import os
 
@@ -1093,7 +1093,7 @@ def server_authenticate(connection, secret_key):
 
 基本原理是当连接建立后，服务器给客户端发送一个随机的字节消息（这里例子中使用了 `os.urandom()` 返回值）。 客户端和服务器同时利用 hmac 和一个只有双方知道的密钥来计算出一个加密哈希值。然后客户端将它计算出的摘要发送给服务器， 服务器通过比较这个值和自己计算的是否一致来决定接受或拒绝连接。摘要的比较需要使用 `hmac.compare_digest()` 函数。 使用这个函数可以避免遭到时间分析攻击，不要用简单的比较操作符（==）。 为了使用这些函数，你需要将它集成到已有的网络或消息代码中。例如，对于 sockets，服务器代码应该类似下面：
 
-```
+```python
 from socket import socket, AF_INET, SOCK_STREAM
 
 secret_key = b'peekaboo'
@@ -1145,7 +1145,7 @@ hmac 认证算法基于哈希函数如 MD5 和 SHA-1，关于这个在 IETF RFC 
 ## 解决方案
 `ssl` 模块能为底层 socket 连接添加 SSL 的支持。 `ssl.wrap_socket()` 函数接受一个已存在的 socket 作为参数并使用 SSL 层来包装它。 例如，下面是一个简单的应答服务器，能在服务器端为所有客户端连接做认证。
 
-```
+```python
 from socket import socket, AF_INET, SOCK_STREAM
 import ssl
 
@@ -1186,7 +1186,7 @@ echo_server(('', 20000))
 
 下面我们演示一个客户端连接服务器的交互例子。客户端会请求服务器来认证并确认连接：
 
-```
+```python
 >>> from socket import socket, AF_INET, SOCK_STREAM
 >>> import ssl
 >>> s = socket(AF_INET, SOCK_STREAM)
@@ -1205,7 +1205,7 @@ b'Hello World?'
 
 首先，对于服务器而言，可以通过像下面这样使用一个 mixin 类来添加 SSL：
 
-```
+```python
 import ssl
 
 class SSLMixin:
@@ -1236,7 +1236,7 @@ def get_request(self):
 
 为了使用这个 mixin 类，你可以将它跟其他服务器类混合。例如，下面是定义一个基于 SSL 的 XML-RPC 服务器例子：
 
-```
+```python
 # XML-RPC server with SSL
 
 from xmlrpc.server import SimpleXMLRPCServer
@@ -1290,7 +1290,7 @@ if __name__ == '__main__':
 
 使用这个服务器时，你可以使用普通的 `xmlrpc.client `模块来连接它。 只需要在URL中指定 `https: `即可，例如：
 
-```
+```python
 >>> from xmlrpc.client import ServerProxy
 >>> s = ServerProxy('https://localhost:15000', allow_none=True)
 >>> s.set('foo','bar')
@@ -1309,7 +1309,7 @@ False
 
 对于 SSL 客户端来讲一个比较复杂的问题是如何确认服务器证书或为服务器提供客户端认证（比如客户端证书）。 不幸的是，暂时还没有一个标准方法来解决这个问题，需要自己去研究。 不过，下面给出一个例子，用来建立一个安全的 XML-RPC 连接来确认服务器证书：
 
-```
+```python
 from xmlrpc.client import SafeTransport, ServerProxy
 import ssl
 
@@ -1339,7 +1339,7 @@ s = ServerProxy('https://localhost:15000',
 
 服务器将证书发送给客户端，客户端来确认它的合法性。这种确认可以是相互的。 如果服务器想要确认客户端，可以将服务器启动代码修改如下：
 
-```
+```python
 if __name__ == '__main__':
     KEYFILE='server_key.pem'   # Private key of the server
     CERTFILE='server_cert.pem' # Server certificate
@@ -1356,7 +1356,7 @@ if __name__ == '__main__':
 
 为了让 XML-RPC 客户端发送证书，修改 `ServerProxy` 的初始化代码如下：
 
-```
+```python
 # Create the client proxy
 s = ServerProxy('https://localhost:15000',
                 transport=VerifyCertSafeTransport('server_cert.pem',
@@ -1370,7 +1370,7 @@ s = ServerProxy('https://localhost:15000',
 
 我解释下到底需要啥，每一个 SSL 连接终端一般都会有一个私钥和一个签名证书文件。 这个证书包含了公钥并在每一次连接的时候都会发送给对方。 对于公共服务器，它们的证书通常是被权威证书机构比如 Verisign、Equifax 或其他类似机构（需要付费的）签名过的。 为了确认服务器签名，客户端回保存一份包含了信任授权机构的证书列表文件。 例如，web 浏览器保存了主要的认证机构的证书，并使用它来为每一个 HTTPS 连接确认证书的合法性。 对本小节示例而言，只是为了测试，我们可以创建自签名的证书，下面是主要步骤：
 
-```
+```python
 bash % openssl req -new -x509 -days 365 -nodes -out server_cert.pem
 -keyout server_key.pem
 Generating a 1024 bit RSA private key ..........................................++++++ ...++++++
@@ -1384,13 +1384,13 @@ Country Name (2 letter code) [AU]:US State or Province Name (full name) [Some-St
 
 在创建证书的时候，各个值的设定可以是任意的，但是”Common Name“的值通常要包含服务器的 DNS 主机名。 如果你只是在本机测试，那么就使用”localhost“，否则使用服务器的域名。
 
-```
+```python
 —–BEGIN RSA PRIVATE KEY—– MIICXQIBAAKBgQCZrCNLoEyAKF+f9UNcFaz5Osa6jf7qkbUl8si5xQrY3ZYC7juu nL1dZLn/VbEFIITaUOgvBtPv1qUWTJGwga62VSG1oFE0ODIx3g2Nh4sRf+rySsx2 L4442nx0z4O5vJQ7k6eRNHAZUUnCL50+YvjyLyt7ryLSjSuKhCcJsbZgPwIDAQAB AoGAB5evrr7eyL4160tM5rHTeATlaLY3UBOe5Z8XN8Z6gLiB/ucSX9AysviVD/6F 3oD6z2aL8jbeJc1vHqjt0dC2dwwm32vVl8mRdyoAsQpWmiqXrkvP4Bsl04VpBeHw Qt8xNSW9SFhceL3LEvw9M8i9MV39viih1ILyH8OuHdvJyFECQQDLEjl2d2ppxND9 PoLqVFAirDfX2JnLTdWbc+M11a9Jdn3hKF8TcxfEnFVs5Gav1MusicY5KB0ylYPb YbTvqKc7AkEAwbnRBO2VYEZsJZp2X0IZqP9ovWokkpYx+PE4+c6MySDgaMcigL7v WDIHJG1CHudD09GbqENasDzyb2HAIW4CzQJBAKDdkv+xoW6gJx42Auc2WzTcUHCA eXR/+BLpPrhKykzbvOQ8YvS5W764SUO1u1LWs3G+wnRMvrRvlMCZKgggBjkCQQCG Jewto2+a+WkOKQXrNNScCDE5aPTmZQc5waCYq4UmCZQcOjkUOiN3ST1U5iuxRqfb V/yX6fw0qh+fLWtkOs/JAkA+okMSxZwqRtfgOFGBfwQ8/iKrnizeanTQ3L6scFXI CHZXdJ3XQ6qUmNxNn7iJ7S/LDawo1QfWkCfD9FYoxBlg —–END RSA PRIVATE KEY—–
 ```
 
 服务器证书文件 server_cert.pem 内容类似下面这样：
 
-```
+```python
 —–BEGIN CERTIFICATE—– MIIC+DCCAmGgAwIBAgIJAPMd+vi45js3MA0GCSqGSIb3DQEBBQUAMFwxCzAJBgNV BAYTAlVTMREwDwYDVQQIEwhJbGxpbm9pczEQMA4GA1UEBxMHQ2hpY2FnbzEUMBIG A1UEChMLRGFiZWF6LCBMTEMxEjAQBgNVBAMTCWxvY2FsaG9zdDAeFw0xMzAxMTEx ODQyMjdaFw0xNDAxMTExODQyMjdaMFwxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhJ bGxpbm9pczEQMA4GA1UEBxMHQ2hpY2FnbzEUMBIGA1UEChMLRGFiZWF6LCBMTEMx EjAQBgNVBAMTCWxvY2FsaG9zdDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA mawjS6BMgChfn/VDXBWs+TrGuo3+6pG1JfLIucUK2N2WAu47rpy9XWS5/1WxBSCE 2lDoLwbT79alFkyRsIGutlUhtaBRNDgyMd4NjYeLEX/q8krMdi+OONp8dM+DubyU
 
 O5OnkTRwGVFJwi+dPmL48i8re68i0o0rioQnCbG2YD8CAwEAAaOBwTCBvjAdBgNV HQ4EFgQUrtoLHHgXiDZTr26NMmgKJLJLFtIwgY4GA1UdIwSBhjCBg4AUrtoLHHgX iDZTr26NMmgKJLJLFtKhYKReMFwxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhJbGxp bm9pczEQMA4GA1UEBxMHQ2hpY2FnbzEUMBIGA1UEChMLRGFiZWF6LCBMTEMxEjAQ BgNVBAMTCWxvY2FsaG9zdIIJAPMd+vi45js3MAwGA1UdEwQFMAMBAf8wDQYJKoZI hvcNAQEFBQADgYEAFci+dqvMG4xF8UTnbGVvZJPIzJDRee6Nbt6AHQo9pOdAIMAu WsGCplSOaDNdKKzl+b2UT2Zp3AIW4Qd51bouSNnR4M/gnr9ZD1ZctFd3jS+C5XRp D3vvcW5lAnCCC80P6rXy7d7hTeFu5EYKtRGXNvVNd/06NALGDflrrOwxF3Y= —–END CERTIFICATE—–
@@ -1413,7 +1413,7 @@ O5OnkTRwGVFJwi+dPmL48i8re68i0o0rioQnCbG2YD8CAwEAAaOBwTCBvjAdBgNV HQ4EFgQUrtoLHHg
 
 一旦一个连接被创建，你可以使用 `multiprocessing.reduction` 中的 `send_handle()` 和` recv_handle()` 函数在不同的处理器直接传递文件描述符。 下面的例子演示了最基本的用法：
 
-```
+```python
 import multiprocessing
 from multiprocessing.reduction import recv_handle, send_handle
 import socket
@@ -1460,7 +1460,7 @@ if __name__ == '__main__':
 
 如果你使用 Telnet 或类似工具连接到服务器，下面是一个演示例子：
 
-```
+```python
 bash % python3 passfd.py SERVER: Got connection from (‘127.0.0.1’, 55543) CHILD: GOT FD 7 CHILD: RECV b’Hellorn’ CHILD: RECV b’Worldrn’
 ```
 
@@ -1471,7 +1471,7 @@ bash % python3 passfd.py SERVER: Got connection from (‘127.0.0.1’, 55543) CH
 
 `send_handle() `和 `recv_handle() `函数只能够用于 `multiprocessing` 连接。 使用它们来代替管道的使用（参考11.7节），只要你使用的是 Unix 域套接字或 Windows 管道。 例如，你可以让服务器和工作者各自以单独的程序来启动。下面是服务器的实现例子：
 
-```
+```python
 # servermp.py
 from multiprocessing.connection import Listener
 from multiprocessing.reduction import send_handle
@@ -1506,7 +1506,7 @@ if __name__ == '__main__':
 
 运行这个服务器，只需要执行 python3 servermp.py /tmp/servconn 15000 ，下面是相应的工作者代码：
 
-```
+```python
 # workermp.py
 
 from multiprocessing.connection import Client
@@ -1539,7 +1539,7 @@ if __name__ == '__main__':
 
 要运行工作者，执行执行命令 python3 workermp.py /tmp/servconn . 效果跟使用 Pipe()例子是完全一样的。 文件描述符的传递会涉及到UNIX域套接字的创建和套接字的 `sendmsg() `方法。 不过这种技术并不常见，下面是使用套接字来传递描述符的另外一种实现：
 
-```
+```python
 # server.py
 import socket
 
@@ -1583,7 +1583,7 @@ if __name__ == '__main__':
 
 下面是使用套接字的工作者实现：
 
-```
+```python
 # worker.py
 import socket
 import struct
@@ -1633,7 +1633,7 @@ if __name__ == '__main__':
 ## 解决方案
 事件驱动 I/O 本质上来讲就是将基本 I/O 操作（比如读和写）转化为你程序需要处理的事件。 例如，当数据在某个 socket 上被接受后，它会转换成一个 `receive` 事件，然后被你定义的回调方法或函数来处理。 作为一个可能的起始点，一个事件驱动的框架可能会以一个实现了一系列基本事件处理器方法的基类开始：
 
-```
+```python
 class EventHandler:
     def fileno(self):
         'Return the associated file descriptor'
@@ -1658,7 +1658,7 @@ class EventHandler:
 
 这个类的实例作为插件被放入类似下面这样的事件循环中：
 
-```
+```python
 import select
 
 def event_loop(handlers):
@@ -1676,7 +1676,7 @@ def event_loop(handlers):
 
 编写应用程序的时候，`EventHandler` 的实例会被创建。例如，下面是两个简单的基于 UDP 网络服务的处理器例子：
 
-```
+```python
 import socket
 import time
 
@@ -1708,7 +1708,7 @@ if __name__ == '__main__':
 
 测试这段代码，试着从另外一个 Python 解释器连接它：
 
-```
+```python
 >>> from socket import *
 >>> s = socket(AF_INET, SOCK_DGRAM)
 >>> s.sendto(b'',('localhost',14000))
@@ -1724,7 +1724,7 @@ if __name__ == '__main__':
 
 实现一个 TCP 服务器会更加复杂一点，因为每一个客户端都要初始化一个新的处理器对象。 下面是一个 TCP 应答客户端例子：
 
-```
+```python
 class TCPServer(EventHandler):
     def __init__(self, address, client_handler, handler_list):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1794,7 +1794,7 @@ TCP 例子的关键点是从处理器中列表增加和删除客户端的操作�
 
 对于阻塞或耗时计算的问题可以通过将事件发送个其他单独的现场或进程来处理。 不过，在事件循环中引入多线程和多进程是比较棘手的， 下面的例子演示了如何使用 `concurrent.futures `模块来实现：
 
-```
+```python
 from concurrent.futures import ThreadPoolExecutor
 import os
 
@@ -1843,7 +1843,7 @@ class ThreadPoolHandler(EventHandler):
 
 在代码中，`run() `方法被用来将工作提交给回调函数池，处理完成后被激发。 实际工作被提交给 `ThreadPoolExecutor `实例。 不过一个难点是协调计算结果和事件循环，为了解决它，我们创建了一对 socket 并将其作为某种信号量机制来使用。 当线程池完成工作后，它会执行类中的 `_complete()` 方法。 这个方法再某个 socket 上写入字节之前会讲挂起的回调函数和结果放入队列中。` fileno()` 方法返回另外的那个 socket。 因此，这个字节被写入时，它会通知事件循环， 然后 `handle_receive() `方法被激活并为所有之前提交的工作执行回调函数。 坦白讲，说了这么多连我自己都晕了。 下面是一个简单的服务器，演示了如何使用线程池来实现耗时的计算：
 
-```
+```python
 # A really bad Fibonacci implementation
 def fib(n):
     if n < 2:
@@ -1868,7 +1868,7 @@ if __name__ == '__main__':
 
 运行这个服务器，然后试着用其它 Python 程序来测试它：
 
-```
+```python
 from socket import *
 sock = socket(AF_INET, SOCK_DGRAM)
 for x in range(40):
@@ -1888,7 +1888,7 @@ for x in range(40):
 ## 解决方案
 下面的函数利用` memoryviews` 来发送和接受大数组：
 
-```
+```python
 # zerocopy.py
 
 def send_from(arr, dest):
@@ -1906,7 +1906,7 @@ def recv_into(arr, source):
 
 为了测试程序，首先创建一个通过 socket 连接的服务器和客户端程序：
 
-```
+```python
 >>> from socket import *
 >>> s = socket(AF_INET, SOCK_STREAM)
 >>> s.bind(('', 25000))
@@ -1917,7 +1917,7 @@ def recv_into(arr, source):
 
 在客户端（另外一个解释器中）：
 
-```
+```python
 >>> from socket import *
 >>> c = socket(AF_INET, SOCK_STREAM)
 >>> c.connect(('localhost', 25000))
@@ -1926,7 +1926,7 @@ def recv_into(arr, source):
 
 本节的目标是你能通过连接传输一个超大数组。这种情况的话，可以通过` array `模块或` numpy` 模块来创建数组：
 
-```
+```python
 # Server
 >>> import numpy
 >>> a = numpy.arange(0.0, 50000000.0)
@@ -1951,7 +1951,7 @@ array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])
 
 本节通过使用内存视图展示了一些魔法操作。 本质上，一个内存视图就是一个已存在数组的覆盖层。不仅仅是那样， 内存视图还能以不同的方式转换成不同类型来表现数据。 这个就是下面这个语句的目的：
 
-```
+```python
 view = memoryview(arr).cast('B')
 ```
 

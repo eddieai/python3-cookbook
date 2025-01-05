@@ -8,7 +8,7 @@
 ## 解决方案
 对于简单的舍入运算，使用内置的 `round(value, ndigits)` 函数即可。比如：
 
-```
+```python
 >>> round(1.23, 1)
 1.2
 >>> round(1.27, 1)
@@ -24,7 +24,7 @@
 
 传给 `round()` 函数的 `ndigits` 参数可以是负数，这种情况下， 舍入运算会作用在十位、百位、千位等上面。比如：
 
-```
+```python
 >>> a = 1627731
 >>> round(a, -1)
 1627730
@@ -38,7 +38,7 @@
 ## 讨论
 不要将舍入和格式化输出搞混淆了。 如果你的目的只是简单的输出一定宽度的数，你不需要使用 `round()` 函数。 而仅仅只需要在格式化的时候指定精度即可。比如：
 
-```
+```python
 >>> x = 1.23456
 >>> format(x, '0.2f')
 '1.23'
@@ -51,7 +51,7 @@
 
 同样，不要试着去舍入浮点值来”修正”表面上看起来正确的问题。比如，你可能倾向于这样做：
 
-```
+```python
 >>> a = 2.1
 >>> b = 4.2
 >>> c = a + b
@@ -72,7 +72,7 @@
 ## 解决方案
 浮点数的一个普遍问题是它们并不能精确的表示十进制数。 并且，即使是最简单的数学运算也会产生小的误差，比如：
 
-```
+```python
 >>> a = 4.2
 >>> b = 2.1
 >>> a + b
@@ -86,7 +86,7 @@ False
 
 如果你想更加精确(并能容忍一定的性能损耗)，你可以使用 `decimal` 模块：
 
-```
+```python
 >>> from decimal import Decimal
 >>> a = Decimal('4.2')
 >>> b = Decimal('2.1')
@@ -102,7 +102,7 @@ True
 
 `decimal` 模块的一个主要特征是允许你控制计算的每一方面，包括数字位数和四舍五入运算。 为了这样做，你先得创建一个本地上下文并更改它的设置，比如：
 
-```
+```python
 >>> from decimal import localcontext
 >>> a = Decimal('1.3')
 >>> b = Decimal('1.7')
@@ -128,7 +128,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 即便如此，你却不能完全忽略误差。数学家花了大量时间去研究各类算法，有些处理误差会比其他方法更好。 你也得注意下减法删除已经大数和小数的加分运算所带来的影响。比如：
 
-```
+```python
 >>> nums = [1.23e+18, 1, -1.23e+18]
 >>> sum(nums) # Notice how 1 disappears
 0.0
@@ -137,7 +137,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 上面的错误可以利用 `math.fsum()` 所提供的更精确计算能力来解决：
 
-```
+```python
 >>> import math
 >>> math.fsum(nums)
 1.0
@@ -155,7 +155,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 ## 解决方案
 格式化输出单个数字的时候，可以使用内置的 `format()` 函数，比如：
 
-```
+```python
 >>> x = 1234.56789
 
 >>> # Two decimal places of accuracy
@@ -184,7 +184,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 如果你想使用指数记法，将 f 改成 e 或者 E(取决于指数输出的大小写形式)。比如：
 
-```
+```python
 >>> format(x, 'e')
 '1.234568e+03'
 >>> format(x, '0.2E')
@@ -194,7 +194,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 同时指定宽度和精度的一般形式是 `'[<>^]?width[,]?(.digits)?'` ， 其中 `width` 和 `digits `为整数，？代表可选部分。 同样的格式也被用在字符串的 `format()` 方法中。比如：
 
-```
+```python
 >>> 'The value is {:0,.2f}'.format(x)
 'The value is 1,234.57'
 >>>
@@ -205,7 +205,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 当指定数字的位数后，结果值会根据 `round()` 函数同样的规则进行四舍五入后返回。比如：
 
-```
+```python
 >>> x
 1234.56789
 >>> format(x, '0.1f')
@@ -217,7 +217,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 包含千位符的格式化跟本地化没有关系。 如果你需要根据地区来显示千位符，你需要自己去调查下 `locale` 模块中的函数了。 你同样也可以使用字符串的 `translate()` 方法来交换千位符。比如：
 
-```
+```python
 >>> swap_separators = { ord('.'):',', ord(','):'.' }
 >>> format(x, ',').translate(swap_separators)
 '1.234,56789'
@@ -226,7 +226,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 在很多 Python 代码中会看到使用%来格式化数字的，比如：
 
-```
+```python
 >>> '%0.2f' % x
 '1234.57'
 >>> '%10.1f' % x
@@ -245,7 +245,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 ## 解决方案
 为了将整数转换为二进制、八进制或十六进制的文本串， 可以分别使用 `bin()` , `oct()` 或 `hex() `函数：
 
-```
+```python
 >>> x = 1234
 >>> bin(x)
 '0b10011010010'
@@ -258,7 +258,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 另外，如果你不想输出 `0b` , `0o` 或者` 0x `的前缀的话，可以使用 `format() `函数。比如：
 
-```
+```python
 >>> format(x, 'b')
 '10011010010'
 >>> format(x, 'o')
@@ -270,7 +270,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 整数是有符号的，所以如果你在处理负数的话，输出结果会包含一个负号。比如：
 
-```
+```python
 >>> x = -1234
 >>> format(x, 'b')
 '-10011010010'
@@ -281,7 +281,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 如果你想产生一个无符号值，你需要增加一个指示最大位长度的值。比如为了显示32位的值，可以像下面这样写：
 
-```
+```python
 >>> x = -1234
 >>> format(2**32 + x, 'b')
 '11111111111111111111101100101110'
@@ -292,7 +292,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 为了以不同的进制转换整数字符串，简单的使用带有进制的 `int()` 函数即可：
 
-```
+```python
 >>> int('4d2', 16)
 1234
 >>> int('10011010010', 2)
@@ -305,7 +305,7 @@ Python 新手会倾向于使用 `decimal` 模块来处理浮点数的精确运�
 
 最后，使用八进制的程序员有一点需要注意下。 Python 指定八进制数的语法跟其他语言稍有不同。比如，如果你像下面这样指定八进制，会出现语法错误：
 
-```
+```python
 >>> import os
 >>> os.chmod('script.py', 0755)
     File "<stdin>", line 1
@@ -317,7 +317,7 @@ SyntaxError: invalid token
 
 需确保八进制数的前缀是` 0o` ，就像下面这样：
 
-```
+```python
 >>> os.chmod('script.py', 0o755)
 >>>
 ```
@@ -329,13 +329,13 @@ SyntaxError: invalid token
 ## 解决方案
 假设你的程序需要处理一个拥有128位长的16个元素的字节字符串。比如：
 
-```
+```python
 data = b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
 ```
 
 为了将 bytes 解析为整数，使用` int.from_bytes()` 方法，并像下面这样指定字节顺序：
 
-```
+```python
 >>> len(data)
 16
 >>> int.from_bytes(data, 'little')
@@ -347,7 +347,7 @@ data = b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
 
 为了将一个大整数转换为一个字节字符串，使用 `int.to_bytes()` 方法，并像下面这样指定字节数和字节顺序：
 
-```
+```python
 >>> x = 94522842520747284487117727783387188
 >>> x.to_bytes(16, 'big')
 b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
@@ -361,7 +361,7 @@ b'4\x00#\x00\x01\xef\xcd\x00\xab\x90x\x00V4\x12\x00'
 
 作为一种替代方案，你可能想使用6.11小节中所介绍的 `struct` 模块来解压字节。 这样也行得通，不过利用 `struct` 模块来解压对于整数的大小是有限制的。 因此，你可能想解压多个字节串并将结果合并为最终的结果，就像下面这样：
 
-```
+```python
 >>> data
 b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
 >>> import struct
@@ -373,7 +373,7 @@ b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
 
 字节顺序规则(little 或 big)仅仅指定了构建整数时的字节的低位高位排列方式。 我们从下面精心构造的16进制数的表示中可以很容易的看出来：
 
-```
+```python
 >>> x = 0x01020304
 >>> x.to_bytes(4, 'big')
 b'\x01\x02\x03\x04'
@@ -384,7 +384,7 @@ b'\x04\x03\x02\x01'
 
 如果你试着将一个整数打包为字节字符串，那么它就不合适了，你会得到一个错误。 如果需要的话，你可以使用 `int.bit_length()` 方法来决定需要多少字节位来存储这个值。
 
-```
+```python
 >>> x = 523 ** 23
 >>> x
 335381300113661875107536852714019056160355655333978849017944067
@@ -411,7 +411,7 @@ b'\x03X\xf1\x82iT\x96\xac\xc7c\x16\xf3\xb9\xcf...\xd0'
 ## 解决方案
 复数可以用使用函数 `complex(real, imag)` 或者是带有后缀j的浮点数来指定。比如：
 
-```
+```python
 >>> a = complex(2, 4)
 >>> b = 3 - 5j
 >>> a
@@ -423,7 +423,7 @@ b'\x03X\xf1\x82iT\x96\xac\xc7c\x16\xf3\xb9\xcf...\xd0'
 
 对应的实部、虚部和共轭复数可以很容易的获取。就像下面这样：
 
-```
+```python
 >>> a.real
 2.0
 >>> a.imag
@@ -435,7 +435,7 @@ b'\x03X\xf1\x82iT\x96\xac\xc7c\x16\xf3\xb9\xcf...\xd0'
 
 另外，所有常见的数学运算都可以工作：
 
-```
+```python
 >>> a + b
 (5-1j)
 >>> a * b
@@ -449,7 +449,7 @@ b'\x03X\xf1\x82iT\x96\xac\xc7c\x16\xf3\xb9\xcf...\xd0'
 
 如果要执行其他的复数函数比如正弦、余弦或平方根，使用 `cmath `模块：
 
-```
+```python
 >>> import cmath
 >>> cmath.sin(a)
 (24.83130584894638-11.356612711218174j)
@@ -463,7 +463,7 @@ b'\x03X\xf1\x82iT\x96\xac\xc7c\x16\xf3\xb9\xcf...\xd0'
 ## 讨论
 Python 中大部分与数学相关的模块都能处理复数。 比如如果你使用 `numpy` ，可以很容易的构造一个复数数组并在这个数组上执行各种操作：
 
-```
+```python
 >>> import numpy as np
 >>> a = np.array([2+3j, 4+5j, 6-7j, 8+9j])
 >>> a
@@ -478,7 +478,7 @@ array([ 9.15449915 -4.16890696j, -56.16227422 -48.50245524j,
 
 Python 的标准数学函数确实情况下并不能产生复数值，因此你的代码中不可能会出现复数返回值。比如：
 
-```
+```python
 >>> import math
 >>> math.sqrt(-1)
 Traceback (most recent call last):
@@ -489,7 +489,7 @@ ValueError: math domain error
 
 如果你想生成一个复数返回结果，你必须显示的使用` cmath `模块，或者在某个支持复数的库中声明复数类型的使用。比如：
 
-```
+```python
 >>> import cmath
 >>> cmath.sqrt(-1)
 1j
@@ -503,7 +503,7 @@ ValueError: math domain error
 ## 解决方案
 Python 并没有特殊的语法来表示这些特殊的浮点值，但是可以使用 `float()` 来创建它们。比如：
 
-```
+```python
 >>> a = float('inf')
 >>> b = float('-inf')
 >>> c = float('nan')
@@ -518,7 +518,7 @@ nan
 
 为了测试这些值的存在，使用 `math.isinf()` 和 `math.isnan()` 函数。比如：
 
-```
+```python
 >>> math.isinf(a)
 True
 >>> math.isnan(c)
@@ -531,7 +531,7 @@ True
 
 无穷大数在执行数学计算的时候会传播，比如：
 
-```
+```python
 >>> a = float('inf')
 >>> a + 45
 inf
@@ -544,7 +544,7 @@ inf
 
 但是有些操作时未定义的并会返回一个 NaN 结果。比如：
 
-```
+```python
 >>> a = float('inf')
 >>> a/a
 nan
@@ -556,7 +556,7 @@ nan
 
 NaN 值会在所有操作中传播，而不会产生异常。比如：
 
-```
+```python
 >>> c = float('nan')
 >>> c + 23
 nan
@@ -571,7 +571,7 @@ nan
 
 NaN 值的一个特别的地方时它们之间的比较操作总是返回 False。比如：
 
-```
+```python
 >>> c = float('nan')
 >>> d = float('nan')
 >>> c == d
@@ -592,7 +592,7 @@ False
 ## 解决方案
 `fractions` 模块可以被用来执行包含分数的数学运算。比如：
 
-```
+```python
 >>> from fractions import Fraction
 >>> a = Fraction(5, 4)
 >>> b = Fraction(7, 16)
@@ -634,7 +634,7 @@ Fraction(15, 4)
 ## 解决方案
 涉及到数组的重量级运算操作，可以使用 `NumPy` 库。 `NumPy `的一个主要特征是它会给 Python 提供一个数组对象，相比标准的 Python 列表而已更适合用来做数学运算。 下面是一个简单的小例子，向你展示标准列表对象和 `NumPy` 数组对象之间的差别：
 
-```
+```python
 >>> # Python lists
 >>> x = [1, 2, 3, 4]
 >>> y = [5, 6, 7, 8]
@@ -666,7 +666,7 @@ array([ 5, 12, 21, 32])
 
 对整个数组中所有元素同时执行数学运算可以使得作用在整个数组上的函数运算简单而又快速。 比如，如果你想计算多项式的值，可以这样做：
 
-```
+```python
 >>> def f(x):
 ... return 3*x**2 - 2*x + 7
 ...
@@ -677,7 +677,7 @@ array([ 8, 15, 28, 47])
 
 `NumPy` 还为数组操作提供了大量的通用函数，这些函数可以作为 `math `模块中类似函数的替代。比如：
 
-```
+```python
 >>> np.sqrt(ax)
 array([ 1. , 1.41421356, 1.73205081, 2. ])
 >>> np.cos(ax)
@@ -689,7 +689,7 @@ array([ 0.54030231, -0.41614684, -0.9899925 , -0.65364362])
 
 底层实现中，` NumPy` 数组使用了 C 或者 Fortran 语言的机制分配内存。 也就是说，它们是一个非常大的连续的并由同类型数据组成的内存区域。 所以，你可以构造一个比普通 Python 列表大的多的数组。 比如，如果你想构造一个10,000*10,000的浮点数二维网格，很轻松：
 
-```
+```python
 >>> grid = np.zeros(shape=(10000,10000), dtype=float)
 >>> grid
     array([[ 0., 0., 0., ..., 0., 0., 0.],
@@ -704,7 +704,7 @@ array([ 0.54030231, -0.41614684, -0.9899925 , -0.65364362])
 
 所有的普通操作还是会同时作用在所有元素上：
 
-```
+```python
 >>> grid += 10
 >>> grid
 array([[ 10., 10., 10., ..., 10., 10., 10.],
@@ -733,7 +733,7 @@ array([[-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
 
 关于 `NumPy` 有一点需要特别的主意，那就是它扩展 Python 列表的索引功能 - 特别是对于多维数组。 为了说明清楚，先构造一个简单的二维数组并试着做些试验：
 
-```
+```python
 >>> a = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
 >>> a
 array([[ 1, 2, 3, 4],
@@ -791,7 +791,7 @@ array([[ 1, 2, 3, 4],
 `NumPy` 库有一个矩阵对象可以用来解决这个问题。
 矩阵类似于3.9小节中数组对象，但是遵循线性代数的计算规则。下面的一个例子展示了矩阵的一些基本特性：
 
-```
+```python
 >>> import numpy as np
 >>> m = np.matrix([[1,-2,3],[0,4,5],[7,8,-9]])
 >>> m
@@ -826,7 +826,7 @@ matrix([[ 8],
 
 可以在 `numpy.linalg` 子包中找到更多的操作函数，比如：
 
-```
+```python
 >>> import numpy.linalg
 
 >>> # Determinant
@@ -864,7 +864,7 @@ matrix([[2],
 ## 解决方案
 `random `模块有大量的函数用来产生随机数和随机选择元素。 比如，要想从一个序列中随机的抽取一个元素，可以使用 `random.choice()` ：
 
-```
+```python
 >>> import random
 >>> values = [1, 2, 3, 4, 5, 6]
 >>> random.choice(values)
@@ -882,7 +882,7 @@ matrix([[2],
 
 为了提取出 N 个不同元素的样本用来做进一步的操作，可以使用` random.sample() `：
 
-```
+```python
 >>> random.sample(values, 2)
 [6, 2]
 >>> random.sample(values, 2)
@@ -896,7 +896,7 @@ matrix([[2],
 
 如果你仅仅只是想打乱序列中元素的顺序，可以使用` random.shuffle() `：
 
-```
+```python
 >>> random.shuffle(values)
 >>> values
 [2, 4, 6, 5, 3, 1]
@@ -908,7 +908,7 @@ matrix([[2],
 
 生成随机整数，请使用 `random.randint()` ：
 
-```
+```python
 >>> random.randint(0,10)
 2
 >>> random.randint(0,10)
@@ -926,7 +926,7 @@ matrix([[2],
 
 为了生成0到1范围内均匀分布的浮点数，使用 `random.random()` ：
 
-```
+```python
 >>> random.random()
 0.9406677561675867
 >>> random.random()
@@ -938,7 +938,7 @@ matrix([[2],
 
 如果要获取 N 位随机位(二进制)的整数，使用 `random.getrandbits() `：
 
-```
+```python
 >>> random.getrandbits(200)
 335837000776573622800628485064121869519521710558559406913275
 >>>
@@ -947,7 +947,7 @@ matrix([[2],
 ## 讨论
 `random `模块使用 Mersenne Twister 算法来计算生成随机数。这是一个确定性算法， 但是你可以通过 `random.seed() `函数修改初始化种子。比如：
 
-```
+```python
 random.seed() # Seed based on system time or os.urandom()
 random.seed(12345) # Seed based on integer given
 random.seed(b'bytedata') # Seed based on byte data
@@ -964,7 +964,7 @@ random.seed(b'bytedata') # Seed based on byte data
 ## 解决方案
 为了执行不同时间单位的转换和计算，请使用 `datetime` 模块。 比如，为了表示一个时间段，可以创建一个` timedelta` 实例，就像下面这样：
 
-```
+```python
 >>> from datetime import timedelta
 >>> a = timedelta(days=2, hours=6)
 >>> b = timedelta(hours=4.5)
@@ -982,7 +982,7 @@ random.seed(b'bytedata') # Seed based on byte data
 
 如果你想表示指定的日期和时间，先创建一个` datetime `实例然后使用标准的数学运算来操作它们。比如：
 
-```
+```python
 >>> from datetime import datetime
 >>> a = datetime(2012, 9, 23)
 >>> print(a + timedelta(days=10))
@@ -1002,7 +1002,7 @@ random.seed(b'bytedata') # Seed based on byte data
 
 在计算的时候，需要注意的是 `datetime `会自动处理闰年。比如：
 
-```
+```python
 >>> a = datetime(2012, 3, 1)
 >>> b = datetime(2012, 2, 28)
 >>> a - b
@@ -1021,7 +1021,7 @@ datetime.timedelta(2)
 
 许多类似的时间计算可以使用 `dateutil.relativedelta() `函数代替。 但是，有一点需要注意的就是，它会在处理月份(还有它们的天数差距)的时候填充间隙。看例子最清楚：
 
-```
+```python
 >>> a = datetime(2012, 9, 23)
 >>> a + timedelta(months=1)
 Traceback (most recent call last):
@@ -1056,7 +1056,7 @@ relativedelta(months=+2, days=+28)
 ## 解决方案
 Python 的 `datetime` 模块中有工具函数和类可以帮助你执行这样的计算。 下面是对类似这样的问题的一个通用解决方案：
 
-```
+```python
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """
@@ -1083,7 +1083,7 @@ def get_previous_byday(dayname, start_date=None):
 
 在交互式解释器中使用如下：
 
-```
+```python
 >>> datetime.today() # For reference
 datetime.datetime(2012, 8, 28, 22, 4, 30, 263076)
 >>> get_previous_byday('Monday')
@@ -1097,7 +1097,7 @@ datetime.datetime(2012, 8, 24, 22, 5, 9, 911393)
 
 可选的 `start_date `参数可以由另外一个 `datetime `实例来提供。比如：
 
-```
+```python
 >>> get_previous_byday('Sunday', datetime(2012, 12, 21))
 datetime.datetime(2012, 12, 16, 0, 0)
 >>>
@@ -1108,7 +1108,7 @@ datetime.datetime(2012, 12, 16, 0, 0)
 
 如果你要像这样执行大量的日期计算的话，你最好安装第三方包 `python-dateutil` 来代替。 比如，下面是是使用 `dateutil` 模块中的 `relativedelta()` 函数执行同样的计算：
 
-```
+```python
 >>> from datetime import datetime
 >>> from dateutil.relativedelta import relativedelta
 >>> from dateutil.rrule import *
@@ -1136,7 +1136,7 @@ datetime.datetime(2012, 12, 16, 0, 0)
 
 下面是一个接受任意 `datetime` 对象并返回一个由当前月份开始日和下个月开始日组成的元组对象。
 
-```
+```python
 from datetime import datetime, date, timedelta
 import calendar
 
@@ -1150,7 +1150,7 @@ def get_month_range(start_date=None):
 
 有了这个就可以很容易的在返回的日期范围上面做循环操作了：
 
-```
+```python
 >>> a_day = timedelta(days=1)
 >>> first_day, last_day = get_month_range()
 >>> while first_day < last_day:
@@ -1180,7 +1180,7 @@ def get_month_range(start_date=None):
 
 理想情况下，如果能为日期迭代创建一个同内置的` range()` 函数一样的函数就好了。 幸运的是，可以使用一个生成器来很容易的实现这个目标：
 
-```
+```python
 def date_range(start, stop, step):
     while start < stop:
         yield start
@@ -1189,7 +1189,7 @@ def date_range(start, stop, step):
 
 下面是使用这个生成器的例子：
 
-```
+```python
 >>> for d in date_range(datetime(2012, 9, 1), datetime(2012,10,1),
                         timedelta(hours=6)):
 ...     print(d)
@@ -1213,7 +1213,7 @@ def date_range(start, stop, step):
 ## 解决方案
 使用 Python 的标准模块 `datetime` 可以很容易的解决这个问题。比如：
 
-```
+```python
 >>> from datetime import datetime
 >>> text = '2012-09-20'
 >>> y = datetime.strptime(text, '%Y-%m-%d')
@@ -1229,7 +1229,7 @@ datetime.timedelta(3, 77824, 177393)
 
 比如，假设你的代码中生成了一个 `datetime` 对象， 你想将它格式化为漂亮易读形式后放在自动生成的信件或者报告的顶部：
 
-```
+```python
 >>> z
 datetime.datetime(2012, 9, 23, 21, 37, 4, 177393)
 >>> nice_z = datetime.strftime(z, '%A %B %d, %Y')
@@ -1240,7 +1240,7 @@ datetime.datetime(2012, 9, 23, 21, 37, 4, 177393)
 
 还有一点需要注意的是， `strptime()` 的性能要比你想象中的差很多， 因为它是使用纯 Python 实现，并且必须处理所有的系统本地设置。 如果你要在代码中需要解析大量的日期并且已经知道了日期字符串的确切格式，可以自己实现一套解析方案来获取更好的性能。 比如，如果你已经知道所以日期格式是 `YYYY-MM-DD` ，你可以像下面这样实现一个解析函数：
 
-```
+```python
 from datetime import datetime
 def parse_ymd(s):
     year_s, mon_s, day_s = s.split('-')
@@ -1258,7 +1258,7 @@ def parse_ymd(s):
 
 `pytz` 模块一个主要用途是将 `datetime` 库创建的简单日期对象本地化。 比如，下面如何表示一个芝加哥时间的示例：
 
-```
+```python
 >>> from datetime import datetime
 >>> from pytz import timezone
 >>> d = datetime(2012, 12, 21, 9, 30, 0)
@@ -1276,7 +1276,7 @@ def parse_ymd(s):
 
 一旦日期被本地化了， 它就可以转换为其他时区的时间了。 为了得到班加罗尔对应的时间，你可以这样做：
 
-```
+```python
 >>> # Convert to Bangalore time
 >>> bang_d = loc_d.astimezone(timezone('Asia/Kolkata'))
 >>> print(bang_d)
@@ -1286,7 +1286,7 @@ def parse_ymd(s):
 
 如果你打算在本地化日期上执行计算，你需要特别注意夏令时转换和其他细节。 比如，在2013年，美国标准夏令时时间开始于本地时间3月13日凌晨2:00(在那时，时间向前跳过一小时)。 如果你正在执行本地计算，你会得到一个错误。比如：
 
-```
+```python
 >>> d = datetime(2013, 3, 10, 1, 45)
 >>> loc_d = central.localize(d)
 >>> print(loc_d)
@@ -1299,7 +1299,7 @@ def parse_ymd(s):
 
 结果错误是因为它并没有考虑在本地时间中有一小时的跳跃。 为了修正这个错误，可以使用时区对象 `normalize()` 方法。比如：
 
-```
+```python
 >>> from datetime import timedelta
 >>> later = central.normalize(loc_d + timedelta(minutes=30))
 >>> print(later)
@@ -1310,7 +1310,7 @@ def parse_ymd(s):
 ## 讨论
 为了不让你被这些东东弄的晕头转向，处理本地化日期的通常的策略先将所有日期转换为 UTC 时间， 并用它来执行所有的中间存储和操作。比如：
 
-```
+```python
 >>> print(loc_d)
 2013-03-10 01:45:00-06:00
 >>> utc_d = loc_d.astimezone(pytz.utc)
@@ -1321,7 +1321,7 @@ def parse_ymd(s):
 
 一旦转换为 UTC，你就不用去担心跟夏令时相关的问题了。 因此，你可以跟之前一样放心的执行常见的日期计算。 当你想将输出变为本地时间的时候，使用合适的时区去转换下就行了。比如：
 
-```
+```python
 >>> later_utc = utc_d + timedelta(minutes=30)
 >>> print(later_utc.astimezone(central))
 2013-03-10 03:15:00-05:00
@@ -1330,7 +1330,7 @@ def parse_ymd(s):
 
 当涉及到时区操作的时候，有个问题就是我们如何得到时区的名称。 比如，在这个例子中，我们如何知道“Asia/Kolkata”就是印度对应的时区名呢？ 为了查找，可以使用 ISO 3166 国家代码作为关键字去查阅字典 `pytz.country_timezones` 。比如：
 
-```
+```python
 >>> pytz.country_timezones['IN']
 ['Asia/Kolkata']
 >>>

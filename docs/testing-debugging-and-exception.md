@@ -10,7 +10,7 @@
 
 作为一个例子，我们在 `mymodule` 模块中定义如下一个函数：
 
-```
+```python
 # mymodule.py
 
 def urlprint(protocol, host, domain):
@@ -20,7 +20,7 @@ def urlprint(protocol, host, domain):
 
 默认情况下内置的 `print` 函数会将输出发送到 `sys.stdout` 。 为了测试输出真的在那里，你可以使用一个替身对象来模拟它，然后使用断言来确认结果。 使用 `unittest.mock` 模块的` patch()` 方法可以很方便的在测试运行的上下文中替换对象， 并且当测试完成时候自动返回它们的原有状态。下面是对 `mymodule `模块的测试代码：
 
-```
+```python
 from io import StringIO
 from unittest import TestCase
 from unittest.mock import patch
@@ -50,7 +50,7 @@ class TestURLPrint(TestCase):
 ## 解决方案
 `unittest.mock.patch()` 函数可被用来解决这个问题。` patch()` 还可被用作一个装饰器、上下文管理器或单独使用，尽管并不常见。 例如，下面是一个将它当做装饰器使用的例子：
 
-```
+```python
 from unittest.mock import patch
 import example
 
@@ -62,7 +62,7 @@ def test1(x, mock_func):
 
 它还可以被当做一个上下文管理器：
 
-```
+```python
 with patch('example.func') as mock_func:
     example.func(x)      # Uses patched example.func
     mock_func.assert_called_with(x)
@@ -70,7 +70,7 @@ with patch('example.func') as mock_func:
 
 最后，你还可以手动的使用它打补丁：
 
-```
+```python
 p = patch('example.func')
 mock_func = p.start()
 example.func(x)
@@ -80,7 +80,7 @@ p.stop()
 
 如果可能的话，你能够叠加装饰器和上下文管理器来给多个对象打补丁。例如：
 
-```
+```python
 @patch('example.func1')
 @patch('example.func2')
 @patch('example.func3')
@@ -97,7 +97,7 @@ def test2():
 ## 讨论
 `patch()` 接受一个已存在对象的全路径名，将其替换为一个新的值。 原来的值会在装饰器函数或上下文管理器完成后自动恢复回来。 默认情况下，所有值会被 `MagicMock` 实例替代。例如：
 
-```
+```python
 >>> x = 42
 >>> with patch('__main__.x'):
 ...     print(x)
@@ -110,7 +110,7 @@ def test2():
 
 不过，你可以通过给 `patch()` 提供第二个参数来将值替换成任何你想要的：
 
-```
+```python
 >>> x
 42
 >>> with patch('__main__.x', 'patched_value'):
@@ -124,7 +124,7 @@ patched_value
 
 被用来作为替换值的 `MagicMock` 实例能够模拟可调用对象和实例。 他们记录对象的使用信息并允许你执行断言检查，例如：
 
-```
+```python
 >>> from unittest.mock import MagicMock
 >>> m = MagicMock(return_value = 10)
 >>> m(1, 2, debug=True)
@@ -160,7 +160,7 @@ True
 
 一般来讲，这些操作会在一个单元测试中完成。例如，假设你已经有了像下面这样的函数：
 
-```
+```python
 # example.py
 from urllib.request import urlopen
 import csv
@@ -175,7 +175,7 @@ def dowprices():
 
 正常来讲，这个函数会使用 `urlopen()` 从 Web 上面获取数据并解析它。 在单元测试中，你可以给它一个预先定义好的数据集。下面是使用补丁操作的例子:
 
-```
+```python
 import unittest
 from unittest.mock import patch
 import io
@@ -215,7 +215,7 @@ if __name__ == '__main__':
 ## 解决方案
 对于异常的测试可使用 `assertRaises()` 方法。 例如，如果你想测试某个函数抛出了 `ValueError` 异常，像下面这样写：
 
-```
+```python
 import unittest
 
 # A simple function to illustrate
@@ -229,7 +229,7 @@ class TestConversion(unittest.TestCase):
 
 如果你想测试异常的具体值，需要用到另外一种方法：
 
-```
+```python
 import errno
 
 class TestIO(unittest.TestCase):
@@ -246,7 +246,7 @@ class TestIO(unittest.TestCase):
 ## 讨论
 `assertRaises()` 方法为测试异常存在性提供了一个简便方法。 一个常见的陷阱是手动去进行异常检测。比如：
 
-```
+```python
 class TestConversion(unittest.TestCase):
     def test_bad_int(self):
         try:
@@ -257,7 +257,7 @@ class TestConversion(unittest.TestCase):
 
 这种方法的问题在于它很容易遗漏其他情况，比如没有任何异常抛出的时候。 那么你还得需要增加另外的检测过程，如下面这样：
 
-```
+```python
 class TestConversion(unittest.TestCase):
     def test_bad_int(self):
         try:
@@ -272,7 +272,7 @@ class TestConversion(unittest.TestCase):
 
 `assertRaises()` 的一个缺点是它测不了异常具体的值是多少。 为了测试异常值，可以使用 `assertRaisesRegex() `方法， 它可同时测试异常的存在以及通过正则式匹配异常的字符串表示。例如：
 
-```
+```python
 class TestConversion(unittest.TestCase):
     def test_bad_int(self):
         self.assertRaisesRegex(ValueError, 'invalid literal .*',
@@ -281,7 +281,7 @@ class TestConversion(unittest.TestCase):
 
 `assertRaises()` 和 `assertRaisesRegex()` 还有一个容易忽略的地方就是它们还能被当做上下文管理器使用：
 
-```
+```python
 class TestConversion(unittest.TestCase):
     def test_bad_int(self):
         with self.assertRaisesRegex(ValueError, 'invalid literal .*'):
@@ -297,7 +297,7 @@ class TestConversion(unittest.TestCase):
 ## 解决方案
 运行单元测试一个常见技术就是在测试文件底部加入下面这段代码片段：
 
-```
+```python
 import unittest
 
 class MyTest(unittest.TestCase):
@@ -309,7 +309,7 @@ if __name__ == '__main__':
 
 这样的话测试文件就是可执行的，并且会将运行测试的结果打印到标准输出上。 如果你想重定向输出，就需要像下面这样修改 `main()` 函数：
 
-```
+```python
 import sys
 
 def main(out=sys.stderr, verbosity=2):
@@ -336,7 +336,7 @@ if __name__ == '__main__':
 ## 解决方案
 `unittest` 模块有装饰器可用来控制对指定测试方法的处理，例如：
 
-```
+```python
 import unittest
 import os
 import platform
@@ -367,7 +367,7 @@ if __name__ == '__main__':
 
 如果你在 Mac 上运行这段代码，你会得到如下输出：
 
-```
+```python
 bash % python3 testsample.py -v
 test_0 (__main__.Tests) ... ok
 test_1 (__main__.Tests) ... skipped 'skipped test'
@@ -386,7 +386,7 @@ OK (skipped=2, expected failures=1)
 
 忽略方法的装饰器还可以被用来装饰整个测试类，比如：
 
-```
+```python
 @unittest.skipUnless(platform.system() == 'Darwin', 'Mac specific tests')
 class DarwinTests(unittest.TestCase):
     pass
@@ -399,7 +399,7 @@ class DarwinTests(unittest.TestCase):
 ## 解决方案
 如果你可以用单个代码块处理不同的异常，可以将它们放入一个元组中，如下所示：
 
-```
+```python
 try:
     client_obj.get_url(url)
 except (URLError, ValueError, SocketTimeout):
@@ -408,7 +408,7 @@ except (URLError, ValueError, SocketTimeout):
 
 在这个例子中，元祖中任何一个异常发生时都会执行 `remove_url()` 方法。 如果你想对其中某个异常进行不同的处理，可以将其放入另外一个 `except `语句中：
 
-```
+```python
 try:
     client_obj.get_url(url)
 except (URLError, ValueError):
@@ -419,7 +419,7 @@ except SocketTimeout:
 
 很多的异常会有层级关系，对于这种情况，你可能使用它们的一个基类来捕获所有的异常。例如，下面的代码：
 
-```
+```python
 try:
     f = open(filename)
 except (FileNotFoundError, PermissionError):
@@ -428,7 +428,7 @@ except (FileNotFoundError, PermissionError):
 
 可以被重写为：
 
-```
+```python
 try:
     f = open(filename)
 except OSError:
@@ -440,7 +440,7 @@ except OSError:
 ## 讨论
 尽管处理多个异常本身并没什么特殊的，不过你可以使用 `as` 关键字来获得被抛出异常的引用：
 
-```
+```python
 try:
     f = open(filename)
 except OSError as e:
@@ -456,7 +456,7 @@ except OSError as e:
 
 同时还要注意的时候 `except `语句是顺序检查的，第一个匹配的会执行。 你可以很容易的构造多个 `except` 同时匹配的情形，比如：
 
-```
+```python
 >>> f = open('missing')
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
@@ -474,7 +474,7 @@ It failed
 
 这里的 `FileNotFoundError` 语句并没有执行的原因是 `OSError `更一般，它可匹配 `FileNotFoundError `异常， 于是就是第一个匹配的。 在调试的时候，如果你对某个特定异常的类成层级关系不是很确定， 你可以通过查看该异常的 `__mro__` 属性来快速浏览。比如：
 
-```
+```python
 >>> FileNotFoundError.__mro__
 (<class 'FileNotFoundError'>, <class 'OSError'>, <class 'Exception'>,
  <class 'BaseException'>, <class 'object'>)
@@ -490,7 +490,7 @@ It failed
 ## 解决方案
 想要捕获所有的异常，可以直接捕获 `Exception` 即可：
 
-```
+```python
 try:
    ...
 except Exception as e:
@@ -505,7 +505,7 @@ except Exception as e:
 
 正因如此，如果你选择捕获所有异常，那么在某个地方（比如日志文件、打印异常到屏幕）打印确切原因就比较重要了。 如果你没有这样做，有时候你看到异常打印时可能摸不着头脑，就像下面这样：
 
-```
+```python
 def parse_int(s):
     try:
         n = int(v)
@@ -515,7 +515,7 @@ def parse_int(s):
 
 试着运行这个函数，结果如下：
 
-```
+```python
 >>> parse_int('n/a')
 Couldn't parse
 >>> parse_int('42')
@@ -525,7 +525,7 @@ Couldn't parse
 
 这时候你就会挠头想：“这咋回事啊？” 假如你像下面这样重写这个函数：
 
-```
+```python
 def parse_int(s):
     try:
         n = int(v)
@@ -536,7 +536,7 @@ def parse_int(s):
 
 这时候你能获取如下输出，指明了有个编程错误：
 
-```
+```python
 >>> parse_int('42')
 Couldn't parse
 Reason: global name 'v' is not defined
@@ -552,7 +552,7 @@ Reason: global name 'v' is not defined
 ## 解决方案
 创建新的异常很简单——定义新的类，让它继承自 `Exception` （或者是任何一个已存在的异常类型）。 例如，如果你编写网络相关的程序，你可能会定义一些类似如下的异常：
 
-```
+```python
 class NetworkError(Exception):
     pass
 
@@ -568,7 +568,7 @@ class ProtocolError(NetworkError):
 
 然后用户就可以像通常那样使用这些异常了，例如：
 
-```
+```python
 try:
     msg = s.recv()
 except TimeoutError as e:
@@ -582,7 +582,7 @@ except ProtocolError as e:
 
 在程序中引入自定义异常可以使得你的代码更具可读性，能清晰显示谁应该阅读这个代码。 还有一种设计是将自定义异常通过继承组合起来。在复杂应用程序中， 使用基类来分组各种异常类也是很有用的。它可以让用户捕获一个范围很窄的特定异常，比如下面这样的：
 
-```
+```python
 try:
     s.send(msg)
 except ProtocolError:
@@ -591,7 +591,7 @@ except ProtocolError:
 
 你还能捕获更大范围的异常，就像下面这样：
 
-```
+```python
 try:
     s.send(msg)
 except NetworkError:
@@ -600,7 +600,7 @@ except NetworkError:
 
 如果你想定义的新异常重写了 `__init__()` 方法， 确保你使用所有参数调用 `Exception.__init__()` ，例如：
 
-```
+```python
 class CustomError(Exception):
     def __init__(self, message, status):
         super().__init__(message, status)
@@ -610,7 +610,7 @@ class CustomError(Exception):
 
 看上去有点奇怪，不过 Exception 的默认行为是接受所有传递的参数并将它们以元组形式存储在 `.args` 属性中. 很多其他函数库和部分 Python 库默认所有异常都必须有 `.args` 属性， 因此如果你忽略了这一步，你会发现有些时候你定义的新异常不会按照期望运行。 为了演示 `.args` 的使用，考虑下下面这个使用内置的 `RuntimeError` 异常的交互会话， 注意看 raise 语句中使用的参数个数是怎样的：
 
-```
+```python
 >>> try:
 ...     raise RuntimeError('It failed')
 ... except RuntimeError as e:
@@ -636,7 +636,7 @@ class CustomError(Exception):
 ## 解决方案
 为了链接异常，使用 `raise from `语句来代替简单的 `raise `语句。 它会让你同时保留两个异常的信息。例如：
 
-```
+```python
 >>> def example():
 ...     try:
 ...             int('N/A')
@@ -651,7 +651,7 @@ ValueError: invalid literal for int() with base 10: 'N/A'
 
 上面的异常是下面的异常产生的直接原因：
 
-```
+```python
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
   File "<stdin>", line 5, in example
@@ -661,7 +661,7 @@ RuntimeError: A parsing error occurred
 
 在回溯中科院看到，两个异常都被捕获。 要想捕获这样的异常，你可以使用一个简单的 `except` 语句。 不过，你还可以通过查看异常对象的 `__cause__` 属性来跟踪异常链。例如：
 
-```
+```python
 try:
     example()
 except RuntimeError as e:
@@ -673,7 +673,7 @@ except RuntimeError as e:
 
 当在 `except` 块中又有另外的异常被抛出时会导致一个隐藏的异常链的出现。例如：
 
-```
+```python
 >>> def example2():
 ...     try:
 ...             int('N/A')
@@ -689,7 +689,7 @@ ValueError: invalid literal for int() with base 10: 'N/A'
 
 在处理上述异常的时候，另外一个异常发生了：
 
-```
+```python
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
   File "<stdin>", line 5, in example2
@@ -701,7 +701,7 @@ NameError: global name 'err' is not defined
 
 如果，你想忽略掉异常链，可使用 `raise from None` :
 
-```
+```python
 >>> def example3():
 ...     try:
 ...             int('N/A')
@@ -719,7 +719,7 @@ RuntimeError: A parsing error occurred
 ## 讨论
 在设计代码时，在另外一个 `except `代码块中使用 `raise `语句的时候你要特别小心了。 大多数情况下，这种 `raise` 语句都应该被改成` raise from `语句。也就是说你应该使用下面这种形式：
 
-```
+```python
 try:
    ...
 except SomeException as e:
@@ -730,7 +730,7 @@ except SomeException as e:
 
 如果你像下面这样写代码，你仍然会得到一个链接异常， 不过这个并没有很清晰的说明这个异常链到底是内部异常还是某个未知的编程错误。
 
-```
+```python
 try:
    ...
 except SomeException:
@@ -748,7 +748,7 @@ except SomeException:
 ## 解决方案
 简单的使用一个单独的 `rasie `语句即可，例如：
 
-```
+```python
 >>> def example():
 ...     try:
 ...             int('N/A')
@@ -769,7 +769,7 @@ ValueError: invalid literal for int() with base 10: 'N/A'
 ## 讨论
 这个问题通常是当你需要在捕获异常后执行某个操作（比如记录日志、清理等），但是之后想将异常传播下去。 一个很常见的用法是在捕获所有异常的处理器中：
 
-```
+```python
 try:
    ...
 except Exception as e:
@@ -787,7 +787,7 @@ except Exception as e:
 ## 解决方案
 要输出一个警告消息，可使用 `warning.warn()` 函数。例如：
 
-```
+```python
 import warnings
 
 def func(x, y, logfile=None, debug=False):
@@ -800,7 +800,7 @@ def func(x, y, logfile=None, debug=False):
 
 对警告的处理取决于你如何运行解释器以及一些其他配置。 例如，如果你使用 `-W all` 选项去运行 Python，你会得到如下的输出：
 
-```
+```python
 bash % python3 -W all example.py
 example.py:5: DeprecationWarning: logfile argument is deprecated
   warnings.warn('logfile argument is deprecated', DeprecationWarning)
@@ -808,7 +808,7 @@ example.py:5: DeprecationWarning: logfile argument is deprecated
 
 通常来讲，警告会输出到标准错误上。如果你想讲警告转换为异常，可以使用 `-W error` 选项：
 
-```
+```python
 bash % python3 -W error example.py
 Traceback (most recent call last):
   File "example.py", line 10, in <module>
@@ -824,7 +824,7 @@ bash %
 
 作为另外一个内置函数库的警告使用例子，下面演示了一个没有关闭文件就销毁它时产生的警告消息：
 
-```
+```python
 >>> import warnings
 >>> warnings.simplefilter('always')
 >>> f = open('/etc/passwd')
@@ -845,7 +845,7 @@ __main__:1: ResourceWarning: unclosed file <_io.TextIOWrapper name='/etc/passwd'
 ## 解决方案
 如果你的程序因为某个异常而奔溃，运行 `python3 -i someprogram.py` 可执行简单的调试。 `-i` 选项可让程序结束后打开一个交互式 shell。 然后你就能查看环境，例如，假设你有下面的代码：
 
-```
+```python
 # sample.py
 
 def func(n):
@@ -856,7 +856,7 @@ func('Hello')
 
 运行 `python3 -i sample.py` 会有类似如下的输出：
 
-```
+```python
 bash % python3 -i sample.py
 Traceback (most recent call last):
   File "sample.py", line 6, in <module>
@@ -871,7 +871,7 @@ TypeError: Can't convert 'int' object to str implicitly
 
 如果你看不到上面这样的，可以在程序奔溃后打开 Python 的调试器。例如：
 
-```
+```python
 >>> import pdb
 >>> pdb.pm()
 > sample.py(4)func()
@@ -889,7 +889,7 @@ TypeError: Can't convert 'int' object to str implicitly
 
 如果你的代码所在的环境很难获取交互 shell（比如在某个服务器上面）， 通常可以捕获异常后自己打印跟踪信息。例如：
 
-```
+```python
 import traceback
 import sys
 
@@ -902,7 +902,7 @@ except:
 
 要是你的程序没有奔溃，而只是产生了一些你看不懂的结果， 你在感兴趣的地方插入一下 `print() `语句也是个不错的选择。 不过，要是你打算这样做，有一些小技巧可以帮助你。 首先，`traceback.print_stack() `函数会你程序运行到那个点的时候创建一个跟踪栈。例如：
 
-```
+```python
 >>> def sample(n):
 ...     if n > 0:
 ...             sample(n-1)
@@ -922,7 +922,7 @@ except:
 
 另外，你还可以像下面这样使用 `pdb.set_trace()` 在任何地方手动的启动调试器：
 
-```
+```python
 import pdb
 
 def func(arg):
@@ -951,7 +951,7 @@ def func(arg):
 ## 解决方案
 如果你只是简单的想测试下你的程序整体花费的时间， 通常使用 Unix 时间函数就行了，比如：
 
-```
+```python
 bash % time python3 someprogram.py
 real 0m13.937s
 user 0m12.162s
@@ -961,7 +961,7 @@ bash %
 
 如果你还需要一个程序各个细节的详细报告，可以使用 `cProfile` 模块：
 
-```
+```python
 bash % python3 -m cProfile someprogram.py
          859647 function calls in 16.016 CPU seconds
 
@@ -984,7 +984,7 @@ bash %
 
 不过通常情况是介于这两个极端之间。比如你已经知道代码运行时在少数几个函数中花费了绝大部分时间。 对于这些函数的性能测试，可以使用一个简单的装饰器：
 
-```
+```python
 # timethis.py
 
 import time
@@ -1003,7 +1003,7 @@ def timethis(func):
 
 要使用这个装饰器，只需要将其放置在你要进行性能测试的函数定义前即可，比如：
 
-```
+```python
 >>> @timethis
 ... def countdown(n):
 ...     while n > 0:
@@ -1016,7 +1016,7 @@ __main__.countdown : 0.803001880645752
 
 要测试某个代码块运行时间，你可以定义一个上下文管理器，例如：
 
-```
+```python
 from contextlib import contextmanager
 
 @contextmanager
@@ -1031,7 +1031,7 @@ def timeblock(label):
 
 下面是使用这个上下文管理器的例子：
 
-```
+```python
 >>> with timeblock('counting'):
 ...     n = 10000000
 ...     while n > 0:
@@ -1043,7 +1043,7 @@ counting : 1.5551159381866455
 
 对于测试很小的代码片段运行性能，使用 `timeit` 模块会很方便，例如：
 
-```
+```python
 >>> from timeit import timeit
 >>> timeit('math.sqrt(2)', 'import math')
 0.1432319980012835
@@ -1054,7 +1054,7 @@ counting : 1.5551159381866455
 
 `timeit` 会执行第一个参数中语句100万次并计算运行时间。 第二个参数是运行测试之前配置环境。如果你想改变循环执行次数， 可以像下面这样设置 `number `参数的值：
 
-```
+```python
 >>> timeit('math.sqrt(2)', 'import math', number=10000000)
 1.434852126003534
 >>> timeit('sqrt(2)', 'from math import sqrt', number=10000000)
@@ -1065,7 +1065,7 @@ counting : 1.5551159381866455
 ## 讨论
 当执行性能测试的时候，需要注意的是你获取的结果都是近似值。 `time.perf_counter() `函数会在给定平台上获取最高精度的计时值。 不过，它仍然还是基于时钟时间，很多因素会影响到它的精确度，比如机器负载。 如果你对于执行时间更感兴趣，使用 `time.process_time()` 来代替它。例如：
 
-```
+```python
 from functools import wraps
 def timethis(func):
     @wraps(func)
@@ -1093,7 +1093,7 @@ def timethis(func):
 
 很多程序员刚开始会使用 Python 语言写一些简单脚本。 当编写脚本的时候，通常习惯了写毫无结构的代码，比如：
 
-```
+```python
 # somescript.py
 
 import sys
@@ -1108,7 +1108,7 @@ with open(sys.argv[1]) as f:
 
 很少有人知道，像这样定义在全局范围的代码运行起来要比定义在函数中运行慢的多。 这种速度差异是由于局部变量和全局变量的实现方式（使用局部变量要更快些）。 因此，如果你想让程序运行更快些，只需要将脚本语句放入函数中即可：
 
-```
+```python
 # somescript.py
 import sys
 import csv
@@ -1130,7 +1130,7 @@ main(sys.argv[1])
 
 通常你可以使用` from module import name`  这样的导入形式，以及使用绑定的方法。 假设你有如下的代码片段：
 
-```
+```python
 import math
 
 def compute_roots(nums):
@@ -1147,7 +1147,7 @@ for n in range(100):
 
 在我们机器上面测试的时候，这个程序花费了大概40秒。现在我们修改` compute_roots() `函数如下：
 
-```
+```python
 from math import sqrt
 
 def compute_roots(nums):
@@ -1167,7 +1167,7 @@ def compute_roots(nums):
 
 之前提过，局部变量会比全局变量运行速度快。 对于频繁访问的名称，通过将这些名称变成局部变量可以加速程序运行。 例如，看下之前对于 `compute_roots() `函数进行修改后的版本：
 
-```
+```python
 import math
 
 def compute_roots(nums):
@@ -1183,7 +1183,7 @@ def compute_roots(nums):
 
 对于类中的属性访问也同样适用于这个原理。 通常来讲，查找某个值比如 `self.name` 会比访问一个局部变量要慢一些。 在内部循环中，可以将某个需要频繁访问的属性放入到一个局部变量中。例如：
 
-```
+```python
 # Slower
 class SomeClass:
     ...
@@ -1205,7 +1205,7 @@ class SomeClass:
 
 任何时候当你使用额外的处理层（比如装饰器、属性访问、描述器）去包装你的代码时，都会让程序运行变慢。 比如看下如下的这个类：
 
-```
+```python
 class A:
     def __init__(self, x, y):
         self.x = x
@@ -1220,7 +1220,7 @@ class A:
 
 现在进行一个简单测试：
 
-```
+```python
 >>> from timeit import timeit
 >>> a = A(1,2)
 >>> timeit('a.x', 'from __main__ import a')
@@ -1240,14 +1240,14 @@ class A:
 
 有时候程序员想显摆下，构造一些并没有必要的数据结构。例如，有人可能会像下面这样写：
 
-```
+```python
 values = [x for x in sequence]
 squares = [x*x for x in values]
 ```
 
 也许这里的想法是首先将一些值收集到一个列表中，然后使用列表推导来执行操作。 不过，第一个列表完全没有必要，可以简单的像下面这样写：
 
-```
+```python
 squares = [x*x for x in sequence]
 ```
 
@@ -1260,7 +1260,7 @@ squares = [x*x for x in sequence]
 
 你还要注意微小优化的结果。例如考虑下面创建一个字典的两种方式：
 
-```
+```python
 a = {
     'name' : 'AAPL',
     'shares' : 100,

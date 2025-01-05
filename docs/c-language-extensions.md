@@ -3,7 +3,7 @@
 
 这里是我们将在大部分秘籍中工作的代码：
 
-```
+```python
 /* sample.c */_method
 #include <math.h>
 
@@ -72,7 +72,7 @@ double distance(Point *p1, Point *p2) {
 
 要访问这个函数库，你要先构建一个包装它的 Python 模块，如下这样：
 
-```
+```python
 # sample.py
 import ctypes
 import os
@@ -154,7 +154,7 @@ distance.restype = ctypes.c_double
 
 如果一切正常，你就可以加载并使用里面定义的 C 函数了。例如：
 
-```
+```python
 >>> import sample
 >>> sample.gcd(35,42)
 7
@@ -178,7 +178,7 @@ distance.restype = ctypes.c_double
 
 如果 C 函数库被安装到其他地方，那么你就要修改相应的路径。 如果 C 函数库在你机器上被安装为一个标准库了， 那么可以使用` ctypes.util.find_library()` 函数来查找：
 
-```
+```python
 >>> from ctypes.util import find_library
 >>> find_library('m')
 '/usr/lib/libm.dylib'
@@ -191,13 +191,13 @@ distance.restype = ctypes.c_double
 
 一旦你知道了 C 函数库的位置，那么就可以像下面这样使用 `ctypes.cdll.LoadLibrary()` 来加载它， 其中 `_path `是标准库的全路径：
 
-```
+```python
 _mod = ctypes.cdll.LoadLibrary(_path)
 ```
 
 函数库被加载后，你需要编写几个语句来提取特定的符号并指定它们的类型。 就像下面这个代码片段一样：
 
-```
+```python
 # int in_mandel(double, double, int)
 in_mandel = _mod.in_mandel
 in_mandel.argtypes = (ctypes.c_double, ctypes.c_double, ctypes.c_int)
@@ -206,7 +206,7 @@ in_mandel.restype = ctypes.c_int
 
 在这段代码中，`.argtypes` 属性是一个元组，包含了某个函数的输入按时， 而 `.restype `就是相应的返回类型。` ctypes` 定义了大量的类型对象（比如 c_double, c_int, c_short, c_float 等）， 代表了对应的 C 数据类型。如果你想让 Python 能够传递正确的参数类型并且正确的转换数据的话， 那么这些类型签名的绑定是很重要的一步。如果你没有这么做，不但代码不能正常运行， 还可能会导致整个解释器进程挂掉。 使用 ctypes 有一个麻烦点的地方是原生的 C 代码使用的术语可能跟 Python 不能明确的对应上来。 `divide() `函数是一个很好的例子，它通过一个参数除以另一个参数返回一个结果值。 尽管这是一个很常见的 C 技术，但是在 Python 中却不知道怎样清晰的表达出来。 例如，你不能像下面这样简单的做：
 
-```
+```python
 >>> divide = _mod.divide
 >>> divide.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
 >>> x = 0
@@ -220,7 +220,7 @@ instance instead of int
 
 就算这个能正确的工作，它会违反 Python 对于整数的不可更改原则，并且可能会导致整个解释器陷入一个黑洞中。 对于涉及到指针的参数，你通常需要先构建一个相应的 ctypes 对象并像下面这样传进去：
 
-```
+```python
 >>> x = ctypes.c_int()
 >>> divide(10, 3, x)
 3
@@ -233,7 +233,7 @@ instance instead of int
 
 对于那些不像 Python 的 C 调用，通常可以写一个小的包装函数。 这里，我们让 `divide() `函数通过元组来返回两个结果：
 
-```
+```python
 # int divide(int, int, int *)
 _divide = _mod.divide
 _divide.argtypes = (ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
@@ -251,7 +251,7 @@ def divide(x, y):
 
 对于列表和元组，`from_list `方法将其转换为一个 `ctypes `的数组对象。 这个看上去有点奇怪，下面我们使用一个交互式例子来将一个列表转换为一个 `ctypes` 数组：
 
-```
+```python
 >>> nums = [1, 2, 3]
 >>> a = (ctypes.c_double * len(nums))(*nums)
 >>> a
@@ -267,7 +267,7 @@ def divide(x, y):
 
 对于数组对象，`from_array()` 提取底层的内存指针并将其转换为一个 `ctypes` 指针对象。例如：
 
-```
+```python
 >>> import array
 >>> a = array.array('d',[1,2,3])
 >>> a
@@ -282,7 +282,7 @@ array('d', [1.0, 2.0, 3.0])
 
 `from_ndarray()` 演示了对于 `numpy` 数组的转换操作。 通过定义 `DoubleArrayType `类并在 `avg()` 类型签名中使用它， 那么这个函数就能接受多个不同的类数组输入了：
 
-```
+```python
 >>> import sample
 >>> sample.avg([1,2,3])
 2.0
@@ -299,7 +299,7 @@ array('d', [1.0, 2.0, 3.0])
 
 本节最后一部分向你演示了怎样处理一个简单的 C 结构。 对于结构体，你只需要像下面这样简单的定义一个类，包含相应的字段和类型即可：
 
-```
+```python
 class Point(ctypes.Structure):
     _fields_ = [('x', ctypes.c_double),
                 ('y', ctypes.c_double)]
@@ -307,7 +307,7 @@ class Point(ctypes.Structure):
 
 一旦类被定义后，你就可以在类型签名中或者是需要实例化结构体的代码中使用它。例如：
 
-```
+```python
 >>> p1 = sample.Point(1,2)
 >>> p2 = sample.Point(4,5)
 >>> p1.x
@@ -332,7 +332,7 @@ class Point(ctypes.Structure):
 ## 解决方案
 对于简单的 C 代码，构建一个自定义扩展模块是很容易的。 作为第一步，你需要确保你的C代码有一个正确的头文件。例如：
 
-```
+```python
 /* sample.h */
 
 #include <math.h>
@@ -351,7 +351,7 @@ extern double distance(Point *p1, Point *p2);
 
 通常来讲，这个头文件要对应一个已经被单独编译过的库。 有了这些，下面我们演示下编写扩展函数的一个简单例子：
 
-```
+```python
 #include "Python.h"
 #include "sample.h"
 
@@ -416,7 +416,7 @@ PyInit_sample(void) {
 
 要绑定这个扩展模块，像下面这样创建一个 `setup.py` 文件：
 
-```
+```python
 # setup.py
 from distutils.core import setup, Extension
 
@@ -436,7 +436,7 @@ setup(name='sample',
 
 为了构建最终的函数库，只需简单的使用 `python3 buildlib.py build_ext --inplace `命令即可：
 
-```
+```python
 bash % python3 setup.py build_ext --inplace
 running build_ext
 building 'sample' extension
@@ -451,7 +451,7 @@ bash %
 
 如上所示，它会创建一个名字叫 `sample.so `的共享库。当被编译后，你就能将它作为一个模块导入进来了：
 
-```
+```python
 >>> import sample
 >>> sample.gcd(35, 42)
 7
@@ -472,7 +472,7 @@ bash %
 
 首先，在扩展模块中，你写的函数都是像下面这样的一个普通原型：
 
-```
+```python
 static PyObject *py_func(PyObject *self, PyObject *args) {
   ...
 }
@@ -484,7 +484,7 @@ static PyObject *py_func(PyObject *self, PyObject *args) {
 
 `Py_BuildValue() `函数被用来根据 C 数据类型创建 Python 对象。 它同样接受一个格式化字符串来指定期望类型。 在扩展函数中，它被用来返回结果给 Python。 `Py_BuildValue()` 的一个特性是它能构建更加复杂的对象类型，比如元组和字典。 在 `py_divide() `代码中，一个例子演示了怎样返回一个元组。不过，下面还有一些实例：
 
-```
+```python
 return Py_BuildValue("i", 34);      // Return an integer
 return Py_BuildValue("d", 3.4);     // Return a double
 return Py_BuildValue("s", "Hello"); // Null-terminated UTF-8 string
@@ -504,7 +504,7 @@ return Py_BuildValue("(ii)", 3, 4); // Tuple (3, 4)
 ## 解决方案
 为了能让接受和处理数组具有可移植性，你需要使用到 Buffer Protocol . 下面是一个手写的 C 扩展函数例子， 用来接受数组数据并调用本章开篇部分的 `avg(double *buf, int len)` 函数：
 
-```
+```python
 /* Call double avg(double *, int) */
 static PyObject *py_avg(PyObject *self, PyObject *args) {
   PyObject *bufobj;
@@ -546,7 +546,7 @@ static PyObject *py_avg(PyObject *self, PyObject *args) {
 
 下面我们演示下这个扩展函数是如何工作的：
 
-```
+```python
 >>> import array
 >>> avg(array.array('d',[1,2,3]))
 2.0
@@ -583,7 +583,7 @@ TypeError: Expected a 1-dimensional array
 
 对于数组、字节字符串和其他类似对象而言，一个` Py_buffer` 结构体包含了所有底层内存的信息。 它包含一个指向内存地址、大小、元素大小、格式和其他细节的指针。下面是这个结构体的定义：
 
-```
+```python
 typedef struct bufferinfo {
     void *buf;              /* Pointer to buffer memory */
     PyObject *obj;          /* Python object that is the owner */
@@ -613,7 +613,7 @@ typedef struct bufferinfo {
 ## 解决方案
 隐形结构体可以很容易的通过将它们包装在胶囊对象中来处理。 考虑我们例子代码中的下列 C 代码片段：
 
-```
+```python
 typedef struct Point {
     double x,y;
 } Point;
@@ -623,7 +623,7 @@ extern double distance(Point *p1, Point *p2);
 
 下面是一个使用胶囊包装 Point 结构体和 `distance() `函数的扩展代码实例：
 
-```
+```python
 /* Destructor function for points */
 static void del_Point(PyObject *obj) {
   free(PyCapsule_GetPointer(obj,"Point"));
@@ -673,7 +673,7 @@ static PyObject *py_distance(PyObject *self, PyObject *args) {
 
 在 Python 中可以像下面这样来使用这些函数：
 
-```
+```python
 >>> import sample
 >>> p1 = sample.Point(2,3)
 >>> p2 = sample.Point(4,5)
@@ -704,7 +704,7 @@ static PyObject *py_distance(PyObject *self, PyObject *args) {
 ## 解决方案
 本节主要问题是如何处理15.4小节中提到的 Point 对象。仔细回一下，在 C 代码中包含了如下这些工具函数：
 
-```
+```python
 /* Destructor function for points */
 static void del_Point(PyObject *obj) {
 
@@ -725,7 +725,7 @@ static PyObject *PyPoint_FromPoint(Point *p, int must_free) {
 
 要解决这个问题，首先要为` sample` 扩展写个新的头文件名叫 `pysample.h `，如下：
 
-```
+```python
 /* pysample.h */
 #include "Python.h"
 #include "sample.h"
@@ -761,7 +761,7 @@ static int import_sample(void) {
 
 这里最重要的部分是函数指针表 `_PointAPIMethods `. 它会在导出模块时被初始化，然后导入模块时被查找到。 修改原始的扩展模块来填充表格并将它像下面这样导出：
 
-```
+```python
 /* pysample.c */
 
 #include "Python.h"
@@ -811,7 +811,7 @@ PyInit_sample(void) {
 
 最后，下面是一个新的扩展模块例子，用来加载并使用这些 API 函数：
 
-```
+```python
 /* ptexample.c */
 
 /* Include the header associated with the other module */
@@ -867,7 +867,7 @@ PyInit_ptexample(void) {
 
 编译这个新模块时，你甚至不需要去考虑怎样将函数库或代码跟其他模块链接起来。 例如，你可以像下面这样创建一个简单的 `setup.py` 文件：
 
-```
+```python
 # setup.py
 from distutils.core import setup, Extension
 
@@ -883,7 +883,7 @@ setup(name='ptexample',
 
 如果一切正常，你会发现你的新扩展函数能和定义在其他模块中的C API函数一起运行的很好。
 
-```
+```python
 >>> import sample
 >>> p1 = sample.Point(2,3)
 >>> p1
@@ -912,7 +912,7 @@ setup(name='ptexample',
 ## 解决方案
 在 C 语言中调用 Python 非常简单，不过设计到一些小窍门。 下面的 C 代码告诉你怎样安全的调用：
 
-```
+```python
 #include <Python.h>
 
 /* Execute func(x,y) in the Python interpreter.  The
@@ -973,7 +973,7 @@ fail:
 
 下面是一个简单例子用来掩饰从一个嵌入的 Python 解释器中调用一个函数：
 
-```
+```python
 #include <Python.h>
 
 /* Definition of call_func() same as above */
@@ -1010,7 +1010,7 @@ int main() {
 
 要构建例子代码，你需要编译 C 并将它链接到 Python 解释器。 下面的 Makefile 可以教你怎样做（不过在你机器上面需要一些配置）。
 
-```
+```python
 all::
         cc -g embed.c -I/usr/local/include/python3.3m \
           -L/usr/local/lib/python3.3/config-3.3m -lpython3.3m
@@ -1018,7 +1018,7 @@ all::
 
 编译并运行会产生类似下面的输出：
 
-```
+```python
 0.00 0.00
 0.10 0.01
 0.20 0.04
@@ -1029,7 +1029,7 @@ all::
 
 下面是一个稍微不同的例子，展示了一个扩展函数， 它接受一个可调用对象和其他参数，并将它们传递给 `call_func()` 来做测试：
 
-```
+```python
 /* Extension function for testing the C-Python callback */
 PyObject *py_call_func(PyObject *self, PyObject *args) {
   PyObject *func;
@@ -1045,7 +1045,7 @@ PyObject *py_call_func(PyObject *self, PyObject *args) {
 
 使用这个扩展函数，你要像下面这样测试它：
 
-```
+```python
 >>> import sample
 >>> def add(x,y):
 ...     return x+y
@@ -1060,7 +1060,7 @@ PyObject *py_call_func(PyObject *self, PyObject *args) {
 
 作为第一步，你必须先有一个表示你将要调用的 Python 可调用对象。 这可以是一个函数、类、方法、内置方法或其他任意实现了 `__call__()` 操作的东西。 为了确保是可调用的，可以像下面的代码这样利用` PyCallable_Check()` 做检查：
 
-```
+```python
 double call_func(PyObject *func, double x, double y) {
   ...
   /* Verify that func is a proper callable */
@@ -1075,7 +1075,7 @@ double call_func(PyObject *func, double x, double y) {
 
 调用一个函数相对来讲很简单——只需要使用 `PyObject_Call()` ， 传一个可调用对象给它、一个参数元组和一个可选的关键字字典。 要构建参数元组或字典，你可以使用 `Py_BuildValue() `,如下：
 
-```
+```python
 double call_func(PyObject *func, double x, double y) {
   PyObject *args;
   PyObject *kwargs;
@@ -1096,7 +1096,7 @@ double call_func(PyObject *func, double x, double y) {
 
 调用万 Python 函数之后，你必须检查是否有异常发生。 `PyErr_Occurred()` 函数可被用来做这件事。 对对于异常的处理就有点麻烦了，由于是用 C 语言写的，你没有像 Python 那么的异常机制。 因此，你必须要设置一个异常状态码，打印异常信息或其他相应处理。 在这里，我们选择了简单的` abort()` 来处理。另外，传统 C 程序员可能会直接让程序奔溃。
 
-```
+```python
 ...
 /* Check for Python exceptions (if any) */
 if (PyErr_Occurred()) {
@@ -1113,7 +1113,7 @@ fail:
 
 最后一个问题是对于 Python 全局锁的管理。 在 C 语言中访问 Python 的时候，你需要确保 GIL 被正确的获取和释放了。 不然的话，可能会导致解释器返回错误数据或者直接奔溃。 调用 `PyGILState_Ensure()` 和 `PyGILState_Release()` 可以确保一切都能正常。
 
-```
+```python
 double call_func(PyObject *func, double x, double y) {
   ...
   double retval;
@@ -1146,7 +1146,7 @@ fail:
 ## 解决方案
 在 C 扩展代码中，GIL 可以通过在代码中插入下面这样的宏来释放和重新获取：
 
-```
+```python
 #include "Python.h"
 ...
 
@@ -1173,7 +1173,7 @@ PyObject *pyfunc(PyObject *self, PyObject *args) {
 ## 解决方案
 如果你想将 C、Python 和线程混合在一起，你需要确保正确的初始化和管理 Python 的全局解释器锁（GIL）。 要想这样做，可以将下列代码放到你的C代码中并确保它在任何线程被创建之前被调用。
 
-```
+```python
 #include <Python.h>
   ...
   if (!PyEval_ThreadsInitialized()) {
@@ -1184,7 +1184,7 @@ PyObject *pyfunc(PyObject *self, PyObject *args) {
 
 对于任何调用 Python 对象或 Python C API 的 C 代码，确保你首先已经正确地获取和释放了 GIL。 这可以用 `PyGILState_Ensure()` 和 `PyGILState_Release() `来做到，如下所示：
 
-```
+```python
 ...
 /* Make sure we own the GIL */
 PyGILState_STATE state = PyGILState_Ensure();
@@ -1210,7 +1210,7 @@ PyGILState_Release(state);
 ## 解决方案
 Swig 通过解析 C 头文件并自动创建扩展代码来操作。 要使用它，你先要有一个 C 头文件。例如，我们示例的头文件如下：
 
-```
+```python
 /* sample.h */
 
 #include <math.h>
@@ -1228,7 +1228,7 @@ extern double distance(Point *p1, Point *p2);
 
 一旦你有了这个头文件，下一步就是编写一个 Swig”接口”文件。 按照约定，这些文件以”.i”后缀并且类似下面这样：
 
-```
+```python
 // sample.i - Swig interface
 %module sample
 %{
@@ -1286,14 +1286,14 @@ extern double distance(Point *p1, Point *p2);
 
 一旦你写好了接口文件，就可以在命令行工具中调用 Swig 了：
 
-```
+```python
 bash % swig -python -py3 sample.i
 bash %
 ```
 
 swig 的输出就是两个文件，sample_wrap.c 和 sample.py。 后面的文件就是用户需要导入的。 而 sample_wrap.c 文件是需要被编译到名叫 `_sample` 的支持模块的 C 代码。 这个可以通过跟普通扩展模块一样的技术来完成。 例如，你创建了一个如下所示的 `setup.py` 文件：
 
-```
+```python
 # setup.py
 from distutils.core import setup, Extension
 
@@ -1315,7 +1315,7 @@ setup(name='sample',
 
 要编译和测试，在 setup.py 上执行 python3，如下：
 
-```
+```python
 bash % python3 setup.py build_ext --inplace
 running build_ext
 building '_sample' extension
@@ -1331,7 +1331,7 @@ bash %
 
 如果一切正常的话，你会发现你就可以很方便的使用生成的 C 扩展模块了。例如：
 
-```
+```python
 >>> import sample
 >>> sample.gcd(42,8)
 2
@@ -1357,7 +1357,7 @@ Swig 是 Python 历史中构建扩展模块的最古老的工具之一。 Swig �
 
 所有 Swig 接口都以类似下面这样的为开头：
 
-```
+```python
 %module sample
 %{
 #include "sample.h"
@@ -1368,7 +1368,7 @@ Swig 是 Python 历史中构建扩展模块的最古老的工具之一。 Swig �
 
 Swig 接口的底下部分是一个 C 声明列表，你需要在扩展中包含它。 这通常从头文件中被复制。在我们的例子中，我们仅仅像下面这样直接粘贴在头文件中：
 
-```
+```python
 %module sample
 %{
 #include "sample.h"
@@ -1392,14 +1392,14 @@ extern double distance(Point *p1, Point *p2);
 
 第一个自定义是 `%extend `指令允许方法被附加到已存在的结构体和类定义上。 我例子中，这个被用来添加一个 Point 结构体的构造器方法。 它可以让你像下面这样使用这个结构体：
 
-```
+```python
 >>> p1 = sample.Point(2,3)
 >>>
 ```
 
 如果略过的话，Point 对象就必须以更加复杂的方式来被创建：
 
-```
+```python
 >>> # Usage if %extend Point is omitted
 >>> p1 = sample.Point()
 >>> p1.x = 2.0
@@ -1408,7 +1408,7 @@ extern double distance(Point *p1, Point *p2);
 
 第二个自定义涉及到对` typemaps.i `库的引入和` %apply` 指令， 它会指示 Swig 参数签名 `int *remainder `要被当做是输出值。 这个实际上是一个模式匹配规则。 在接下来的所有声明中，任何时候只要碰上 `int  *remainder` ，他就会被作为输出。 这个自定义方法可以让 `divide()` 函数返回两个值。
 
-```
+```python
 >>> sample.divide(42,8)
 [5, 2]
 >>>
@@ -1431,7 +1431,7 @@ extern double distance(Point *p1, Point *p2);
 
 作为准备，假设本章介绍部分的示例代码已经被编译到某个叫 `libsample` 的 C 函数库中了。 首先创建一个名叫 `csample.pxd `的文件，如下所示：
 
-```
+```python
 # csample.pxd
 #
 # Declarations of "external" C functions and structures
@@ -1453,7 +1453,7 @@ cdef extern from "sample.h":
 
 下一步，创建一个名为 `sample.pyx` 的问题。 该文件会定义包装器，用来桥接 Python 解释器到 `csample.pxd` 中声明的 C 代码。
 
-```
+```python
 # sample.pyx
 
 # Import the low-level C declarations
@@ -1509,7 +1509,7 @@ def distance(p1, p2):
 
 该文件更多的细节部分会在讨论部分详细展开。 最后，为了构建扩展模块，像下面这样创建一个` setup.py `文件：
 
-```
+```python
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
@@ -1529,7 +1529,7 @@ setup(
 
 要构建我们测试的目标模块，像下面这样做：
 
-```
+```python
 bash % python3 setup.py build_ext --inplace
 running build_ext
 cythoning sample.pyx to sample.c
@@ -1544,7 +1544,7 @@ bash %
 
 如果一切顺利的话，你应该有了一个扩展模块 `sample.so` ，可在下面例子中使用：
 
-```
+```python
 >>> import sample
 >>> sample.gcd(42,10)
 2
@@ -1574,7 +1574,7 @@ True
 
 尽管 .pxd 文件包含了定义，但它们并不是用来自动创建扩展代码的。 因此，你还是要写包装函数。例如，就算` csample.pxd `文件声明了 `int gcd(int, int)` 函数， 你仍然需要在` sample.pyx `中为它写一个包装函数。例如：
 
-```
+```python
 cimport csample
 
 def gcd(unsigned int x, unsigned int y):
@@ -1583,7 +1583,7 @@ def gcd(unsigned int x, unsigned int y):
 
 对于简单的函数，你并不需要去做太多的时。 Cython 会生成包装代码来正确的转换参数和返回值。 绑定到属性上的 C 数据类型是可选的。不过，如果你包含了它们，你可以另外做一些错误检查。 例如，如果有人使用负数来调用这个函数，会抛出一个异常：
 
-```
+```python
 >>> sample.gcd(-10,2)
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
@@ -1595,7 +1595,7 @@ OverflowError: can't convert negative value to unsigned int
 
 如果你想对包装函数做另外的检查，只需要使用另外的包装代码。例如：
 
-```
+```python
 def gcd(unsigned int x, unsigned int y):
     if x <= 0:
         raise ValueError("x must be > 0")
@@ -1608,7 +1608,7 @@ def gcd(unsigned int x, unsigned int y):
 
 在 Cython 包装器中，你可以选择声明 C 数据类型，也可以使用所有的常见 Python 对象。 对于 `divide()` 的包装器展示了这样一个例子，同时还有如何去处理一个指针参数。
 
-```
+```python
 def divide(x,y):
     cdef int rem
     quot = csample.divide(x,y,&rem)
@@ -1617,7 +1617,7 @@ def divide(x,y):
 
 在这里，`rem` 变量被显示的声明为一个 C 整型变量。 当它被传入 `divide()` 函数的时候，`&rem `创建一个跟 C 一样的指向它的指针。 `avg() `函数的代码演示了 Cython 更高级的特性。 首先 `def avg(double[:] a)` 声明了` avg() `接受一个一维的双精度内存视图。 最惊奇的部分是返回的结果函数可以接受任何兼容的数组对象，包括被 numpy 创建的。例如：
 
-```
+```python
 >>> import array
 >>> a = array.array('d',[1,2,3])
 >>> import numpy
@@ -1636,7 +1636,7 @@ def divide(x,y):
 
 对 Point 结构体的处理是一个挑战。本节使用胶囊对象将 Point 对象当做隐形指针来处理，这个在15.4小节介绍过。 要这样做的话，底层 Cython 代码稍微有点复杂。 首先，下面的导入被用来引入 C 函数库和 Python C API 中定义的函数：
 
-```
+```python
 from cpython.pycapsule cimport *
 from libc.stdlib cimport malloc, free
 ```
@@ -1647,7 +1647,7 @@ from libc.stdlib cimport malloc, free
 
 处理 Point 结构体一个缺点是它的实现是不可见的。 你不能访问任何属性来查看它的内部。 这里有另外一种方法去包装它，就是定义一个扩展类型，如下所示：
 
-```
+```python
 # sample.pyx
 
 cimport csample
@@ -1684,7 +1684,7 @@ def distance(Point p1, Point p2):
 
 做了这个改变后，你会发现操作 Point 对象就显得更加自然了：
 
-```
+```python
 >>> import sample
 >>> p1 = sample.Point(2,3)
 >>> p2 = sample.Point(4,5)
@@ -1712,7 +1712,7 @@ def distance(Point p1, Point p2):
 ## 解决方案
 作为一个例子，下面的代码演示了一个 Cython 函数，用来修整一个简单的一维双精度浮点数数组中元素的值。
 
-```
+```python
 # sample.pyx (Cython)
 
 cimport cython
@@ -1738,7 +1738,7 @@ cpdef clip(double[:] a, double min, double max, double[:] out):
 
 要编译和构建这个扩展，你需要一个像下面这样的 `setup.py` 文件 （使用 `python3 setup.py build_ext --inplace `来构建它）：
 
-```
+```python
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
@@ -1757,7 +1757,7 @@ setup(
 
 你会发现结果函数确实对数组进行的修正，并且可以适用于多种类型的数组对象。例如：
 
-```
+```python
 >>> # array module example
 >>> import sample
 >>> import array
@@ -1791,7 +1791,7 @@ array([-5.        ,  5.        ,  0.69248932, ...,  0.69583148,
 
 你还会发现运行生成结果非常的快。 下面我们将本例和 numpy 中的已存在的 `clip()` 函数做一个性能对比：
 
-```
+```python
 >>> timeit('numpy.clip(b,-5,5,c)','from __main__ import b,c,numpy',number=1000)
 8.093049556000551
 >>> timeit('sample.clip(b,-5,5,c)','from __main__ import b,c,sample',
@@ -1815,7 +1815,7 @@ array([-5.        ,  5.        ,  0.69248932, ...,  0.69583148,
 
 任何时候处理数组时，研究并改善底层算法同样可以极大的提示性能。 例如，考虑对 `clip()` 函数的如下修正，使用条件表达式：
 
-```
+```python
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cpdef clip(double[:] a, double min, double max, double[:] out):
@@ -1831,7 +1831,7 @@ cpdef clip(double[:] a, double min, double max, double[:] out):
 
 到这里为止，你可能想知道这种代码怎么能跟手写 C 语言 PK 呢？ 例如，你可能写了如下的 C 函数并使用前面几节的技术来手写扩展：
 
-```
+```python
 void clip(double *a, int n, double min, double max, double *out) {
   double x;
   for (; n >= 0; n--, a++, out++) {
@@ -1846,7 +1846,7 @@ void clip(double *a, int n, double min, double max, double *out) {
 
 你可以对实例代码构建多个扩展。 对于某些数组操作，最好要释放 GIL，这样多个线程能并行运行。 要这样做的话，需要修改代码，使用 `with nogil:` 语句：
 
-```
+```python
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cpdef clip(double[:] a, double min, double max, double[:] out):
@@ -1861,7 +1861,7 @@ cpdef clip(double[:] a, double min, double max, double[:] out):
 
 如果你想写一个操作二维数组的版本，下面是可以参考下：
 
-```
+```python
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
@@ -1889,7 +1889,7 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
 ## 解决方案
 `ctypes `模块可被用来创建包装任意内存地址的 Python 可调用对象。 下面的例子演示了怎样获取 C 函数的原始、底层地址，以及如何将其转换为一个可调用对象：
 
-```
+```python
 >>> import ctypes
 >>> lib = ctypes.cdll.LoadLibrary(None)
 >>> # Get the address of sin() from the C math library
@@ -1918,7 +1918,7 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
 
 例如，下面是一个使用 `llvmpy` 扩展的简单例子，用来构建一个小的聚集函数，获取它的函数指针， 并将其转换为一个 Python 可调用对象。
 
-```
+```python
 >>> from llvm.core import Module, Function, Type, Builder
 >>> mod = Module.new('example')
 >>> f = Function.new(mod,Type.function(Type.double(), \
@@ -1956,7 +1956,7 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
 ## 解决方案
 许多 C 函数库包含一些操作 NULL 结尾的字符串，被声明类型为 `char * `. 考虑如下的 C 函数，我们用来做演示和测试用的：
 
-```
+```python
 void print_chars(char *s) {
     while (*s) {
         printf("%2x ", (unsigned char) *s);
@@ -1969,13 +1969,13 @@ void print_chars(char *s) {
 
 此函数会打印被传进来字符串的每个字符的十六进制表示，这样的话可以很容易的进行调试了。例如：
 
-```
+```python
 print_chars("Hello");   // Outputs: 48 65 6c 6c 6f
 ```
 
 对于在 Python 中调用这样的 C 函数，你有几种选择。 首先，你可以通过调用 `PyArg_ParseTuple() `并指定”y“转换码来限制它只能操作字节，如下：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   char *s;
 
@@ -1989,7 +1989,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 结果函数的使用方法如下。仔细观察嵌入了 NULL 字节的字符串以及 Unicode 支持是怎样被拒绝的：
 
-```
+```python
 >>> print_chars(b'Hello World')
 48 65 6c 6c 6f 20 57 6f 72 6c 64
 >>> print_chars(b'Hello\x00World')
@@ -2005,7 +2005,7 @@ TypeError: 'str' does not support the buffer interface
 
 如果你想传递 Unicode 字符串，在 `PyArg_ParseTuple() `中使用”s“格式码，如下：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   char *s;
 
@@ -2019,7 +2019,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 当被使用的时候，它会自动将所有字符串转换为以 NULL 结尾的 UTF-8 编码。例如：
 
-```
+```python
 >>> print_chars('Hello World')
 48 65 6c 6c 6f 20 57 6f 72 6c 64
 >>> print_chars('Spicy Jalape\u00f1o')  # Note: UTF-8 encoding
@@ -2037,7 +2037,7 @@ TypeError: must be str, not bytes
 
 如果因为某些原因，你要直接使用 `PyObject * `而不能使用` PyArg_ParseTuple()` ， 下面的例子向你展示了怎样从字节和字符串对象中检查和提取一个合适的 `char * `引用：
 
-```
+```python
 /* Some Python Object (obtained somehow) */
 PyObject *obj;
 
@@ -2073,7 +2073,7 @@ PyObject *obj;
 
 尽管很容易使用，但是很容易忽视的一个问题是在 `PyArg_ParseTuple()` 中使用“s”格式化码会有内存损耗。 但你需要使用这种转换的时候，一个 UTF-8 字符串被创建并永久附加在原始字符串对象上面。 如果原始字符串包含非 ASCII 字符的话，就会导致字符串的尺寸增到一直到被垃圾回收。例如：
 
-```
+```python
 >>> import sys
 >>> s = 'Spicy Jalape\u00f1o'
 >>> sys.getsizeof(s)
@@ -2087,7 +2087,7 @@ PyObject *obj;
 
 如果你在乎这个内存的损耗，你最好重写你的 C 扩展代码，让它使用 `PyUnicode_AsUTF8String()` 函数。如下：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   PyObject *o, *bytes;
   char *s;
@@ -2105,7 +2105,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 通过这个修改，一个 UTF-8 编码的字符串根据需要被创建，然后在使用过后被丢弃。下面是修订后的效果：
 
-```
+```python
 >>> import sys
 >>> s = 'Spicy Jalape\u00f1o'
 >>> sys.getsizeof(s)
@@ -2119,7 +2119,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 如果你试着传递 NULL 结尾字符串给 ctypes 包装过的函数， 要注意的是 ctypes 只能允许传递字节，并且它不会检查中间嵌入的 NULL 字节。例如：
 
-```
+```python
 >>> import ctypes
 >>> lib = ctypes.cdll.LoadLibrary("./libsample.so")
 >>> print_chars = lib.print_chars
@@ -2137,7 +2137,7 @@ ctypes.ArgumentError: argument 1: <class 'TypeError'>: wrong type
 
 如果你想传递字符串而不是字节，你需要先执行手动的 UTF-8 编码。例如：
 
-```
+```python
 >>> print_chars('Hello World'.encode('utf-8'))
 48 65 6c 6c 6f 20 57 6f 72 6c 64
 >>>
@@ -2154,7 +2154,7 @@ ctypes.ArgumentError: argument 1: <class 'TypeError'>: wrong type
 
 为了演示的目的，下面有两个 C 函数，用来操作字符串数据并输出它来调试和测试。 一个使用形式为` char *, int` 形式的字节， 而另一个使用形式为 `wchar_t *, int` 的宽字符形式：
 
-```
+```python
 void print_chars(char *s, int len) {
   int n = 0;
 
@@ -2177,7 +2177,7 @@ void print_wchars(wchar_t *s, int len) {
 
 对于面向字节的函数 `print_chars()` ，你需要将 Python 字符串转换为一个合适的编码比如 UTF-8. 下面是一个这样的扩展函数例子：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   char *s;
   Py_ssize_t  len;
@@ -2192,7 +2192,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 对于那些需要处理机器本地 `wchar_t `类型的库函数，你可以像下面这样编写扩展代码：
 
-```
+```python
 static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
   wchar_t *s;
   Py_ssize_t  len;
@@ -2207,7 +2207,7 @@ static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
 
 下面是一个交互会话来演示这个函数是如何工作的：
 
-```
+```python
 >>> s = 'Spicy Jalape\u00f1o'
 >>> print_chars(s)
 53 70 69 63 79 20 4a 61 6c 61 70 65 c3 b1 6f
@@ -2221,7 +2221,7 @@ static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
 ## 讨论
 在继续本节之前，你应该首先学习你访问的 C 函数库的特征。 对于很多 C 函数库，通常传递字节而不是字符串会比较好些。要这样做，请使用如下的转换代码：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   char *s;
   Py_ssize_t  len;
@@ -2239,7 +2239,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 不过这种转换有个缺点就是它可能会导致原始字符串对象的尺寸增大。 一旦转换过后，会有一个转换数据的复制附加到原始字符串对象上面，之后可以被重用。 你可以观察下这种效果：
 
-```
+```python
 >>> import sys
 >>> s = 'Spicy Jalape\u00f1o'
 >>> sys.getsizeof(s)
@@ -2257,7 +2257,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 对于少量的字符串对象，可能没什么影响， 但是如果你需要在扩展中处理大量的文本，你可能想避免这个损耗了。 下面是一个修订版本可以避免这种内存损耗：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   PyObject *obj, *bytes;
   char *s;
@@ -2278,7 +2278,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 如果你想避免长时间内存损耗，你唯一的选择就是复制 Unicode 数据懂啊一个临时的数组， 将它传递给 C 函数，然后回收这个数组的内存。下面是一个可能的实现：
 
-```
+```python
 static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
   PyObject *obj;
   wchar_t *s;
@@ -2300,7 +2300,7 @@ static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
 
 如果你知道 C 函数库需要的字节编码并不是 UTF-8， 你可以强制 Python 使用扩展码来执行正确的转换，就像下面这样：
 
-```
+```python
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
   char *s = 0;
   int   len;
@@ -2315,7 +2315,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 最后，如果你想直接处理 Unicode 字符串，下面的是例子，演示了底层操作访问：
 
-```
+```python
 static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
   PyObject *obj;
   int n, len;
@@ -2353,7 +2353,7 @@ static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
 ## 解决方案
 C 字符串使用一对` char * `和 `int `来表示， 你需要决定字符串到底是用一个原始字节字符串还是一个 Unicode 字符串来表示。 字节对象可以像下面这样使用 `Py_BuildValue() `来构建：
 
-```
+```python
 char *s;     /* Pointer to C string data */
 int   len;   /* Length of data */
 
@@ -2363,13 +2363,13 @@ PyObject *obj = Py_BuildValue("y#", s, len);
 
 如果你要创建一个 Unicode 字符串，并且你知道 `s `指向了 UTF-8 编码的数据，可以使用下面的方式：
 
-```
+```python
 PyObject *obj = Py_BuildValue("s#", s, len);
 ```
 
 如果` s` 使用其他编码方式，那么可以像下面使用 `PyUnicode_Decode() `来构建一个字符串：
 
-```
+```python
 PyObject *obj = PyUnicode_Decode(s, len, "encoding", "errors");
 
 /* Examples /*
@@ -2379,7 +2379,7 @@ obj = PyUnicode_Decode(s, len, "ascii", "ignore");
 
 如果你恰好有一个用` wchar_t *, len `对表示的宽字符串， 有几种选择性。首先你可以使用 `Py_BuildValue() `：
 
-```
+```python
 wchar_t *w;    /* Wide character string */
 int len;       /* Length */
 
@@ -2388,7 +2388,7 @@ PyObject *obj = Py_BuildValue("u#", w, len);
 
 另外，你还可以使用 `PyUnicode_FromWideChar()` :
 
-```
+```python
 PyObject *obj = PyUnicode_FromWideChar(w, len);
 ```
 
@@ -2404,7 +2404,7 @@ PyObject *obj = PyUnicode_FromWideChar(w, len);
 ## 解决方案
 下面是一些 C 的数据和一个函数来演示这个问题：
 
-```
+```python
 /* Some dubious string data (malformed UTF-8) */
 const char *sdata = "Spicy Jalape\xc3\xb1o\xae";
 int slen = 16;
@@ -2422,7 +2422,7 @@ void print_chars(char *s, int len) {
 
 在这个代码中，字符串 `sdata` 包含了 UTF-8 和不合格数据。 不过，如果用户在 C 中调用 `print_chars(sdata, slen)` ，它缺能正常工作。 现在假设你想将 `sdata` 的内容转换为一个 Python 字符串。 进一步假设你在后面还想通过一个扩展将那个字符串传个` print_chars()` 函数。 下面是一种用来保护原始数据的方法，就算它编码有问题。
 
-```
+```python
 /* Return the C string back to Python */
 static PyObject *py_retstr(PyObject *self, PyObject *args) {
   if (!PyArg_ParseTuple(args, "")) {
@@ -2454,7 +2454,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 如果你在 Python 中尝试这些函数，下面是运行效果：
 
-```
+```python
 >>> s = retstr()
 >>> s
 'Spicy Jalapeño\udcae'
@@ -2470,7 +2470,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 一般来讲，可以通过制定一些错误策略比如严格、忽略、替代或其他类似的来处理 Unicode 错误。 不过，这些策略的一个缺点是它们永久性破坏了原始字符串的内容。 例如，如果例子中的不合格数据使用这些策略之一解码，你会得到下面这样的结果：
 
-```
+```python
 >>> raw = b'Spicy Jalape\xc3\xb1o\xae'
 >>> raw.decode('utf-8','ignore')
 'Spicy Jalapeño'
@@ -2481,7 +2481,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 `surrogateescape `错误处理策略会将所有不可解码字节转化为一个代理对的低位字节（udcXX 中 XX 是原始字节值）。 例如：
 
-```
+```python
 >>> raw.decode('utf-8','surrogateescape')
 'Spicy Jalapeño\udcae'
 >>>
@@ -2489,7 +2489,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 
 单独的低位代理字符比如 `\udcae` 在 Unicode 中是非法的。 因此，这个字符串就是一个非法表示。 实际上，如果你将它传个一个执行输出的函数，你会得到一个错误：
 
-```
+```python
 >>> s = raw.decode('utf-8', 'surrogateescape')
 >>> print(s)
 Traceback (most recent call last):
@@ -2501,7 +2501,7 @@ in position 14: surrogates not allowed
 
 然而，允许代理转换的关键点在于从 C 传给 Python 又回传给 C 的不合格字符串不会有任何数据丢失。 当这个字符串再次使用 `surrogateescape` 编码时，代理字符会转换回原始字节。例如：
 
-```
+```python
 >>> s
 'Spicy Jalapeño\udcae'
 >>> s.encode('utf-8','surrogateescape')
@@ -2522,7 +2522,7 @@ b'Spicy Jalape\xc3\xb1o\xae'
 ## 解决方案
 写一个接受一个文件名为参数的扩展函数，如下这样：
 
-```
+```python
 static PyObject *py_get_filename(PyObject *self, PyObject *args) {
   PyObject *bytes;
   char *filename;
@@ -2542,7 +2542,7 @@ static PyObject *py_get_filename(PyObject *self, PyObject *args) {
 
 如果你已经有了一个 `PyObject * `，希望将其转换成一个文件名，可以像下面这样做：
 
-```
+```python
 PyObject *obj;    /* Object with the filename */
 PyObject *bytes;
 char *filename;
@@ -2576,7 +2576,7 @@ PyObject *obj = PyUnicode_DecodeFSDefaultAndSize(filename, filename_len);
 ## 解决方案
 要将一个文件转换为一个整型的文件描述符，使用 `PyFile_FromFd()` ，如下：
 
-```
+```python
 PyObject *fobj;     /* File object (already obtained somehow) */
 int fd = PyObject_AsFileDescriptor(fobj);
 if (fd < 0) {
@@ -2588,7 +2588,7 @@ if (fd < 0) {
 
 如果你需要转换一个整型文件描述符为一个 Python 对象，适用下面的 `PyFile_FromFd()` :
 
-```
+```python
 int fd;     /* Existing file descriptor (already open) */
 PyObject *fobj = PyFile_FromFd(fd, "filename","r",-1,NULL,NULL,NULL,1);
 ```
@@ -2611,7 +2611,7 @@ PyObject *fobj = PyFile_FromFd(fd, "filename","r",-1,NULL,NULL,NULL,1);
 
 下面是一个 C 扩展函数例子，仅仅只是读取一个类文件对象中的所有数据并将其输出到标准输出：
 
-```
+```python
 #define CHUNK_SIZE 8192
 
 /* Consume a "file-like" object and write bytes to stdout */
@@ -2677,7 +2677,7 @@ static PyObject *py_consume_file(PyObject *self, PyObject *args) {
 
 要测试这个代码，先构造一个类文件对象比如一个 StringIO 实例，然后传递进来：
 
-```
+```python
 >>> import io
 >>> f = io.StringIO('Hello\nWorld\n')
 >>> import sample
@@ -2694,7 +2694,7 @@ World
 
 对于所有的 I/O 操作，你需要关注底层的编码格式，还有字节和 Unicode 之前的区别。 本节演示了如何以文本模式读取一个文件并将结果文本解码为一个字节编码，这样在 C 中就可以使用它了。 如果你想以二进制模式读取文件，只需要修改一点点即可，例如：
 
-```
+```python
 ...
 /* Call read() */
 if ((data = PyObject_Call(read_meth, read_args, NULL)) == NULL) {
@@ -2730,7 +2730,7 @@ PyBytes_AsStringAndSize(data, &buf, &len);
 ## 解决方案
 下面是一个 C 扩展函数例子，演示了怎样处理可迭代对象中的元素：
 
-```
+```python
 static PyObject *py_consume_iterable(PyObject *self, PyObject *args) {
   PyObject *obj;
   PyObject *iter;
@@ -2763,20 +2763,20 @@ static PyObject *py_consume_iterable(PyObject *self, PyObject *args) {
 ## 解决方案
 `faulthandler` 模块能被用来帮你解决这个问题。 在你的程序中引入下列代码：
 
-```
+```python
 import faulthandler
 faulthandler.enable()
 ```
 
 另外还可以像下面这样使用 `-Xfaulthandler` 来运行 Python：
 
-```
+```python
 bash % python3 -Xfaulthandler program.py
 ```
 
 最后，你可以设置 `PYTHONFAULTHANDLER` 环境变量。 开启 faulthandler 后，在 C 扩展中的致命错误会导致一个 Python 错误堆栈被打印出来。例如：
 
-```
+```python
 Fatal Python error: Segmentation fault
 
 Current thread 0x00007fff71106cc0:

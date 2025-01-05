@@ -8,7 +8,7 @@
 ## 解决方案
 Python 内置的 `fileinput` 模块让这个变得简单。如果你有一个下面这样的脚本：
 
-```
+```python
 #!/usr/bin/env python3
 import fileinput
 
@@ -19,7 +19,7 @@ with fileinput.input() as f_input:
 
 那么你就能以前面提到的所有方式来为此脚本提供输入。假设你将此脚本保存为 `filein.py `并将其变为可执行文件， 那么你可以像下面这样调用它，得到期望的输出：
 
-```
+```python
 $ ls | ./filein.py          # Prints a directory listing to stdout.
 $ ./filein.py /etc/passwd   # Reads /etc/passwd to stdout.
 $ ./filein.py < /etc/passwd # Reads /etc/passwd to stdout.
@@ -28,7 +28,7 @@ $ ./filein.py < /etc/passwd # Reads /etc/passwd to stdout.
 ## 讨论
 `fileinput.input() `创建并返回一个 `FileInput `类的实例。 该实例除了拥有一些有用的帮助方法外，它还可被当做一个上下文管理器使用。 因此，整合起来，如果我们要写一个打印多个文件输出的脚本，那么我们需要在输出中包含文件名和行号，如下所示：
 
-```
+```python
 >>> import fileinput
 >>> with fileinput.input('/etc/passwd') as f:
 >>>     for line in f:
@@ -50,7 +50,7 @@ $ ./filein.py < /etc/passwd # Reads /etc/passwd to stdout.
 ## 解决方案
 你有一个程序像下面这样终止，抛出一个 `SystemExit` 异常，使用错误消息作为参数。例如：
 
-```
+```python
 raise SystemExit('It failed!')
 ```
 
@@ -59,7 +59,7 @@ raise SystemExit('It failed!')
 ## 讨论
 本节虽然很短小，但是它能解决在写脚本时的一个常见问题。 也就是说，当你想要终止某个程序时，你可能会像下面这样写：
 
-```
+```python
 import sys
 sys.stderr.write('It failed!\n')
 raise SystemExit(1)
@@ -74,7 +74,7 @@ raise SystemExit(1)
 ## 解决方案
 `argparse` 模块可被用来解析命令行选项。下面一个简单例子演示了最基本的用法：
 
-```
+```python
 # search.py
 '''
 Hypothetical command-line tool for searching a collection of
@@ -111,7 +111,7 @@ print(args.speed)
 
 该程序定义了一个如下使用的命令行解析器：
 
-```
+```python
 bash % python3 search.py -h
 usage: search.py [-h] [-p pattern] [-v] [-o OUTFILE] [--speed {slow,fast}]
                  [filename [filename ...]]
@@ -132,7 +132,7 @@ optional arguments:
 
 下面的部分演示了程序中的数据部分。仔细观察 print()语句的打印输出。
 
-```
+```python
 bash % python3 search.py foo.txt bar.txt
 usage: search.py [-h] -p pattern [-v] [-o OUTFILE] [--speed {fast,slow}]
                  [filename [filename ...]]
@@ -168,27 +168,27 @@ speed     = fast
 
 为了解析命令行选项，你首先要创建一个 `ArgumentParser` 实例， 并使用 `add_argument() `方法声明你想要支持的选项。 在每个` add-argument()` 调用中，`dest` 参数指定解析结果被指派给属性的名字。 `metavar` 参数被用来生成帮助信息。`action` 参数指定跟属性对应的处理逻辑， 通常的值为 `store` ,被用来存储某个值或讲多个参数值收集到一个列表中。 下面的参数收集所有剩余的命令行参数到一个列表中。在本例中它被用来构造一个文件名列表：
 
-```
+```python
 parser.add_argument(dest='filenames',metavar='filename', nargs='*')
 ```
 
 下面的参数根据参数是否存在来设置一个 `Boolean` 标志：
 
-```
+```python
 parser.add_argument('-v', dest='verbose', action='store_true',
                     help='verbose mode')
 ```
 
 下面的参数接受一个单独值并将其存储为一个字符串：
 
-```
+```python
 parser.add_argument('-o', dest='outfile', action='store',
                     help='output file')
 ```
 
 下面的参数说明允许某个参数重复出现多次，并将它们追加到一个列表中去。` required` 标志表示该参数至少要有一个。`-p` 和 `--pat `表示两个参数名形式都可使用。
 
-```
+```python
 parser.add_argument('-p', '--pat',metavar='pattern', required=True,
                     dest='patterns', action='append',
                     help='text pattern to search for')
@@ -196,7 +196,7 @@ parser.add_argument('-p', '--pat',metavar='pattern', required=True,
 
 最后，下面的参数说明接受一个值，但是会将其和可能的选择值做比较，以检测其合法性：
 
-```
+```python
 parser.add_argument('--speed', dest='speed', action='store',
                     choices={'slow','fast'}, default='slow',
                     help='search speed')
@@ -213,7 +213,7 @@ parser.add_argument('--speed', dest='speed', action='store',
 ## 解决方案
 这时候 Python 的 `getpass` 模块正是你所需要的。你可以让你很轻松的弹出密码输入提示， 并且不会在用户终端回显密码。下面是具体代码：
 
-```
+```python
 import getpass
 
 user = getpass.getuser()
@@ -232,7 +232,7 @@ else:
 
 如果你想显示的弹出用户名输入提示，使用内置的 `input` 函数：
 
-```
+```python
 user = input('Enter your username: ')
 ```
 
@@ -247,7 +247,7 @@ user = input('Enter your username: ')
 
 代码示例：
 
-```
+```python
 >>> import os
 >>> sz = os.get_terminal_size()
 >>> sz
@@ -269,20 +269,20 @@ os.terminal_size(columns=80, lines=24)
 ## 解决方案
 使用 `subprocess.check_output()` 函数。例如：
 
-```
+```python
 import subprocess
 out_bytes = subprocess.check_output(['netstat','-a'])
 ```
 
 这段代码执行一个指定的命令并将执行结果以一个字节字符串的形式返回。 如果你需要文本形式返回，加一个解码步骤即可。例如：
 
-```
+```python
 out_text = out_bytes.decode('utf-8')
 ```
 
 如果被执行的命令以非零码返回，就会抛出异常。 下面的例子捕获到错误并获取返回码：
 
-```
+```python
 try:
     out_bytes = subprocess.check_output(['cmd','arg1','arg2'])
 except subprocess.CalledProcessError as e:
@@ -292,14 +292,14 @@ except subprocess.CalledProcessError as e:
 
 默认情况下，`check_output()` 仅仅返回输入到标准输出的值。 如果你需要同时收集标准输出和错误输出，使用 `stderr` 参数：
 
-```
+```python
 out_bytes = subprocess.check_output(['cmd','arg1','arg2'],
                                     stderr=subprocess.STDOUT)
 ```
 
 如果你需要用一个超时机制来执行命令，使用 `timeout` 参数：
 
-```
+```python
 try:
     out_bytes = subprocess.check_output(['cmd','arg1','arg2'], timeout=5)
 except subprocess.TimeoutExpired as e:
@@ -308,7 +308,7 @@ except subprocess.TimeoutExpired as e:
 
 通常来讲，命令的执行不需要使用到底层 shell 环境（比如 sh、bash）。 一个字符串列表会被传递给一个低级系统命令，比如 `os.execve()` 。 如果你想让命令被一个 shell 执行，传递一个字符串参数，并设置参数 `shell=True` . 有时候你想要 Python 去执行一个复杂的 shell 命令的时候这个就很有用了，比如管道流、I/O 重定向和其他特性。例如：
 
-```
+```python
 out_bytes = subprocess.check_output('grep python | wc > out', shell=True)
 ```
 
@@ -317,7 +317,7 @@ out_bytes = subprocess.check_output('grep python | wc > out', shell=True)
 ## 讨论
 使用 `check_output()` 函数是执行外部命令并获取其返回值的最简单方式。 但是，如果你需要对子进程做更复杂的交互，比如给它发送输入，你得采用另外一种方法。 这时候可直接使用 `subprocess.Popen` 类。例如：
 
-```
+```python
 import subprocess
 
 # Some text to send
@@ -349,7 +349,7 @@ err = stderr.decode('utf-8')
 ## 解决方案
 `shutil` 模块有很多便捷的函数可以复制文件和目录。使用起来非常简单，比如：
 
-```
+```python
 import shutil
 
 # Copy src to dst. (cp src dst)
@@ -371,13 +371,13 @@ shutil.move(src, dst)
 
 如果你想保留被复制目录中的符号链接，像这样做：
 
-```
+```python
 shutil.copytree(src, dst, symlinks=True)
 ```
 
 `copytree()` 可以让你在复制过程中选择性的忽略某些文件或目录。 你可以提供一个忽略函数，接受一个目录名和文件名列表作为输入，返回一个忽略的名称列表。例如：
 
-```
+```python
 def ignore_pyc_files(dirname, filenames):
     return [name in filenames if name.endswith('.pyc')]
 
@@ -391,7 +391,7 @@ shutil.copytree(src, dst, ignore=shutil.ignore_patterns(‘~’,’.pyc’))
 ## 讨论
 使用 `shutil` 复制文件和目录也忒简单了点吧。 不过，对于文件元数据信息，`copy2()` 这样的函数只能尽自己最大能力来保留它。 访问时间、创建时间和权限这些基本信息会被保留， 但是对于所有者、ACLs、资源 fork 和其他更深层次的文件元信息就说不准了， 这个还得依赖于底层操作系统类型和用户所拥有的访问权限。 你通常不会去使用` shutil.copytree()` 函数来执行系统备份。 当处理文件名的时候，最好使用` os.path` 中的函数来确保最大的可移植性（特别是同时要适用于 Unix 和 Windows）。 例如：
 
-```
+```python
 >>> filename = '/Users/guido/programs/spam.py'
 >>> import os.path
 >>> os.path.basename(filename)
@@ -409,7 +409,7 @@ shutil.copytree(src, dst, ignore=shutil.ignore_patterns(‘~’,’.pyc’))
 
 使用` copytree()` 复制文件夹的一个棘手的问题是对于错误的处理。 例如，在复制过程中，函数可能会碰到损坏的符号链接，因为权限无法访问文件的问题等等。 为了解决这个问题，所有碰到的问题会被收集到一个列表中并打包为一个单独的异常，到了最后再抛出。 下面是一个例子：
 
-```
+```python
 try:
     shutil.copytree(src, dst)
 except shutil.Error as e:
@@ -431,7 +431,7 @@ except shutil.Error as e:
 ## 解决方案
 `shutil` 模块拥有两个函数—— `make_archive()` 和 `unpack_archive()` 可派上用场。 例如：
 
-```
+```python
 >>> import shutil
 >>> shutil.unpack_archive('Python-3.3.0.tgz')
 
@@ -442,7 +442,7 @@ except shutil.Error as e:
 
 `make_archive() `的第二个参数是期望的输出格式。 可以使用 `get_archive_formats()` 获取所有支持的归档格式列表。例如：
 
-```
+```python
 >>> shutil.get_archive_formats()
 [('bztar', "bzip2'ed tar-file"), ('gztar', "gzip'ed tar-file"),
  ('tar', 'uncompressed tar file'), ('zip', 'ZIP file')]
@@ -461,7 +461,7 @@ Python 还有其他的模块可用来处理多种归档格式（比如 tarfile, 
 ## 解决方案
 查找文件，可使用 `os.walk()` 函数，传一个顶级目录名给它。 下面是一个例子，查找特定的文件名并答应所有符合条件的文件全路径：
 
-```
+```python
 #!/usr/bin/env python3.3
 import os
 
@@ -484,7 +484,7 @@ if __name__ == '__main__':
 
 尽管这个脚本相对于 UNIX 平台上面的很多查找公交来讲要简单很多，它还有跨平台的优势。 并且，还能很轻松的加入其他的功能。 我们再演示一个例子，下面的函数打印所有最近被修改过的文件：
 
-```
+```python
 #!/usr/bin/env python3.3
 
 import os
@@ -518,7 +518,7 @@ if __name__ == '__main__':
 ## 解决方案
 `configparser` 模块能被用来读取配置文件。例如，假设你有如下的配置文件：
 
-```
+```python
 ; config.ini
 ; Sample configuration file
 
@@ -546,7 +546,7 @@ signature:
 
 下面是一个读取和提取其中值的例子：
 
-```
+```python
 >>> from configparser import ConfigParser
 >>> cfg = ConfigParser()
 >>> cfg.read('config.ini')
@@ -572,14 +572,14 @@ Brought to you by the Python Cookbook
 
 如果有需要，你还能修改配置并使用 `cfg.write()` 方法将其写回到文件中。例如：
 
-```
+```python
 >>> cfg.set('server','port','9000')
 >>> cfg.set('debug','log_errors','False')
 >>> import sys
 >>> cfg.write(sys.stdout)
 ```
 
-```
+```python
 [installation]
 library = %(prefix)s/lib
 include = %(prefix)s/include
@@ -607,14 +607,14 @@ signature =
 
 对于可实现同样功能的配置文件和 Python 源文件是有很大的不同的。 首先，配置文件的语法要更自由些，下面的赋值语句是等效的：
 
-```
+```python
 prefix=/usr/local
 prefix: /usr/local
 ```
 
 配置文件中的名字是不区分大小写的。例如：
 
-```
+```python
 >>> cfg.get('installation','PREFIX')
 '/usr/local'
 >>> cfg.get('installation','prefix')
@@ -624,7 +624,7 @@ prefix: /usr/local
 
 在解析值的时候，`getboolean()` 方法查找任何可行的值。例如下面都是等价的：
 
-```
+```python
 log_errors = true
 log_errors = TRUE
 log_errors = Yes
@@ -633,7 +633,7 @@ log_errors = 1
 
 或许配置文件和 Python 代码最大的不同在于，它并不是从上而下的顺序执行。 文件是安装一个整体被读取的。如果碰到了变量替换，它实际上已经被替换完成了。 例如，在下面这个配置中，`prefix `变量在使用它的变量之前后之后定义都是可以的：
 
-```
+```python
 [installation]
 library=%(prefix)s/lib
 include=%(prefix)s/include
@@ -643,7 +643,7 @@ prefix=/usr/local
 
 `ConfigParser` 有个容易被忽视的特性是它能一次读取多个配置文件然后合并成一个配置。 例如，假设一个用户像下面这样构造了他们的配置文件：
 
-```
+```python
 ; ~/.config.ini
 [installation]
 prefix=/Users/beazley/test
@@ -654,7 +654,7 @@ log_errors=False
 
 读取这个文件，它就能跟之前的配置合并起来。如：
 
-```
+```python
 >>> # Previously read configuration
 >>> cfg.get('installation', 'prefix')
 '/usr/local'
@@ -675,7 +675,7 @@ False
 
 仔细观察下 `prefix `变量是怎样覆盖其他相关变量的，比如 `library `的设定值。 产生这种结果的原因是变量的改写采取的是后发制人策略，以最后一个为准。 你可以像下面这样做试验：
 
-```
+```python
 >>> cfg.get('installation','library')
 '/Users/beazley/test/lib'
 >>> cfg.set('installation','prefix','/tmp/dir')
@@ -693,7 +693,7 @@ False
 ## 解决方案
 The easiest way to add logging to simple programs is to use the logging module. For example: 打印日志最简单方式是使用 `logging` 模块。例如：
 
-```
+```python
 import logging
 
 def main():
@@ -724,14 +724,14 @@ if __name__ == '__main__':
 
 运行这个程序后，在文件 `app.log `中的内容应该是下面这样：
 
-```
+```python
 CRITICAL:root:Host www.python.org unknown
 ERROR:root:Could not find 'spam'
 ```
 
 If you want to change the output or level of output, you can change the parameters to the basicConfig() call. For example: 如果你想改变输出等级，你可以修改 `basicConfig()` 调用中的参数。例如：
 
-```
+```python
 logging.basicConfig(
      filename='app.log',
      level=logging.WARNING,
@@ -740,7 +740,7 @@ logging.basicConfig(
 
 最后输出变成如下：
 
-```
+```python
 CRITICAL:2012-11-20 12:27:13,595:Host www.python.org unknown
 ERROR:2012-11-20 12:27:13,595:Could not find 'spam'
 WARNING:2012-11-20 12:27:13,595:Feature is deprecated
@@ -748,7 +748,7 @@ WARNING:2012-11-20 12:27:13,595:Feature is deprecated
 
 上面的日志配置都是硬编码到程序中的。如果你想使用配置文件， 可以像下面这样修改 `basicConfig()` 调用：
 
-```
+```python
 import logging
 import logging.config
 
@@ -760,7 +760,7 @@ def main():
 
 创建一个下面这样的文件，名字叫 `logconfig.ini `：
 
-```
+```python
 [loggers]
 keys=root
 
@@ -791,13 +791,13 @@ format=%(levelname)s:%(name)s:%(message)s
 
 如果你想要你的日志消息写到标准错误中，而不是日志文件中，调用 basicConfig() 时不传文件名参数即可。例如：
 
-```
+```python
 logging.basicConfig(level=logging.INFO)
 ```
 
 `basicConfig()` 在程序中只能被执行一次。如果你稍后想改变日志配置， 就需要先获取 `root logger `，然后直接修改它。例如：
 
-```
+```python
 logging.getLogger().level = logging.DEBUG
 ```
 
@@ -810,7 +810,7 @@ logging.getLogger().level = logging.DEBUG
 ## 解决方案
 对于想要执行日志操作的函数库而已，你应该创建一个专属的 `logger` 对象，并且像下面这样初始化配置：
 
-```
+```python
 # somelib.py
 
 import logging
@@ -825,7 +825,7 @@ def func():
 
 使用这个配置，默认情况下不会打印日志。例如：
 
-```
+```python
 >>> import somelib
 >>> somelib.func()
 >>>
@@ -833,7 +833,7 @@ def func():
 
 不过，如果配置过日志系统，那么日志消息打印就开始生效，例如：
 
-```
+```python
 >>> import logging
 >>> logging.basicConfig()
 >>> somelib.func()
@@ -850,7 +850,7 @@ CRITICAL:somelib:A Critical Error!
 
 还有一点就是对于各个函数库的日志配置可以是相互独立的，不影响其他库的日志配置。 例如，对于如下的代码：
 
-```
+```python
 >>> import logging
 >>> logging.basicConfig(level=logging.ERROR)
 
@@ -877,7 +877,7 @@ DEBUG:somelib:A debug message
 ## 解决方案
 `time `模块包含很多函数来执行跟时间有关的函数。 尽管如此，通常我们会在此基础之上构造一个更高级的接口来模拟一个计时器。例如：
 
-```
+```python
 import time
 
 class Timer:
@@ -915,7 +915,7 @@ class Timer:
 
 这个类定义了一个可以被用户根据需要启动、停止和重置的计时器。 它会在 `elapsed` 属性中记录整个消耗时间。 下面是一个例子来演示怎样使用它：
 
-```
+```python
 def countdown(n):
     while n > 0:
         n -= 1
@@ -945,7 +945,7 @@ print(t2.elapsed)
 
 上述代码中由 `Timer` 类记录的时间是钟表时间，并包含了所有休眠时间。 如果你只想计算该进程所花费的 CPU 时间，应该使用 `time.process_time()` 来代替：
 
-```
+```python
 t = Timer(time.process_time)
 with t:
     countdown(1000000)
@@ -963,7 +963,7 @@ print(t.elapsed)
 ## 解决方案
 `resource` 模块能同时执行这两个任务。例如，要限制 CPU 时间，可以像下面这样做：
 
-```
+```python
 import signal
 import resource
 import os
@@ -988,7 +988,7 @@ if __name__ == '__main__':
 
 要限制内存使用，设置可使用的总内存值即可，如下：
 
-```
+```python
 import resource
 
 def limit_memory(maxsize):
@@ -1012,7 +1012,7 @@ def limit_memory(maxsize):
 ## 解决方案
 `webbrowser` 模块能被用来启动一个浏览器，并且与平台无关。例如：
 
-```
+```python
 >>> import webbrowser
 >>> webbrowser.open('http://www.python.org')
 True
@@ -1021,7 +1021,7 @@ True
 
 它会使用默认浏览器打开指定网页。如果你还想对网页打开方式做更多控制，还可以使用下面这些函数：
 
-```
+```python
 >>> # Open the page in a new browser window
 >>> webbrowser.open_new('http://www.python.org')
 True
@@ -1037,7 +1037,7 @@ True
 
 如果你想指定浏览器类型，可以使用` webbrowser.get()` 函数来指定某个特定浏览器。例如：
 
-```
+```python
 >>> c = webbrowser.get('firefox')
 >>> c.open('http://www.python.org')
 True

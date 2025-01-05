@@ -8,7 +8,7 @@
 ## 解决方案
 封装成包是很简单的。在文件系统上组织你的代码，并确保每个目录都定义了一个__init__.py 文件。 例如：
 
-```
+```python
 graphics/
     __init__.py
     primitive/
@@ -24,7 +24,7 @@ graphics/
 
 一旦你做到了这一点，你应该能够执行各种 import 语句，如下：
 
-```
+```python
 import graphics.primitive.line
 from graphics.primitive import line
 import graphics.formats.jpg as jpg
@@ -35,7 +35,7 @@ import graphics.formats.jpg as jpg
 
 绝大部分时候让__init__.py 空着就好。但是有些情况下可能包含代码。 举个例子，__init__.py 能够用来自动加载子模块:
 
-```
+```python
 # graphics/formats/__init__.py
 from . import jpg
 from . import png
@@ -56,7 +56,7 @@ __init__.py 的其他常用用法包括将多个文件合并到一个逻辑命�
 
 举个例子:
 
-```
+```python
 # somemodule.py
 def spam():
     pass
@@ -81,7 +81,7 @@ __all__ = ['spam', 'grok']
 ## 解决方案
 使用包的相对导入，使一个的模块导入同一个包的另一个模块 举个例子，假设在你的文件系统上有 mypackage 包，组织如下：
 
-```
+```python
 mypackage/
     __init__.py
     A/
@@ -95,14 +95,14 @@ mypackage/
 
 如果模块 mypackage.A.spam 要导入同目录下的模块 grok，它应该包括的 import 语句如下：
 
-```
+```python
 # mypackage/A/spam.py
 from . import grok
 ```
 
 如果模块 mypackage.A.spam 要导入不同目录下的模块 B.bar，它应该使用的 import 语句如下：
 
-```
+```python
 # mypackage/A/spam.py
 from ..B import bar
 ```
@@ -112,7 +112,7 @@ from ..B import bar
 ## 讨论
 在包内，既可以使用相对路径也可以使用绝对路径来导入。 举个例子：
 
-```
+```python
 # mypackage/A/spam.py
 from mypackage.A import grok # OK
 from . import grok # OK
@@ -123,7 +123,7 @@ import grok # Error (not found)
 
 import 语句的 . 和 ``..``看起来很滑稽, 但它指定目录名.为当前目录，..B 为目录../B。这种语法只适用于 import。 举个例子：
 
-```
+```python
 from . import grok # OK
 import .grok # ERROR
 ```
@@ -132,13 +132,13 @@ import .grok # ERROR
 
 最后，相对导入只适用于在合适的包中的模块。尤其是在顶层的脚本的简单模块中，它们将不起作用。如果包的部分被作为脚本直接执行，那它们将不起作用 例如：
 
-```
+```python
 % python3 mypackage/A/spam.py # Relative imports fail
 ```
 
 另一方面，如果你使用 Python 的-m 选项来执行先前的脚本，相对导入将会正确运行。 例如：
 
-```
+```python
 % python3 -m mypackage.A.spam # Relative imports work
 ```
 
@@ -151,7 +151,7 @@ import .grok # ERROR
 ## 解决方案
 程序模块可以通过变成包来分割成多个独立的文件。考虑下下面简单的模块：
 
-```
+```python
 # mymodule.py
 class A:
     def spam(self):
@@ -164,7 +164,7 @@ class B(A):
 
 假设你想 mymodule.py 分为两个文件，每个定义的一个类。要做到这一点，首先用 mymodule 目录来替换文件 mymodule.py。 这这个目录下，创建以下文件：
 
-```
+```python
 mymodule/
     __init__.py
     a.py
@@ -173,7 +173,7 @@ mymodule/
 
 在 a.py 文件中插入以下代码：
 
-```
+```python
 # a.py
 class A:
     def spam(self):
@@ -182,7 +182,7 @@ class A:
 
 在 b.py 文件中插入以下代码：
 
-```
+```python
 # b.py
 from .a import A
 class B(A):
@@ -192,7 +192,7 @@ class B(A):
 
 最后，在 __init__.py 中，将2个文件粘合在一起：
 
-```
+```python
 # __init__.py
 from .a import A
 from .b import B
@@ -200,7 +200,7 @@ from .b import B
 
 如果按照这些步骤，所产生的包 MyModule 将作为一个单一的逻辑模块：
 
-```
+```python
 >>> import mymodule
 >>> a = mymodule.A()
 >>> a.spam()
@@ -214,7 +214,7 @@ B.bar
 ## 讨论
 在这个章节中的主要问题是一个设计问题，不管你是否希望用户使用很多小模块或只是一个模块。举个例子，在一个大型的代码库中，你可以将这一切都分割成独立的文件，让用户使用大量的 import 语句，就像这样：
 
-```
+```python
 from mymodule.a import A
 from mymodule.b import B
 ...
@@ -222,7 +222,7 @@ from mymodule.b import B
 
 这样能工作，但这让用户承受更多的负担，用户要知道不同的部分位于何处。通常情况下，将这些统一起来，使用一条 import 将更加容易，就像这样：
 
-```
+```python
 from mymodule import A, B
 ```
 
@@ -234,7 +234,7 @@ from mymodule import A, B
 
 作为这一章节的延伸，将介绍延迟导入。如图所示，__init__.py 文件一次导入所有必需的组件的。但是对于一个很大的模块，可能你只想组件在需要时被加载。 要做到这一点，__init__.py 有细微的变化：
 
-```
+```python
 # __init__.py
 def A():
     from .a import A
@@ -247,7 +247,7 @@ def B():
 
 在这个版本中，类 A 和类 B 被替换为在第一次访问时加载所需的类的函数。对于用户，这看起来不会有太大的不同。 例如：
 
-```
+```python
 >>> import mymodule
 >>> a = mymodule.A()
 >>> a.spam()
@@ -257,7 +257,7 @@ A.spam
 
 延迟加载的主要缺点是继承和类型检查可能会中断。你可能会稍微改变你的代码，例如:
 
-```
+```python
 if isinstance(x, mymodule.A): # Error
 ...
 
@@ -276,7 +276,7 @@ if isinstance(x, mymodule.a.A): # Ok
 
 在统一不同的目录里统一相同的命名空间，但是要删去用来将组件联合起来的__init__.py 文件。假设你有 Python 代码的两个不同的目录如下：
 
-```
+```python
 foo-package/
     spam/
         blah.py
@@ -290,7 +290,7 @@ bar-package/
 
 让我们看看，如果将 foo-package 和 bar-package 都加到 python 模块路径并尝试导入会发生什么
 
-```
+```python
 >>> import sys
 >>> sys.path.extend(['foo-package', 'bar-package'])
 >>> import spam.blah
@@ -305,7 +305,7 @@ bar-package/
 
 包命名空间的关键是确保顶级目录中没有__init__.py 文件来作为共同的命名空间。缺失__init__.py 文件使得在导入包的时候会发生有趣的事情：这并没有产生错误，解释器创建了一个由所有包含匹配包名的目录组成的列表。特殊的包命名空间模块被创建，只读的目录列表副本被存储在其__path__变量中。 举个例子：
 
-```
+```python
 >>> import spam
 >>> spam.__path__
 _NamespacePath(['foo-package/spam', 'bar-package/spam'])
@@ -316,7 +316,7 @@ _NamespacePath(['foo-package/spam', 'bar-package/spam'])
 
 包命名空间的一个重要特点是任何人都可以用自己的代码来扩展命名空间。举个例子，假设你自己的代码目录像这样：
 
-```
+```python
 my-package/
     spam/
         custom.py
@@ -324,7 +324,7 @@ my-package/
 
 如果你将你的代码目录和其他包一起添加到 sys.path，这将无缝地合并到别的 spam 包目录中：
 
-```
+```python
 >>> import spam.custom
 >>> import spam.grok
 >>> import spam.blah
@@ -333,7 +333,7 @@ my-package/
 
 一个包是否被作为一个包命名空间的主要方法是检查其__file__属性。如果没有，那包是个命名空间。这也可以由其字符表现形式中的“namespace”这个词体现出来。
 
-```
+```python
 >>> spam.__file__
 Traceback (most recent call last):
     File "<stdin>", line 1, in <module>
@@ -352,7 +352,7 @@ AttributeError: 'module' object has no attribute '__file__'
 ## 解决方案
 使用 imp.reload()来重新加载先前加载的模块。举个例子：
 
-```
+```python
 >>> import spam
 >>> import imp
 >>> imp.reload(spam)
@@ -367,7 +367,7 @@ reload()擦除了模块底层字典的内容，并通过重新执行模块的源
 
 尽管如此，reload()没有更新像”from module import name”这样使用 import 语句导入的定义。举个例子：
 
-```
+```python
 # spam.py
 def bar():
     print('bar')
@@ -378,7 +378,7 @@ def grok():
 
 现在启动交互式会话：
 
-```
+```python
 >>> import spam
 >>> from spam import grok
 >>> spam.bar()
@@ -390,14 +390,14 @@ grok
 
 不退出 Python 修改 spam.py 的源码，将 grok()函数改成这样：
 
-```
+```python
 def grok():
     print('New grok')
 ```
 
 现在回到交互式会话，重新加载模块，尝试下这个实验：
 
-```
+```python
 >>> import imp
 >>> imp.reload(spam)
 <module 'spam' from './spam.py'>
@@ -421,7 +421,7 @@ New grok
 ## 解决方案
 如果你的应用程序已经有多个文件，你可以把你的应用程序放进它自己的目录并添加一个__main__.py 文件。 举个例子，你可以像这样创建目录：
 
-```
+```python
 myapplication/
     spam.py
     bar.py
@@ -431,7 +431,7 @@ myapplication/
 
 如果__main__.py 存在，你可以简单地在顶级目录运行 Python 解释器：
 
-```
+```python
 bash % python3 myapplication
 ```
 
@@ -439,7 +439,7 @@ bash % python3 myapplication
 
 如果你将你的代码打包成 zip 文件，这种技术同样也适用，举个例子：
 
-```
+```python
 bash % ls
 spam.py bar.py grok.py __main__.py
 bash % zip -r myapp.zip *.py
@@ -452,7 +452,7 @@ bash % python3 myapp.zip
 
 由于目录和 zip 文件与正常文件有一点不同，你可能还需要增加一个 shell 脚本，使执行更加容易。例如，如果代码文件名为 myapp.zip，你可以创建这样一个顶级脚本：
 
-```
+```python
 #!/usr/bin/env python3 /usr/local/bin/myapp.zip
 ```
 
@@ -463,7 +463,7 @@ bash % python3 myapp.zip
 ## 解决方案
 假设你的包中的文件组织成如下：
 
-```
+```python
 mypackage/
     __init__.py
     somedata.dat
@@ -472,7 +472,7 @@ mypackage/
 
 现在假设 spam.py 文件需要读取 somedata.dat 文件中的内容。你可以用以下代码来完成：
 
-```
+```python
 # spam.py
 import pkgutil
 data = pkgutil.get_data(__package__, 'somedata.dat')
@@ -498,7 +498,7 @@ get_data()的第一个参数是包含包名的字符串。你可以直接使用�
 ## 解决方案
 有两种常用的方式将新目录添加到 sys.path。第一种，你可以使用 PYTHONPATH 环境变量来添加。例如：
 
-```
+```python
 bash % env PYTHONPATH=/some/dir:/other/dir python3
 Python 3.3.0 (default, Oct 4 2012, 10:17:33)
 [GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
@@ -513,7 +513,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 第二种方法是创建一个.pth 文件，将目录列举出来，像这样：
 
-```
+```python
 # myapplication.pth
 /some/dir
 /other/dir
@@ -524,7 +524,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## 讨论
 比起费力地找文件，你可能会倾向于写一个代码手动调节 sys.path 的值。例如:
 
-```
+```python
 import sys
 sys.path.insert(0, '/some/dir')
 sys.path.insert(0, '/other/dir')
@@ -532,7 +532,7 @@ sys.path.insert(0, '/other/dir')
 
 虽然这能“工作”，它是在实践中极为脆弱，应尽量避免使用。这种方法的问题是，它将目录名硬编码到了你的源。如果你的代码被移到一个新的位置，这会导致维护问题。更好的做法是在不修改源代码的情况下，将path配置到其他地方。如果您使用模块级的变量来精心构造一个适当的绝对路径，有时你可以解决硬编码目录的问题，比如__file__。举个例子：
 
-```
+```python
 import sys
 from os.path import abspath, join, dirname
 sys.path.insert(0, abspath(dirname('__file__'), 'src'))
@@ -549,7 +549,7 @@ site-packages 目录是第三方包和模块安装的目录。如果你手动安
 ## 解决方案
 使用 importlib.import_module()函数来手动导入名字为字符串给出的一个模块或者包的一部分。举个例子：
 
-```
+```python
 >>> import importlib
 >>> math = importlib.import_module('math')
 >>> math.sin(2)
@@ -563,7 +563,7 @@ import_module 只是简单地执行和 import 相同的步骤，但是返回生�
 
 如果你正在使用的包，import_module()也可用于相对导入。但是，你需要给它一个额外的参数。例如：
 
-```
+```python
 import importlib
 # Same as 'from . import b'
 b = importlib.import_module('.b', __package__)
@@ -585,7 +585,7 @@ b = importlib.import_module('.b', __package__)
 
 本节核心是设计导入语句的扩展功能。有很多种方法可以做这个， 不过为了演示的方便，我们开始先构造下面这个 Python 代码结构：
 
-```
+```python
 testcode/
     spam.py
     fib.py
@@ -596,7 +596,7 @@ testcode/
 
 这些文件的内容并不重要，不过我们在每个文件中放入了少量的简单语句和函数， 这样你可以测试它们并查看当它们被导入时的输出。例如：
 
-```
+```python
 # spam.py
 print("I'm spam")
 
@@ -621,7 +621,7 @@ print("I'm grok.blah")
 
 这里的目的是允许这些文件作为模块被远程访问。 也许最简单的方式就是将它们发布到一个 web 服务器上面。在 testcode 目录中像下面这样运行 Python：
 
-```
+```python
 bash % cd testcode
 bash % python3 -m http.server 15000
 Serving HTTP on 0.0.0.0 port 15000 ...
@@ -629,7 +629,7 @@ Serving HTTP on 0.0.0.0 port 15000 ...
 
 服务器运行起来后再启动一个单独的 Python 解释器。 确保你可以使用 `urllib `访问到远程文件。例如：
 
-```
+```python
 >>> from urllib.request import urlopen
 >>> u = urlopen('http://localhost:15000/fib.py')
 >>> data = u.read().decode('utf-8')
@@ -649,7 +649,7 @@ def fib(n):
 
 加载远程模块的第一种方法是创建一个显示的加载函数来完成它。例如：
 
-```
+```python
 import imp
 import urllib.request
 import sys
@@ -667,7 +667,7 @@ def load_module(url):
 
 这个函数会下载源代码，并使用 `compile()` 将其编译到一个代码对象中， 然后在一个新创建的模块对象的字典中来执行它。下面是使用这个函数的方式：
 
-```
+```python
 >>> fib = load_module('http://localhost:15000/fib.py')
 I'm fib
 >>> fib.fib(10)
@@ -687,7 +687,7 @@ Hello Guido
 
 一个更酷的做法是创建一个自定义导入器。第一种方法是创建一个元路径导入器。如下：
 
-```
+```python
 # urlimport.py
 import sys
 import importlib.abc
@@ -848,7 +848,7 @@ def remove_meta(address):
 
 下面是一个交互会话，演示了如何使用前面的代码：
 
-```
+```python
 >>> # importing currently fails
 >>> import fib
 Traceback (most recent call last):
@@ -875,7 +875,7 @@ I'm grok.blah
 
 自定义导入的第二种方法是编写一个钩子直接嵌入到` sys.path `变量中去， 识别某些目录命名模式。 在 `urlimport.py `中添加如下的类和支持函数：
 
-```
+```python
 # urlimport.py
 # ... include previous code above ...
 # Path finder class for a URL
@@ -948,7 +948,7 @@ def remove_path_hook():
 
 要使用这个路径查找器，你只需要在 `sys.path` 中加入 URL 链接。例如：
 
-```
+```python
 >>> # Initial import fails
 >>> import fib
 Traceback (most recent call last):
@@ -982,7 +982,7 @@ I'm grok.blah
 
 远程模块加载跟其他的加载使用方法几乎是一样的。例如：
 
-```
+```python
 >>> fib
 <urlmodule 'fib' from 'http://localhost:15000/fib.py'>
 >>> fib.__name__
@@ -1007,7 +1007,7 @@ def fib(n):
 
 首先，如果你想创建一个新的模块对象，使用 `imp.new_module()` 函数：
 
-```
+```python
 >>> import imp
 >>> m = imp.new_module('spam')
 >>> m
@@ -1021,7 +1021,7 @@ def fib(n):
 
 其次，模块会被解释器缓存起来。模块缓存可以在字典 `sys.modules` 中被找到。 因为有了这个缓存机制，通常可以将缓存和模块的创建通过一个步骤完成：
 
-```
+```python
 >>> import sys
 >>> import imp
 >>> m = sys.modules.setdefault('spam', imp.new_module('spam'))
@@ -1032,7 +1032,7 @@ def fib(n):
 
 如果给定模块已经存在那么就会直接获得已经被创建过的模块，例如：
 
-```
+```python
 >>> import math
 >>> m = sys.modules.setdefault('math', imp.new_module('math'))
 >>> m
@@ -1048,7 +1048,7 @@ def fib(n):
 
 扩展 import 语句很简单，但是会有很多移动操作。 最高层上，导入操作被一个位于 sys.meta_path 列表中的“元路径”查找器处理。 如果你输出它的值，会看到下面这样：
 
-```
+```python
 >>> from pprint import pprint
 >>> pprint(sys.meta_path)
 [<class '_frozen_importlib.BuiltinImporter'>,
@@ -1059,7 +1059,7 @@ def fib(n):
 
 当执行一个语句比如 `import fib` 时，解释器会遍历 sys.mata_path 中的查找器对象， 调用它们的` find_module() `方法定位正确的模块加载器。 可以通过实验来看看：
 
-```
+```python
 >>> class Finder:
 ...     def find_module(self, fullname, path):
 ...         print('Looking for', fullname, path)
@@ -1083,7 +1083,7 @@ Looking for token None
 
 注意看 `find_module() `方法是怎样在每一个导入就被触发的。 这个方法中的 path 参数的作用是处理包。 多个包被导入，就是一个可在包的` __path__` 属性中找到的路径列表。 要找到包的子组件就要检查这些路径。 比如注意对于 `xml.etree` 和 `xml.etree.ElementTree` 的路径配置：
 
-```
+```python
 >>> import xml.etree.ElementTree
 Looking for xml None
 Looking for xml.etree ['/usr/local/lib/python3.3/xml']
@@ -1101,7 +1101,7 @@ Looking for ElementC14N None
 
 在 `sys.meta_path `上查找器的位置很重要，将它从队头移到队尾，然后再试试导入看：
 
-```
+```python
 >>> del sys.meta_path[0]
 >>> sys.meta_path.append(Finder())
 >>> import urllib.request
@@ -1110,7 +1110,7 @@ Looking for ElementC14N None
 
 现在你看不到任何输出了，因为导入被 sys.meta_path 中的其他实体处理。 这时候，你只有在导入不存在模块的时候才能看到它被触发：
 
-```
+```python
 >>> import fib
 Looking for fib None
 Traceback (most recent call last):
@@ -1128,7 +1128,7 @@ ImportError: No module named 'xml.superfast'
 
 对于包的其他处理可在 `UrlPackageLoader` 类中被找到。 这个类不会导入包名，而是去加载对应的 `__init__.py` 文件。 它也会设置模块的 `__path__` 属性，这一步很重要， 因为在加载包的子模块时这个值会被传给后面的 `find_module()` 调用。 基于路径的导入钩子是这些思想的一个扩展，但是采用了另外的方法。 我们都知道，`sys.path` 是一个 Python 查找模块的目录列表，例如：
 
-```
+```python
 >>> from pprint import pprint
 >>> import sys
 >>> pprint(sys.path)
@@ -1143,7 +1143,7 @@ ImportError: No module named 'xml.superfast'
 
 在 `sys.path` 中的每一个实体都会被额外的绑定到一个查找器对象上。 你可以通过查看 `sys.path_importer_cache` 去看下这些查找器：
 
-```
+```python
 >>> pprint(sys.path_importer_cache)
 {'.': FileFinder('.'),
 '/usr/local/lib/python3.3': FileFinder('/usr/local/lib/python3.3'),
@@ -1161,7 +1161,7 @@ ImportError: No module named 'xml.superfast'
 
 要执行 `import fib` ，会顺序检查` sys.path `中的目录。 对于每个目录，名称“fib”会被传给相应的 `sys.path_importer_cache` 中的查找器。 这个可以让你创建自己的查找器并在缓存中放入一个实体。试试这个：
 
-```
+```python
 >>> class Finder:
 ... def find_loader(self, name):
 ...     print('Looking for', name)
@@ -1186,7 +1186,7 @@ Looking for token
 
 `sys.path_importer_cache `的使用被一个存储在 `sys.path_hooks `中的函数列表控制。 试试下面的例子，它会清除缓存并给 `sys.path_hooks` 添加一个新的路径检查函数
 
-```
+```python
 >>> sys.path_importer_cache.clear()
 >>> def check_path(path):
 ...     print('Checking', path)
@@ -1213,7 +1213,7 @@ ImportError: No module named 'fib'
 
 知道了怎样 sys.path 是怎样被处理的，你就能构建一个自定义路径检查函数来查找文件名，不然 URL。例如：
 
-```
+```python
 >>> def check_url(path):
 ...     if path.startswith('http://'):
 ...         return Finder()
@@ -1244,7 +1244,7 @@ ImportError: No module named 'fib'
 
 所有的包都包含了一个内部路径设置，可以在__path__属性中看到，例如：
 
-```
+```python
 >>> import xml.etree.ElementTree
 >>> xml.__path__
 ['/usr/local/lib/python3.3/xml']
@@ -1257,7 +1257,7 @@ ImportError: No module named 'fib'
 
 还有个难点就是 `handle_url()` 函数以及它跟内部使用的` _get_links()` 函数之间的交互。 如果你的查找器实现需要使用到其他模块（比如 urllib.request）， 有可能这些模块会在查找器操作期间进行更多的导入。 它可以导致 `handle_url()` 和其他查找器部分陷入一种递归循环状态。 为了解释这种可能性，实现中有一个被创建的查找器缓存（每一个 URL 一个）。 它可以避免创建重复查找器的问题。 另外，下面的代码片段可以确保查找器不会在初始化链接集合的时候响应任何导入请求：
 
-```
+```python
 # Check link cache
 if self._links is None:
     self._links = [] # See discussion
@@ -1270,7 +1270,7 @@ if self._links is None:
 
 如果到现在为止你还是不是很明白，那么可以通过增加一些日志打印来测试下本节。像下面这样：
 
-```
+```python
 >>> import logging
 >>> logging.basicConfig(level=logging.DEBUG)
 >>> import urlimport
@@ -1306,7 +1306,7 @@ I'm fib
 
 这个问题可以使用10.11小节中同样的导入钩子机制来实现。下面是一个可能的方案：
 
-```
+```python
 # postimport.py
 import importlib
 import sys
@@ -1350,7 +1350,7 @@ sys.meta_path.insert(0, PostImportFinder())
 
 这样，你就可以使用 `when_imported()` 装饰器了，例如：
 
-```
+```python
 >>> from postimport import when_imported
 >>> @when_imported('threading')
 ... def warn_threads(mod):
@@ -1364,7 +1364,7 @@ Threads? Are you crazy?
 
 作为一个更实际的例子，你可能想在已存在的定义上面添加装饰器，如下所示：
 
-```
+```python
 from functools import wraps
 from postimport import when_imported
 
@@ -1404,13 +1404,13 @@ def add_logging(mod):
 ## 解决方案
 Python 有一个用户安装目录，通常类似”~/.local/lib/python3.3/site-packages”。 要强制在这个目录中安装包，可使用安装选项“–user”。例如：
 
-```
+```python
 python3 setup.py install --user
 ```
 
 或者
 
-```
+```python
 pip install --user packagename
 ```
 
@@ -1430,14 +1430,14 @@ pip install --user packagename
 ## 解决方案
 你可以使用 `pyvenv` 命令创建一个新的“虚拟”环境。 这个命令被安装在 Python 解释器同一目录，或 Windows 上面的 Scripts 目录中。下面是一个例子：
 
-```
+```python
 bash % pyvenv Spam
 bash %
 ```
 
 传给` pyvenv `命令的名字是将要被创建的目录名。当被创建后，Span 目录像下面这样：
 
-```
+```python
 bash % cd Spam
 bash % ls
 bin include lib pyvenv.cfg
@@ -1446,7 +1446,7 @@ bash %
 
 在 bin 目录中，你会找到一个可以使用的 Python 解释器：
 
-```
+```python
 bash % Spam/bin/python3
 Python 3.3.0 (default, Oct 6 2012, 15:45:22)
 [GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
@@ -1474,7 +1474,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 默认情况下，虚拟环境是空的，不包含任何额外的第三方库。如果你想将一个已经安装的包作为虚拟环境的一部分， 可以使用“–system-site-packages”选项来创建虚拟环境，例如：
 
-```
+```python
 bash % pyvenv --system-site-packages Spam
 bash %
 ```
@@ -1488,7 +1488,7 @@ bash %
 ## 解决方案
 如果你想分发你的代码，第一件事就是给它一个唯一的名字，并且清理它的目录结构。 例如，一个典型的函数库包会类似下面这样：
 
-```
+```python
 projectname/
     README.txt
     Doc/
@@ -1508,7 +1508,7 @@ projectname/
 
 要让你的包可以发布出去，首先你要编写一个 `setup.py` ，类似下面这样：
 
-```
+```python
 # setup.py
 from distutils.core import setup
 
@@ -1523,7 +1523,7 @@ setup(name='projectname',
 
 下一步，就是创建一个 `MANIFEST.in `文件，列出所有在你的包中需要包含进来的非源码文件：
 
-```
+```python
 # MANIFEST.in
 include *.txt
 recursive-include examples *
@@ -1532,7 +1532,7 @@ recursive-include Doc *
 
 确保 `setup.py` 和 `MANIFEST.in` 文件放在你的包的最顶级目录中。 一旦你已经做了这些，你就可以像下面这样执行命令来创建一个源码分发包了：
 
-```
+```python
 % bash python3 setup.py sdist
 ```
 
